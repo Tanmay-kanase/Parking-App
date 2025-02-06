@@ -5,6 +5,7 @@ import { getLatLng, getNearbyParkings } from "../services/mapService";
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [parkingLocations, setParkingLocations] = useState([]);
+  const [map, setMap] = useState(null);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -16,10 +17,14 @@ const Home = () => {
     document.body.appendChild(script);
 
     window.initMap = () => {
-      new window.google.maps.Map(document.getElementById("googleMap"), {
-        center: { lat: 40.7128, lng: -74.006 },
-        zoom: 12,
-      });
+      const newMap = new window.google.maps.Map(
+        document.getElementById("googleMap"),
+        {
+          center: { lat: 40.7128, lng: -74.006 },
+          zoom: 12,
+        }
+      );
+      setMap(newMap);
     };
 
     return () => {
@@ -30,12 +35,22 @@ const Home = () => {
   const handleSearch = async () => {
     try {
       const { lat, lng } = await getLatLng(searchQuery);
-      console.log(lat);
-      console.log(lng); 
       const parkings = await getNearbyParkings(lat, lng);
-      console.log(parkings);
-      
+
       setParkingLocations(parkings);
+
+      if (map) {
+        map.setCenter({ lat, lng });
+        map.setZoom(14);
+
+        parkings.forEach((location) => {
+          new window.google.maps.Marker({
+            position: location.geometry.location,
+            map: map,
+            title: location.name,
+          });
+        });
+      }
     } catch (error) {
       console.error("Error fetching parking locations:", error);
     }
