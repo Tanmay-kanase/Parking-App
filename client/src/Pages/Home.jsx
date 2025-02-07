@@ -131,13 +131,52 @@ const Home = () => {
 
           {parkingLocations.length > 0 && (
             <div className="mt-4">
-              {parkingLocations.map((location, index) => (
-                <div key={index} className="card my-2 p-3">
-                  <h3>{location.name}</h3>
-                  <p>{location.vicinity}</p>
-                </div>
-              ))}
-            </div>
+            {parkingLocations.map((location, index) => (
+              <div key={index} className="card my-2 p-3">
+                <h3>{location.name}</h3>
+                <p>{location.vicinity}</p>
+          
+                {/* Displaying rating */}
+                <p><strong>Rating:</strong> {location.rating}</p>
+          
+                {/* Displaying opening hours */}
+                {location.opening_hours.weekday_text && (
+                  <div>
+                    <h4>Opening Hours:</h4>
+                    <ul>
+                      {location.opening_hours.weekday_text.map((day, idx) => (
+                        <li key={idx}>{day}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+          
+                {/* Displaying Photos */}
+                {location.photos.length > 0 && (
+                  <div>
+                    <h4>Photos:</h4>
+                    <div className="photos">
+                      {location.photos.map((photo, idx) => (
+                        <img
+                          key={idx}
+                          src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${GOOGLE_API_KEY}`}
+                          alt={`Photo of ${location.name}`}
+                          className="img-thumbnail"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+          
+                {/* Displaying author info */}
+                <p><strong>Ratings:</strong> {location.author_name} users</p>
+          
+                {/* Website */}
+                <p><strong>Website:</strong> <a href={location.website} target="_blank" rel="noopener noreferrer">{location.website}</a></p>
+              </div>
+            ))}
+          </div>
+          
           )}
         </div>
       </header>
