@@ -1,4 +1,35 @@
+import { auth, provider, signInWithPopup } from "../config/firebase.js"; // Import Firebase config
+import axios from "axios"; // For API call
+
+
+
+
+
 function Signup() {
+  const handleGoogleSignup = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log(result);
+
+      //const user = result.user;
+
+      // Prepare user data
+      // const userData = {
+      //   username: user.displayName,
+      //   email: user.email,
+      //   profilePhoto: user.photoURL,
+      //   providerId: user.providerId,
+      // };
+      // console.log(userData);
+
+
+      // Send user data to backend
+      // await axios.post("http://localhost:8080/api/auth/google-signup", userData);
+      // alert("Signup Successful!");
+    } catch (error) {
+      console.log("Google Signup Error:", error.message);
+    }
+  };
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
       <div
@@ -43,7 +74,7 @@ function Signup() {
             <small>or sign up with</small>
           </div>
 
-          <button className="btn btn-danger w-100 mt-2">
+          <button className="btn btn-danger w-100 mt-2" onClick={handleGoogleSignup}>
             <i className="bi bi-google"></i> Sign up with Google
           </button>
         </form>
