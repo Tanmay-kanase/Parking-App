@@ -1,0 +1,52 @@
+# Ignore Maven and Gradle build directories
+/target/
+/out/
+/build/
+
+# Ignore IDE-specific files
+/.idea/
+/*.iml
+/.vscode/
+/*.suo
+/*.ntvs*
+/*.njsproj
+/*.sln
+/*.sw?
+
+# Ignore Logs and temp files
+/logs/
+/*.log
+/*.tmp
+hs_err_pid*
+
+# Ignore dependency directories
+/mvnw
+/mvnw.cmd
+/.mvn/
+/.gradle/
+/gradle/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled files
+*.class
+
+# Ignore generated files
+/.cache/
+/bin/
+/gen/
+/dist/
+/node_modules/
+
+# Ignore Spring Boot specific files
+.env
+*.jar
+*.war
+
+# Ignore application properties (DO NOT commit sensitive config)
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+src/main/resources/application.yml
+src/main/resources/application-*.yml

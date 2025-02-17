@@ -81,7 +81,7 @@ const Navbar = () => {
                 className="group-hover:text-yellow-400 transition duration-300"
               />
               <span className="text-sm relative">
-                About
+                Signin
                 <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
               </span>
             </a>
@@ -181,8 +181,11 @@ const Navbar = () => {
 };
 
 export default Navbar;
-{/* From Uiverse.io by jubayer-10 */ }
-{/* <div className="p-5 overflow-hidden w-[60px] h-[60px] hover:w-[270px] bg-[#4070f4] shadow-[2px_2px_20px_rgba(0,0,0,0.08)] rounded-full flex group items-center hover:duration-300 duration-300">
+{
+  /* From Uiverse.io by jubayer-10 */
+}
+{
+  /* <div className="p-5 overflow-hidden w-[60px] h-[60px] hover:w-[270px] bg-[#4070f4] shadow-[2px_2px_20px_rgba(0,0,0,0.08)] rounded-full flex group items-center hover:duration-300 duration-300">
 <div className="flex items-center justify-center fill-white">
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -199,4 +202,5 @@ export default Navbar;
   type="text"
   className="outline-none text-[20px] bg-transparent w-full text-white font-normal px-4"
 />
-</div> */}
+</div> */
+}

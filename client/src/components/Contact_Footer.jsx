@@ -31,13 +31,14 @@ const Contact_Footer = () => {
           <h3 className="text-xl font-semibold text-blue-400">Contact Us</h3>
           <div className="mt-3 space-y-2 text-gray-300">
             <p className="flex items-center justify-center md:justify-start gap-2">
-              <FaMapMarkerAlt /> 123 Parking St, New York, USA
+              <FaMapMarkerAlt /> A-8/3-5 , Om Sadguru Soc , CHS , Sec-24 , Nerul
+              Navi Mumbai- 400 706
             </p>
             <p className="flex items-center justify-center md:justify-start gap-2">
-              <FaPhone /> +1 234 567 890
+              <FaPhone /> +91 9702210707
             </p>
             <p className="flex items-center justify-center md:justify-start gap-2">
-              <FaEnvelope /> support@parkease.com
+              <FaEnvelope /> tanmaykanase07@gmail.com
             </p>
           </div>
         </div>
@@ -70,11 +71,6 @@ const Contact_Footer = () => {
           </div>
         </div>
       </motion.div>
-
-      {/* Bottom Text */}
-      <div className="text-center text-gray-500 mt-10 text-sm">
-        &copy; {new Date().getFullYear()} ParkEase. All Rights Reserved.
-      </div>
     </footer>
   );
 };

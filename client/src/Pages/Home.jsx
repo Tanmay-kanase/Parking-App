@@ -2,16 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ParkingCircle, CreditCard, Map } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-
+  const user = useSelector((state) => state.auth.user);
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
       navigate(`/parking-spots?query=${encodeURIComponent(searchQuery)}`);
     }
   };
+  console.log("User : " + user);
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
@@ -38,7 +40,7 @@ const Home = () => {
       <div className="relative z-10 text-center max-w-3xl px-6 pt-40">
         <p className="text-4xl md:text-6xl font-extrabold leading-tight text-black">
           Revolutionizing <span className="text-yellow-400">Parking</span>, One
-          Spot at a Time!
+          Spot at a Time! 
         </p>
         <p className="text-lg md:text-xl text-black mt-4">
           Smart parking solutions that save time, reduce stress, and optimize
@@ -90,7 +92,6 @@ const Home = () => {
             Get Nearby Location
           </button>
         </div>
-
       </div>
       <section className=" text-white py-16 px-6 pt-35">
         <div className="max-w-6xl mx-auto text-center">
@@ -115,7 +116,8 @@ const Home = () => {
               <ParkingCircle size={50} className="text-yellow-400" />
               <h3 className="text-xl font-semibold mt-4">Smart Parking</h3>
               <p className="text-gray-300 mt-2">
-                Find and reserve your parking spot in seconds with AI-powered recommendations.
+                Find and reserve your parking spot in seconds with AI-powered
+                recommendations.
               </p>
             </motion.div>
 
@@ -128,7 +130,8 @@ const Home = () => {
               <CreditCard size={50} className="text-yellow-400" />
               <h3 className="text-xl font-semibold mt-4">Secure Payment</h3>
               <p className="text-gray-300 mt-2">
-                Pay securely using multiple payment options with one-tap checkout.
+                Pay securely using multiple payment options with one-tap
+                checkout.
               </p>
             </motion.div>
 
@@ -154,7 +157,8 @@ const Home = () => {
               <ParkingCircle size={50} className="text-yellow-400" />
               <h3 className="text-xl font-semibold mt-4">AI Predictions</h3>
               <p className="text-gray-300 mt-2">
-                Get AI-driven suggestions for the best parking spots based on real-time data.
+                Get AI-driven suggestions for the best parking spots based on
+                real-time data.
               </p>
             </motion.div>
 
@@ -167,7 +171,8 @@ const Home = () => {
               <CreditCard size={50} className="text-yellow-400" />
               <h3 className="text-xl font-semibold mt-4">Contactless Access</h3>
               <p className="text-gray-300 mt-2">
-                Enter and exit parking lots seamlessly with QR-based or NFC access.
+                Enter and exit parking lots seamlessly with QR-based or NFC
+                access.
               </p>
             </motion.div>
 
@@ -180,16 +185,13 @@ const Home = () => {
               <Map size={50} className="text-yellow-400" />
               <h3 className="text-xl font-semibold mt-4">24/7 Support</h3>
               <p className="text-gray-300 mt-2">
-                Get round-the-clock support for any parking-related queries or issues.
+                Get round-the-clock support for any parking-related queries or
+                issues.
               </p>
             </motion.div>
           </div>
         </div>
       </section>
-
-
-
-
     </section>
   );
 };
