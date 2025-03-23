@@ -1,34 +1,29 @@
 package com.example.controller;
 
-import com.example.model.User;
-import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.model.User;
+import com.example.service.UserService;
 
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:5173")  // Allow frontend access
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
-    // Store user data in MongoDB
-    @PostMapping("/signup")
-    public String signupUser(@RequestBody User user) {
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-        if (existingUser.isPresent()) {
-            return "User already exists!";
-        }
-        userRepository.save(user);
-        return "User registered successfully!";
+    @GetMapping("/email/{email}")
+    public Optional<User> getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email);
     }
 
-    // Get user details by email
-    @GetMapping("/{email}")
-    public Optional<User> getUserByEmail(@PathVariable String email) {
-        return userRepository.findByEmail(email);
+    @PostMapping("/signup")
+    public ResponseEntity<User> signupUser(@RequestBody User user) {
+        User savedUser = userService.saveUser(user);
+        return ResponseEntity.ok(savedUser);
     }
 }
