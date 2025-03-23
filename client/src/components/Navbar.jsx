@@ -10,11 +10,12 @@ import {
   HelpCircle,
   Info,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  const user = useSelector((state) => state.auth.user);
   return (
     <nav className="bg-[#F8FBFF] text-gray-900 shadow-lg font-mono">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,46 +76,67 @@ const Navbar = () => {
             </a>
 
             {/* About */}
-            <a href="signup" className="flex flex-col items-center group">
+            <a href="login" className="flex flex-col items-center group">
               <Info
                 size={24}
                 className="group-hover:text-yellow-400 transition duration-300"
               />
               <span className="text-sm relative">
-                Signin
+                About
                 <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
               </span>
             </a>
 
-            {/* Profile Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex flex-col items-center group"
-              >
-                <User
+            {/* Signin / Profile Dropdown */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex flex-col items-center group"
+                >
+                  {user.photo ? (
+                    <img
+                      src={user.profilePic}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full border-2 border-yellow-400 group-hover:border-yellow-500 transition duration-300"
+                    />
+                  ) : (
+                    <User
+                      size={24}
+                      className="group-hover:text-yellow-400 transition duration-300"
+                    />
+                  )}
+                  <span className="text-sm relative">
+                    Profile
+                    <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
+                  </span>
+                </button>
+                {dropdownOpen && (
+                  <div className="absolute mt-2 w-40 bg-gray-800 text-white rounded-md shadow-lg">
+                    <a href="#" className="block px-4 py-2 hover:bg-gray-700">
+                      My Account
+                    </a>
+                    <a href="#" className="block px-4 py-2 hover:bg-gray-700">
+                      Settings
+                    </a>
+                    <a href="#" className="block px-4 py-2 hover:bg-red-500">
+                      Logout
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <a href="login" className="flex flex-col items-center group">
+                <Info
                   size={24}
                   className="group-hover:text-yellow-400 transition duration-300"
                 />
                 <span className="text-sm relative">
-                  Profile
+                  Signin
                   <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
                 </span>
-              </button>
-              {dropdownOpen && (
-                <div className="absolute mt-2 w-40 bg-gray-800 text-white rounded-md shadow-lg">
-                  <a href="#" className="block px-4 py-2 hover:bg-gray-700">
-                    My Account
-                  </a>
-                  <a href="#" className="block px-4 py-2 hover:bg-gray-700">
-                    Settings
-                  </a>
-                  <a href="#" className="block px-4 py-2 hover:bg-red-500">
-                    Logout
-                  </a>
-                </div>
-              )}
-            </div>
+              </a>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
