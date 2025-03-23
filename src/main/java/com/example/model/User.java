@@ -1,26 +1,20 @@
 package com.example.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Document(collection = "users") // Collection name in MongoDB
+@Document(collection = "users")
 public class User {
     @Id
-    private String id;
+    private String userId;
     private String name;
     private String email;
     private String password;
-    private String picture;
-
-    public User(String name, String email, String picture) {
-        this.name = name;
-        this.email = email;
-        this.picture = picture;
-    }
+    private String phone;
+    private String photo;
+    private String role;  // "customer", "parking host"
+    private List<String> vehicles; // List of vehicle IDs
 }
