@@ -14,10 +14,11 @@ const Home = () => {
     }
   };
   console.log("User : " + user);
-
+  const userId = useSelector((state) => state.auth.userId);
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
       {/* Background Grid of Parking Images */}
+
       <div className="absolute inset-0 hidden sm:grid grid grid-cols-3 md:grid-cols-5 gap-4 rotate-[-29deg]">
         {[
           "https://images.pexels.com/photos/2402235/pexels-photo-2402235.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -40,7 +41,7 @@ const Home = () => {
       <div className="relative z-10 text-center max-w-3xl px-6 pt-40">
         <p className="text-4xl md:text-6xl font-extrabold leading-tight text-black">
           Revolutionizing <span className="text-yellow-400">Parking</span>, One
-          Spot at a Time! 
+          Spot at a Time!
         </p>
         <p className="text-lg md:text-xl text-black mt-4">
           Smart parking solutions that save time, reduce stress, and optimize
