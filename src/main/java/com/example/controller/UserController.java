@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.model.User;
 import com.example.service.UserService;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -22,8 +24,18 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signupUser(@RequestBody User user) {
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(savedUser);
+    public ResponseEntity<Map<String, String>> signupUser(@RequestBody User user) {
+        String userId = userService.saveUser(user); // Returns userId
+
+        Map<String, String> response = new HashMap<>();
+        response.put("userId", userId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable String userId) {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(user);
     }
 }

@@ -8,8 +8,13 @@ import Contact_Footer from "./components/Contact_Footer";
 import ParkingSpots from "./Pages/Parking_Spots";
 import Profile from "./Pages/Profile";
 import ParkingSlots from "./Pages/parking_slots";
-import ParkingSlots3 from "./Pages/demo";
 import EditProfile from "./Pages/editprofile";
+import HowItWorks from "./components/Howitworks";
+import ParkingHistory from "./Pages/parkhistoy";
+import Payments from "./Pages/Payments";
+import Bookings from "./Pages/Booking";
+import DoBookings from "./Pages/dobooking";
+import MyBookings from "./Pages/Booking";
 
 function App() {
   return (
@@ -22,9 +27,14 @@ function App() {
         <Route path="/parking-spots" element={<ParkingSpots />} />
         <Route path="/parking-slots" element={<ParkingSlots />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/parkingslot" element={<ParkingSlots3 />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/edit-profile/:userId" element={<EditProfile />} />
+        <Route path="/park-history" element={<ParkingHistory />} />
+        <Route path="/payments" element={<Payments />} />
+        <Route path="/booking" element={<Bookings />} />
+        <Route path="/do-booking" element={<DoBookings />} />
+        <Route path="/mybookings" element={<MyBookings />} />
       </Routes>
+      <HowItWorks />
       <Footer />
       <Contact_Footer />
     </>

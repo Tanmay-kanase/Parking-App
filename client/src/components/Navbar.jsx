@@ -9,13 +9,17 @@ import {
   DollarSign,
   HelpCircle,
   Info,
+  MapPinPlusInside,
+  History,
+  RussianRuble,
+  Bookmark,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const user = useSelector((state) => state.auth.user);
+  const user = localStorage.getItem("userId");
   return (
     <nav className="bg-[#F8FBFF] text-gray-900 shadow-lg font-mono">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,7 +32,7 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-8 items-center">
             {/* Home */}
-            <a href="#" className="flex flex-col items-center group">
+            <a href="/" className="flex flex-col items-center group">
               <Home
                 size={24}
                 className="group-hover:text-yellow-400 transition duration-300"
@@ -40,7 +44,7 @@ const Navbar = () => {
             </a>
 
             {/* Features */}
-            <a href="#" className="flex flex-col items-center group">
+            {/* <a href="/" className="flex flex-col items-center group">
               <List
                 size={24}
                 className="group-hover:text-yellow-400 transition duration-300"
@@ -49,34 +53,83 @@ const Navbar = () => {
                 Features
                 <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
               </span>
-            </a>
+            </a> */}
 
-            {/* Pricing */}
-            <a href="#" className="flex flex-col items-center group">
-              <DollarSign
-                size={24}
-                className="group-hover:text-yellow-400 transition duration-300"
-              />
-              <span className="text-sm relative">
-                Pricing
-                <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
-              </span>
-            </a>
+            {user ? (
+              <>
+                {/* Parking History */}
+                <a
+                  href="park-history"
+                  className="flex flex-col items-center group"
+                >
+                  <History
+                    size={24}
+                    className="group-hover:text-yellow-400 transition duration-300"
+                  />
+                  <span className="text-sm relative">
+                    Parking History
+                    <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
+                  </span>
+                </a>
 
-            {/* Support */}
-            <a href="#" className="flex flex-col items-center group">
+                {/* Payments */}
+                <a href="payments" className="flex flex-col items-center group">
+                  <RussianRuble
+                    size={24}
+                    className="group-hover:text-yellow-400 transition duration-300"
+                  />
+                  <span className="text-sm relative">
+                    Payments
+                    <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
+                  </span>
+                </a>
+
+                {/* My Parkings */}
+                <a
+                  href="parking-spots"
+                  className="flex flex-col items-center group"
+                >
+                  <MapPinPlusInside
+                    size={24}
+                    className="group-hover:text-yellow-400 transition duration-300"
+                  />
+                  <span className="text-sm relative">
+                    MyParkings
+                    <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
+                  </span>
+                </a>
+
+                {/* My Bookings */}
+                <a
+                  href="mybookings"
+                  className="flex flex-col items-center group"
+                >
+                  <Bookmark
+                    size={24}
+                    className="group-hover:text-yellow-400 transition duration-300"
+                  />
+                  <span className="text-sm relative">
+                    MyBookings
+                    <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
+                  </span>
+                </a>
+              </>
+            ) : null}
+
+            {/* Always Visible: How It Works */}
+            <a href="#howitworks" className="flex flex-col items-center group">
               <HelpCircle
                 size={24}
                 className="group-hover:text-yellow-400 transition duration-300"
               />
               <span className="text-sm relative">
-                Support
+                How it Works
                 <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
               </span>
             </a>
 
             {/* About */}
-            <a href="login" className="flex flex-col items-center group">
+            {/* <a href="login" className="flex flex-col items-center group">
               <Info
                 size={24}
                 className="group-hover:text-yellow-400 transition duration-300"
@@ -85,7 +138,7 @@ const Navbar = () => {
                 About
                 <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
               </span>
-            </a>
+            </a> */}
 
             {/* Signin / Profile Dropdown */}
             {user ? (
@@ -101,15 +154,19 @@ const Navbar = () => {
                       className="w-8 h-8 rounded-full border-2 border-yellow-400 group-hover:border-yellow-500 transition duration-300"
                     />
                   ) : (
-                    <User
-                      size={24}
-                      className="group-hover:text-yellow-400 transition duration-300"
-                    />
+                    <a href="profile">
+                      <User
+                        size={24}
+                        className="group-hover:text-yellow-400 transition duration-300"
+                      />
+                    </a>
                   )}
-                  <span className="text-sm relative">
-                    Profile
-                    <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
-                  </span>
+                  <a href="profile">
+                    <span className="text-sm relative">
+                      Profile
+                      <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
+                    </span>
+                  </a>
                 </button>
                 {dropdownOpen && (
                   <div className="absolute mt-2 w-40 bg-gray-800 text-white rounded-md shadow-lg">

@@ -14,22 +14,24 @@ public class UserService {
     private UserRepository userRepository;
 
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        Optional<User> User = userRepository.findByEmail(email);
+        return User;
+
     }
 
-    public User saveUser(User user) {
-        // Check if user exists in the database
+    public String saveUser(User user) {
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-        
-        if (existingUser.isPresent()) {
-            return existingUser.get(); // Return the existing user
-        }
-        // Create new user if not found
-        User newUser = new User();
-        newUser.setEmail(user.getEmail());
-        newUser.setName(user.getName());
-        newUser.setRole("customer"); // Default role
 
-        return userRepository.save(user);
+        if (existingUser.isPresent()) {
+            return existingUser.get().getUserId(); // Return existing user's ID
+        } else {
+            User newUser = userRepository.save(user);
+            return newUser.getUserId(); // Return new user's ID
+        }
+    }
+
+    public User getUserById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
     }
 }

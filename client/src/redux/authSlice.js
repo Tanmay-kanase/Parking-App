@@ -2,11 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 import jwtDecode from "jwt-decode";
 
 const token = localStorage.getItem("token");
+const userId = localStorage.getItem("userId");
 
 const initialState = {
   user: token ? jwtDecode(token) : null, // Decode token if available
-  userId: token ? jwtDecode(token).sub : null, // Extract userId
-  token: token,
+  userId: userId || null, // Get userId from localStorage
+  token: token || null,
 };
 
 const authSlice = createSlice({
@@ -14,24 +15,19 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      state.token = action.payload;
-      localStorage.setItem("token", action.payload); // Save token
+      state.token = action.payload.token;
+      state.userId = action.payload.userId;
+      state.user = jwtDecode(action.payload.token);
 
-      try {
-        const decoded = jwtDecode(action.payload);
-        state.user = decoded;
-        state.userId = decoded.sub; // Store userId from JWT
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        state.user = null;
-        state.userId = null;
-      }
+      localStorage.setItem("token", action.payload.token); // Save token
+      localStorage.setItem("userId", action.payload.userId); // Store userId
     },
     logout: (state) => {
       state.token = null;
       state.user = null;
       state.userId = null;
       localStorage.removeItem("token");
+      localStorage.removeItem("userId");
     },
   },
 });

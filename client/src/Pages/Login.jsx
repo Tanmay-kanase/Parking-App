@@ -15,24 +15,27 @@ const Login = () => {
       const decodedToken = jwtDecode(credential);
       console.log("Decoded User:", decodedToken);
 
-      const userInfo = JSON.parse(atob(credential.split(".")[1])); // Decode JWT
-      const { name, email, sub: userId, picture } = userInfo; // Extract user data
+      const userInfo = JSON.parse(atob(credential.split(".")[1])); // Decode Google JWT
+      const { name, email, sub: googleUserId, picture } = userInfo;
 
-      const userData = { name, email, userId, photo: picture };
+      const userData = { name, email, userId: googleUserId, photo: picture };
+
+      // Send user data to backend
       const { data } = await axios.post(
         "http://localhost:8088/api/users/signup",
         userData
       );
 
-      console.log("User saved/logged in:", data);
+      console.log("User logged in:", data);
 
-      dispatch(loginSuccess(credential));
+      localStorage.setItem("userId", data.userId); // Store userId in browser
+      // dispatch(loginSuccess({ userId: data.userId }));
+
       navigate("/");
     } catch (error) {
       console.error("Login failed", error);
     }
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#faf5d7]">
       <div className="bg-white shadow-lg rounded-lg p-8 w-96">
