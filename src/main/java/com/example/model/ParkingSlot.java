@@ -9,11 +9,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class ParkingSlot {
     @Id
     private String slotId;
+    private String userId;
     private String parkingId;
-
     private String slotNumber;
     private String location;
     private double pricePerHour;
-    private String slotType; // "compact", "large"
+    private String vehicleType; // "compact", "large"
     private boolean isAvailable;
 }

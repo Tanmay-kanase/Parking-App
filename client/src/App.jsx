@@ -15,6 +15,9 @@ import Payments from "./Pages/Payments";
 import Bookings from "./Pages/Booking";
 import DoBookings from "./Pages/dobooking";
 import MyBookings from "./Pages/Booking";
+import UploadParkingSpots from "./Pages/upload_parking";
+import UploadParkingLocations from "./Pages/uploadparkinglocations";
+import ShowParkings from "./Pages/showparkings";
 
 function App() {
   return (
@@ -27,12 +30,18 @@ function App() {
         <Route path="/parking-spots" element={<ParkingSpots />} />
         <Route path="/parking-slots" element={<ParkingSlots />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/edit-profile/:userId" element={<EditProfile />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/park-history" element={<ParkingHistory />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/booking" element={<Bookings />} />
         <Route path="/do-booking" element={<DoBookings />} />
         <Route path="/mybookings" element={<MyBookings />} />
+        <Route path="/upload-parking-slots" element={<UploadParkingSpots />} />
+        <Route
+          path="/upload-parking-location"
+          element={<UploadParkingLocations />}
+        />
+        <Route path="/show-parkings" element={<ShowParkings />} />
       </Routes>
       <HowItWorks />
       <Footer />

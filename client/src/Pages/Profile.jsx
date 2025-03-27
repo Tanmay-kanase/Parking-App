@@ -15,7 +15,7 @@ const Profile = () => {
   const handleLogout = () => {
     localStorage.removeItem("userId"); // Clear user data
     dispatch(logout());
-    navigate("/login"); // Redirect to login
+    navigate("/"); // Redirect to login
   };
 
   useEffect(() => {

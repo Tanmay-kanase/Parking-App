@@ -41,55 +41,52 @@ const Payments = () => {
 
         <div className="overflow-x-auto">
           <table className="w-full bg-white border border-gray-300 rounded-lg">
-            <thead>
-              <tr className="bg-yellow-500 text-white text-left">
-                <th className="p-3">User</th>
-                <th className="p-3">Reservation</th>
-                <th className="p-3">Amount</th>
-                <th className="p-3">Method</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Payment Time</th>
+            <tr className="bg-yellow-500 text-white text-left">
+              <td className="p-3">User</td>
+              <td className="p-3">Reservation</td>
+              <td className="p-3">Amount</td>
+              <td className="p-3">Method</td>
+              <td className="p-3">Status</td>
+              <td className="p-3">Payment Time</td>
+            </tr>
+
+            {payments.map((payment) => (
+              <tr key={payment.paymentId} className="border-b border-gray-300">
+                <td className="p-3">{payment.userId}</td>
+                <td className="p-3">{payment.reservationId}</td>
+                <td className="p-3 whitespace-nowrap  items-center gap-2">
+                  <>
+                    <FaMoneyBill className="text-green-600" />
+                  </>
+                  <> ${payment.amount} </>
+                </td>
+                <td className="p-3 whitespace-nowrap items-center gap-2">
+                  {payment.paymentMethod === "credit_card" ? (
+                    <>
+                      <FaCreditCard className="text-blue-600" /> Credit Card
+                    </>
+                  ) : (
+                    <>
+                      <FaPaypal className="text-blue-500" /> PayPal
+                    </>
+                  )}
+                </td>
+                <td className="p-3 whitespace-nowrap flex items-center gap-2">
+                  {payment.status === "completed" ? (
+                    <>
+                      <FaCheckCircle className="text-green-600" /> Completed
+                    </>
+                  ) : (
+                    <>
+                      <FaTimesCircle className="text-red-600" /> Failed
+                    </>
+                  )}
+                </td>
+                <td className="p-3 whitespace-nowrap  items-center gap-2">
+                  <FaClock className="text-gray-600" /> {payment.paymentTime}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {payments.map((payment) => (
-                <tr
-                  key={payment.paymentId}
-                  className="border-b border-gray-300 text-left"
-                >
-                  <td className="p-3">{payment.userId}</td>
-                  <td className="p-3">{payment.reservationId}</td>
-                  <td className="p-3 whitespace-nowrap flex items-center gap-2">
-                    <FaMoneyBill className="text-green-600" /> ${payment.amount}
-                  </td>
-                  <td className="p-3 whitespace-nowrap flex items-center gap-2">
-                    {payment.paymentMethod === "credit_card" ? (
-                      <>
-                        <FaCreditCard className="text-blue-600" /> Credit Card
-                      </>
-                    ) : (
-                      <>
-                        <FaPaypal className="text-blue-500" /> PayPal
-                      </>
-                    )}
-                  </td>
-                  <td className="p-3 whitespace-nowrap flex items-center gap-2">
-                    {payment.status === "completed" ? (
-                      <>
-                        <FaCheckCircle className="text-green-600" /> Completed
-                      </>
-                    ) : (
-                      <>
-                        <FaTimesCircle className="text-red-600" /> Failed
-                      </>
-                    )}
-                  </td>
-                  <td className="p-3 whitespace-nowrap flex items-center gap-2">
-                    <FaClock className="text-gray-600" /> {payment.paymentTime}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            ))}
           </table>
         </div>
 

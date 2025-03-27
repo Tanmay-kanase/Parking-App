@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ParkingCircle, CreditCard, Map } from "lucide-react";
@@ -7,6 +7,58 @@ import { useSelector } from "react-redux";
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const handleGetDirections = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          const apiKey = import.meta.env.GOOGLE_API_KEY; // Replace with your API Key
+          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+
+          try {
+            const response = await fetch(geocodeUrl);
+            const data = await response.json();
+
+            if (data.status === "OK" && data.results.length > 0) {
+              // Extract the first relevant address component (e.g., locality, city)
+              const addressComponents = data.results[0].address_components;
+              let placeName = "";
+
+              // Prioritize locality, sublocality, or a known area instead of full address
+              for (const component of addressComponents) {
+                if (
+                  component.types.includes("locality") || // City
+                  component.types.includes("sublocality") || // Area inside city
+                  component.types.includes("neighborhood") // Neighborhood
+                ) {
+                  placeName = component.long_name;
+                  break;
+                }
+              }
+
+              // If no short name found, fallback to formatted address
+              if (!placeName) {
+                placeName = data.results[0].formatted_address.split(",")[0]; // Use only first part
+              }
+
+              navigate(`/parking-spots?query=${encodeURIComponent(placeName)}`);
+            } else {
+              alert("Unable to get location name. Try again.");
+            }
+          } catch (error) {
+            console.error("Geocoding error:", error);
+            alert("Failed to fetch location name.");
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert("Please enable GPS and try again.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
   const user = useSelector((state) => state.auth.user);
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
@@ -79,7 +131,10 @@ const Home = () => {
           </div>
 
           {/* Get Nearby Location Button */}
-          <button className="w-full sm:w-[110px] h-10 flex items-center justify-center gap-2 bg-yellow-400 rounded-full text-white font-semibold border-none relative cursor-pointer shadow-md pl-2 transition-all duration-500 hover:bg-yellow-500 active:scale-95">
+          <button
+            onClick={handleGetDirections}
+            className="w-full sm:w-[110px] h-10 flex items-center justify-center gap-2 bg-yellow-400 rounded-full text-white font-semibold border-none relative cursor-pointer shadow-md pl-2 transition-all duration-500 hover:bg-yellow-500 active:scale-95"
+          >
             <svg
               className="h-6 transition-transform duration-[1500ms] group-hover:rotate-[250deg]"
               viewBox="0 0 512 512"

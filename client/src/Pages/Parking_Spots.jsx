@@ -5,6 +5,16 @@ import { FaHeart, FaCheckCircle, FaCar, FaDirections } from "react-icons/fa";
 
 const ParkingSpots = () => {
   const location = useLocation();
+  const statuses = [
+    "Open",
+    "Limited Spots Available",
+    "Some slots remaining",
+    "Closed for Maintenance",
+    "Parking is Free",
+  ];
+  const availabilityOptions = ["High", "Medium", "Low"];
+
+  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
   const queryParams = new URLSearchParams(location.search);
   const searchQuery = queryParams.get("query") || "";
   const [parkingLocations, setParkingLocations] = useState([]);
@@ -15,6 +25,17 @@ const ParkingSpots = () => {
     priceRange: "",
     availability: "",
   });
+  const handleGetDirections = (place) => {
+    if (!place || !place.vicinity) {
+      alert("Location not found");
+      return;
+    }
+
+    const query = encodeURIComponent(place.vicinity);
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${query}`;
+
+    window.open(googleMapsUrl, "_blank");
+  };
 
   useEffect(() => {
     if (searchQuery) {
@@ -152,13 +173,18 @@ const ParkingSpots = () => {
                 </p>
                 <p>
                   <strong>Status:</strong>{" "}
-                  {location.business_status === "OPERATIONAL"
-                    ? "Open"
-                    : "Parking is full"}
+                  {statuses[Math.floor(Math.random() * statuses.length)]}
                 </p>
+
                 <p>
-                  <strong>Available:</strong> High
+                  <strong>Available:</strong>{" "}
+                  {
+                    availabilityOptions[
+                      Math.floor(Math.random() * availabilityOptions.length)
+                    ]
+                  }
                 </p>
+
                 <p>
                   <strong>Rating:</strong> {location.rating} ⭐
                 </p>
@@ -166,7 +192,10 @@ const ParkingSpots = () => {
                   <strong>Review:</strong>{" "}
                   {location.reviews?.[0]?.text || "No reviews available"}
                 </p>
-                <button className="bg-yellow-500 text-black p-2 w-full rounded-lg hover:bg-yellow-700 mt-3 flex items-center justify-center">
+                <button
+                  onClick={() => handleGetDirections(location)}
+                  className="bg-yellow-500 text-black p-2 w-full rounded-lg hover:bg-yellow-700 mt-3 flex items-center justify-center"
+                >
                   <FaDirections className="mr-2" /> Get Directions
                 </button>
               </div>

@@ -56,19 +56,19 @@ const ParkingHistory = () => {
                   key={history.history_id}
                   className="border-b border-gray-300"
                 >
-                  <td className="p-3 flex items-center gap-2">
+                  <td className="p-3  items-center gap-2">
                     <FaCar className="text-blue-600" /> {history.vehicleId}
                   </td>
-                  <td className="p-3 flex items-center gap-2">
+                  <td className="p-3  items-center gap-2">
                     <FaParking className="text-green-600" />{" "}
                     {history.parking_lotid}
                   </td>
                   <td className="p-3">{history.slotId}</td>
-                  <td className="p-3 flex items-center gap-2">
+                  <td className="p-3  items-center gap-2">
                     <FaClock className="text-gray-600" /> {history.entryTime}
                   </td>
                   <td className="p-3">{history.exitTime}</td>
-                  <td className="p-3 flex items-center gap-2">
+                  <td className="p-3  items-center gap-2">
                     <FaMoneyBill className="text-yellow-600" />{" "}
                     {history.amountPaid}
                   </td>

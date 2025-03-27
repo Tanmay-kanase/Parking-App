@@ -86,7 +86,7 @@ const Navbar = () => {
 
                 {/* My Parkings */}
                 <a
-                  href="parking-spots"
+                  href="upload-parking-location"
                   className="flex flex-col items-center group"
                 >
                   <MapPinPlusInside

@@ -32,6 +32,7 @@ const Login = () => {
       // dispatch(loginSuccess({ userId: data.userId }));
 
       navigate("/");
+      window.location.reload();
     } catch (error) {
       console.error("Login failed", error);
     }
