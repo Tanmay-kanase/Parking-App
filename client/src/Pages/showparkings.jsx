@@ -19,20 +19,25 @@ const ShowParkings = () => {
       try {
         // Step 1: Fetch parking slots
         const parkingResponse = await axios.get(
-          `http://localhost:8088/api/parking-slots?location=${searchLocation}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots?location=${searchLocation}`
         );
 
         const parkingData = parkingResponse.data;
+        console.log(parkingData);
+
 
         // Step 2: Extract unique user IDs
         const userIds = [...new Set(parkingData.map((p) => p.userId))].filter(
           (id) => id
         );
 
+        console.log(userIds);
+
+
         // Step 3: Fetch user details
         const userResponses = await Promise.all(
           userIds.map((id) =>
-            axios.get(`http://localhost:8088/api/users/${id}`)
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`)
           )
         );
 

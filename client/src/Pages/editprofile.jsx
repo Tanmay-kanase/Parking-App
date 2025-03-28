@@ -57,7 +57,7 @@ const EditProfile = () => {
       console.log(vehicles);
 
       const response = await axios.post(
-        "http://localhost:8088/api/vehicles/add",
+        `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/add`,
         vehiclesWithUserId, // Directly passing the data object
         {
           headers: {
@@ -79,7 +79,7 @@ const EditProfile = () => {
     const fetchUserData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8088/api/users/${userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`
         );
         const data = await response.json();
         setUser(data); // Set user state with API response
@@ -166,9 +166,8 @@ const EditProfile = () => {
                 <input
                   type="text"
                   placeholder="MH-43-AR-0707"
-                  className={`border p-2 rounded-lg ${
-                    error ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`border p-2 rounded-lg ${error ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={vehicle.licensePlate}
                   onChange={(e) => {
                     const formattedValue = formatVehicleNumber(e.target.value);

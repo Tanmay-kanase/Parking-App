@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/parking-locations")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ParkingLocationController {
 
     @Autowired
@@ -20,6 +19,11 @@ public class ParkingLocationController {
     @GetMapping
     public List<ParkingLocation> getAllParkingLocations() {
         return parkingLocationService.getAllParkingLocations();
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<ParkingLocation> getByUserId(@PathVariable String userId) {
+        return parkingLocationService.getParkingLocationsByUserId(userId);
     }
 
     @GetMapping("/{id}")

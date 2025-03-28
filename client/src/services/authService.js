@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/auth";
+const API_URL = `${import.meta.env.VITE_NODEJS}/api/auth`;
 
 export const signup = async (userData) => {
     const response = await fetch(`${API_URL}/signup`, {

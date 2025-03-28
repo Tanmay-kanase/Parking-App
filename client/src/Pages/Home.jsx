@@ -62,7 +62,7 @@ const Home = () => {
   const user = useSelector((state) => state.auth.user);
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
-      navigate(`/parking-spots?query=${encodeURIComponent(searchQuery)}`);
+      navigate(`/show-parkings?query=${encodeURIComponent(searchQuery)}`);
     }
   };
   console.log("User : " + user);

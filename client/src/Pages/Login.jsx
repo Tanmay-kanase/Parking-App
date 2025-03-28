@@ -10,6 +10,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -19,7 +21,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:8088/api/users/login",
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
         loginData
       );
       if (response.data.userId) {
@@ -44,7 +46,7 @@ const Login = () => {
 
       const userData = { name, email, userId: googleUserId, photo: picture };
       const { data } = await axios.post(
-        "http://localhost:8088/api/users/google-signup",
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-signup`,
         userData
       );
 
@@ -112,7 +114,7 @@ const Login = () => {
 
         {/* Google Login */}
         <div className="w-full px-4 py-2">
-          <GoogleOAuthProvider clientId="543095501152-ijjcpgtomrp7lsmc7rba2mpujmtirh24.apps.googleusercontent.com">
+          <GoogleOAuthProvider clientId={`${clientId}`}>
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={() => console.log("Login Failed")}

@@ -18,6 +18,10 @@ public class ParkingLocationService {
         return parkingLocationRepository.findAll();
     }
 
+    public List<ParkingLocation> getParkingLocationsByUserId(String userId) {
+        return parkingLocationRepository.findByUserId(userId);
+    }
+
     public Optional<ParkingLocation> getParkingLocationById(String id) {
         return parkingLocationRepository.findById(id);
     }

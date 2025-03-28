@@ -18,7 +18,7 @@ const DoBooking = () => {
     const fetchParkingSlots = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8088/api/parking-slots/parking/${locationId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/parking/${locationId}`
         );
         setSpots(response.data); // Storing response data in 'spots'
       } catch (error) {
@@ -41,7 +41,7 @@ const DoBooking = () => {
   const handleSubmit = async (e) => {
     try {
       await axios.put(
-        `http://localhost:8088/api/parking-slots/${selectedSpot.slotId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${selectedSpot.slotId}`,
         {
           available: false, // Update availability status
         }
@@ -96,9 +96,8 @@ const DoBooking = () => {
               <td className="border p-2">${spot.pricePerHour}</td>
               <td className="border p-2 capitalize">{spot.vehicleType}</td>
               <td
-                className={`border p-2 font-bold ${
-                  spot.available ? "text-green-600" : "text-red-600"
-                }`}
+                className={`border p-2 font-bold ${spot.available ? "text-green-600" : "text-red-600"
+                  }`}
               >
                 {spot.available ? "Available" : "Not Available"}
               </td>

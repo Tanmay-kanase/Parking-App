@@ -26,13 +26,14 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8088/api/users/signup",
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
         formData
       );
       if (response.data.userId) {
         localStorage.setItem("userId", response.data.userId);
         console.log("User registered with ID:", response.data.userId);
-        navigate(`/edit-profile/${response.data.userId}`);
+        navigate("/");
+        window.location.reload();
       }
     } catch (error) {
       setError(
