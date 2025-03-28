@@ -32,7 +32,13 @@ public class ParkingSlotService {
     }
 
     public ParkingSlot createSlot(ParkingSlot slot) {
+        System.out.println(slot);
+        slot.setAvailable(slot.isAvailable());
         return parkingSlotRepository.save(slot);
+    }
+
+    public List<ParkingSlot> getSlotsByParkingId(String parkingId) {
+        return parkingSlotRepository.findByParkingId(parkingId);
     }
 
     public ParkingSlot updateSlot(String slotId, ParkingSlot updatedSlot) {

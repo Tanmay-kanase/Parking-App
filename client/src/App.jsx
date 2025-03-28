@@ -37,6 +37,7 @@ function App() {
         <Route path="/do-booking" element={<DoBookings />} />
         <Route path="/mybookings" element={<MyBookings />} />
         <Route path="/upload-parking-slots" element={<UploadParkingSpots />} />
+        <Route path="/dobooking" element={<DoBookings />} />
         <Route
           path="/upload-parking-location"
           element={<UploadParkingLocations />}

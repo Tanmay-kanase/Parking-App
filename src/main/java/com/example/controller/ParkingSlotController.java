@@ -35,6 +35,12 @@ public class ParkingSlotController {
         return slots.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(slots);
     }
 
+    @GetMapping("/parking/{parkingId}")
+    public ResponseEntity<List<ParkingSlot>> getSlotsByParkingId(@PathVariable String parkingId) {
+        List<ParkingSlot> slots = parkingSlotService.getSlotsByParkingId(parkingId);
+        return slots.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(slots);
+    }
+
     @GetMapping("/available")
     public List<ParkingSlot> getAvailableSlots() {
         return parkingSlotService.getAvailableSlots();
@@ -43,6 +49,7 @@ public class ParkingSlotController {
     @PostMapping
     public ResponseEntity<ParkingSlot> createSlot(@RequestBody ParkingSlot slot) {
         ParkingSlot createdSlot = parkingSlotService.createSlot(slot);
+        System.out.println("Received Request: " + slot);
         return ResponseEntity.ok(createdSlot);
     }
 

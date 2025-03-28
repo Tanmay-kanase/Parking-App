@@ -8,17 +8,17 @@ const UploadParkingSpots = () => {
   const location = useLocation();
   const userId = localStorage.getItem("userId");
   const params = new URLSearchParams(location.search);
-  const parkingId = params.get("parkingId");
+  const locationId = params.get("locationId");
   const name = params.get("name");
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     slotNumber: "",
-    parkingId: `${parkingId}`,
+    parkingId: `${locationId}`,
     location: `${name}`,
     userId: `${userId}`,
     pricePerHour: "",
     vehicleType: "", // Updated for multiple selections
-    isAvailable: true, // Default to available
+    available: true, // Default to available
   });
 
   useEffect(() => {
@@ -37,26 +37,30 @@ const UploadParkingSpots = () => {
   }, []);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.id === "available") {
+      setFormData({
+        ...formData,
+        [e.target.id]: e.target.checked,
+      });
+    }
   };
 
   const handleVehicleType = (type) => {
     setFormData({ ...formData, vehicleType: type });
   };
 
-  const toggleAvailability = () => {
-    setFormData((prev) => ({ ...prev, isAvailable: !prev.isAvailable }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log(formData);
+
       const response = await axios.post(
         "http://localhost:8088/api/parking-slots",
         formData
       );
+
       console.log("Parking slot uploaded:", response.data);
       setShowModal(false);
-      e.preventDefault();
     } catch (error) {
       console.error("Error uploading parking slot:", error);
     }
@@ -144,19 +148,20 @@ const UploadParkingSpots = () => {
             <div className="col-span-2 flex items-center">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
+                  onChange={handleChange}
+                  checked={formData.available}
                   type="checkbox"
-                  checked={formData.isAvailable}
-                  onChange={toggleAvailability}
+                  id="available"
                   className="hidden"
                 />
                 <span
                   className={`px-4 py-2 rounded-lg text-lg font-semibold ${
-                    formData.isAvailable
+                    formData.available
                       ? "bg-green-500 text-white"
                       : "bg-red-500 text-white"
                   }`}
                 >
-                  {formData.isAvailable ? "Available" : "Not Available"}
+                  {formData.available ? "Available" : "Not Available"}
                 </span>
               </label>
             </div>
@@ -188,10 +193,10 @@ const UploadParkingSpots = () => {
                 <td className="border p-2 capitalize">{spot.vehicleType}</td>
                 <td
                   className={`border p-2 font-bold ${
-                    spot.isAvailable ? "text-green-600" : "text-red-600"
+                    spot.available ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  {spot.isAvailable ? "Available" : "Not Available"}
+                  {spot.available ? "Available" : "Not Available"}
                 </td>
               </tr>
             ))}
