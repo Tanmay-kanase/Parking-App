@@ -1,246 +1,154 @@
-import { useState } from "react";
-import {
-  FaCar,
-  FaClock,
-  FaDollarSign,
-  FaCalendarAlt,
-  FaUser,
-  FaMapMarkerAlt,
-  FaPhone,
-  FaParking,
-} from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import axios from "axios";
 
-const DoBookings = () => {
+const DoBooking = () => {
+  const [spots, setSpots] = useState([]);
+  const [selectedSpot, setSelectedSpot] = useState(null);
   const [formData, setFormData] = useState({
-    fullName: "",
-    contactNumber: "",
-    email: "",
-    vehicleNumber: "",
-    vehicleType: "",
-    slotId: "",
-    location: "",
-    startTime: "",
-    endTime: "",
-    amountPaid: "",
-    totalCost: "",
-    additionalNotes: "",
+    time: 1,
+    paymentMethod: "credit-card",
   });
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const locationId = params.get("locID");
+  const name = params.get("namr");
 
+  useEffect(() => {
+    const fetchParkingSlots = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8088/api/parking-slots/parking/${locationId}`
+        );
+        setSpots(response.data); // Storing response data in 'spots'
+      } catch (error) {
+        console.error("Error fetching parking slots:", error);
+      }
+    };
+
+    if (locationId) {
+      fetchParkingSlots();
+    }
+  }, [locationId]);
+
+  // Handle form input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Booking Data:", formData);
+    console.log("Booking Confirmed", { ...formData, slotId: selectedSpot.id });
     alert("Booking Confirmed!");
-    setFormData({
-      fullName: "",
-      contactNumber: "",
-      email: "",
-      vehicleNumber: "",
-      vehicleType: "",
-      slotId: "",
-      location: "",
-      startTime: "",
-      endTime: "",
-      amountPaid: "",
-      totalCost: "",
-      additionalNotes: "",
-    });
+    setSelectedSpot(null); // Close form after submission
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-yellow-400 to-yellow-600 flex justify-center items-center p-6">
-      <div className="bg-white shadow-lg rounded-xl p-8 max-w-3xl w-full">
-        {/* Header */}
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
-          Parking Slot Booking
-        </h2>
+    <div className="p-10 bg-gray-100 min-h-screen">
+      <h2 className="text-2xl font-bold text-yellow-600 mb-6">
+        Booking for Location {name}
+      </h2>
 
-        {/* Booking Form */}
+      {/* Table */}
+      <table className="w-full mt-6 border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-yellow-100">
+            <th className="border p-2">Slot Number</th>
+            <th className="border p-2">Location</th>
+            <th className="border p-2">Price (Per Hour)</th>
+            <th className="border p-2">Vehicle Type</th>
+            <th className="border p-2">Availability</th>
+            <th className="border p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {spots.map((spot) => (
+            <tr key={spot.id} className="text-center">
+              <td className="border p-2">{spot.slotNumber}</td>
+              <td className="border p-2">{spot.location}</td>
+              <td className="border p-2">${spot.pricePerHour}</td>
+              <td className="border p-2 capitalize">{spot.vehicleType}</td>
+              <td
+                className={`border p-2 font-bold ${
+                  spot.available ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {spot.available ? "Available" : "Not Available"}
+              </td>
+              <td className="border p-2">
+                {spot.available && (
+                  <button
+                    className="bg-yellow-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-yellow-600"
+                    onClick={() => setSelectedSpot(spot)}
+                  >
+                    Book
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Booking Form */}
+      {selectedSpot && (
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          className="bg-white p-6 rounded-lg shadow-md mt-6"
         >
-          {/* Full Name */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaUser className="text-gray-600 mr-2" />
+          <h3 className="text-xl font-semibold mb-4">
+            Booking Slot {selectedSpot.slotNumber}
+          </h3>
+          <div className="mb-4">
+            <label className="block text-gray-700">Time (Hours):</label>
             <input
-              type="text"
-              name="fullName"
-              placeholder="Full Name"
-              value={formData.fullName}
+              type="number"
+              name="time"
+              value={formData.time}
               onChange={handleChange}
-              className="w-full bg-transparent outline-none"
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              min="1"
               required
             />
           </div>
-
-          {/* Contact Number */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaPhone className="text-gray-600 mr-2" />
-            <input
-              type="text"
-              name="contactNumber"
-              placeholder="Contact Number"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
+          <div className="mb-4">
+            <label className="block text-gray-700">Total Amount:</label>
+            <p className="font-semibold">
+              ${selectedSpot.pricePerHour * (formData.time || 1)}
+            </p>
           </div>
-
-          {/* Email */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaUser className="text-gray-600 mr-2" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Vehicle Number */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaCar className="text-gray-600 mr-2" />
-            <input
-              type="text"
-              name="vehicleNumber"
-              placeholder="Vehicle Number"
-              value={formData.vehicleNumber}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Vehicle Type */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaCar className="text-gray-600 mr-2" />
+          <div className="mb-4">
+            <label className="block text-gray-700">Payment Method:</label>
             <select
-              name="vehicleType"
-              value={formData.vehicleType}
+              name="paymentMethod"
+              value={formData.paymentMethod}
               onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
+              className="w-full p-2 border border-gray-300 rounded-lg"
             >
-              <option value="">Select Vehicle Type</option>
-              <option value="Car">Car</option>
-              <option value="Bike">Bike</option>
-              <option value="Truck">Truck</option>
+              <option value="credit-card">Credit Card</option>
+              <option value="debit-card">Debit Card</option>
+              <option value="paypal">PayPal</option>
+              <option value="upi">UPI</option>
             </select>
           </div>
-
-          {/* Slot ID */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaParking className="text-gray-600 mr-2" />
-            <input
-              type="text"
-              name="slotId"
-              placeholder="Slot ID"
-              value={formData.slotId}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Location */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaMapMarkerAlt className="text-gray-600 mr-2" />
-            <input
-              type="text"
-              name="location"
-              placeholder="Location"
-              value={formData.location}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Start Time */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaClock className="text-gray-600 mr-2" />
-            <input
-              type="datetime-local"
-              name="startTime"
-              value={formData.startTime}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* End Time */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaClock className="text-gray-600 mr-2" />
-            <input
-              type="datetime-local"
-              name="endTime"
-              value={formData.endTime}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Amount Paid */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaDollarSign className="text-gray-600 mr-2" />
-            <input
-              type="number"
-              name="amountPaid"
-              placeholder="Amount Paid"
-              value={formData.amountPaid}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Total Cost */}
-          <div className="flex items-center border p-3 rounded-md bg-gray-50">
-            <FaDollarSign className="text-gray-600 mr-2" />
-            <input
-              type="number"
-              name="totalCost"
-              placeholder="Total Cost"
-              value={formData.totalCost}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
-
-          {/* Additional Notes */}
-          <div className="col-span-2 flex items-center border p-3 rounded-md bg-gray-50">
-            <FaCalendarAlt className="text-gray-600 mr-2" />
-            <textarea
-              name="additionalNotes"
-              placeholder="Additional Notes (Optional)"
-              value={formData.additionalNotes}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-            ></textarea>
-          </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
-            className="col-span-2 bg-yellow-500 text-white font-semibold py-3 px-6 rounded-md hover:bg-yellow-700 transition duration-300"
+            className="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600"
           >
-            Confirm Booking
+            Proceed to Payment
+          </button>
+          <button
+            type="button"
+            className="ml-4 bg-gray-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500"
+            onClick={() => setSelectedSpot(null)}
+          >
+            Cancel
           </button>
         </form>
-      </div>
+      )}
     </div>
   );
 };
 
-export default DoBookings;
+export default DoBooking;

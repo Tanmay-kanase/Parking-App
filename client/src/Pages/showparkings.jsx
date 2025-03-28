@@ -1,22 +1,56 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const ShowParkings = () => {
+  const navigate = useNavigate();
+
+  const handleBooking = (parkingId, name) => {
+    navigate(`/dobooking?locID=${parkingId}&name=${name}`);
+  };
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const searchLocation = params.get("name");
+  const searchLocation = params.get("query");
+
   const [parkings, setParkings] = useState([]);
 
   useEffect(() => {
     const fetchParkings = async () => {
       try {
-        const response = await axios.get(
+        // Step 1: Fetch parking slots
+        const parkingResponse = await axios.get(
           `http://localhost:8088/api/parking-slots?location=${searchLocation}`
         );
-        setParkings(response.data);
+
+        const parkingData = parkingResponse.data;
+
+        // Step 2: Extract unique user IDs
+        const userIds = [...new Set(parkingData.map((p) => p.userId))].filter(
+          (id) => id
+        );
+
+        // Step 3: Fetch user details
+        const userResponses = await Promise.all(
+          userIds.map((id) =>
+            axios.get(`http://localhost:8088/api/users/${id}`)
+          )
+        );
+
+        // Convert users array into an object for quick lookup
+        const usersData = userResponses.reduce((acc, res) => {
+          acc[res.data.userId] = res.data;
+          return acc;
+        }, {});
+
+        // Step 4: Merge user details into parking slots
+        const mergedData = parkingData.map((p) => ({
+          ...p,
+          user: usersData[p.userId] || null, // Attach user data if available
+        }));
+        console.log(mergedData);
+        setParkings(mergedData);
       } catch (error) {
-        console.error("Error fetching parkings:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
@@ -35,7 +69,7 @@ const ShowParkings = () => {
           {parkings.length > 0 ? (
             parkings.map((parking) => (
               <div
-                key={parking.id}
+                key={parking.slotId}
                 className="bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between"
               >
                 <h3 className="text-xl font-semibold text-gray-800">
@@ -47,28 +81,34 @@ const ShowParkings = () => {
                 </p>
                 <p
                   className={
-                    parking.isAvailable
+                    parking.available
                       ? "text-green-600 font-bold"
                       : "text-red-600 font-bold"
                   }
                 >
-                  {parking.isAvailable ? "Available" : "Booked"}
+                  {parking.available ? "Available" : "Booked"}
                 </p>
-                <p className="text-gray-600">
-                  <strong>Owner:</strong> {parking.ownerName}
-                </p>
-                <p className="text-gray-600">
-                  <strong>Contact:</strong> {parking.contact}
-                </p>
-                <p className="text-gray-600">
-                  <strong>Description</strong> {parking.amenities}
-                </p>
-
+                {parking.user && (
+                  <>
+                    <p className="text-gray-600">
+                      <strong>Owner:</strong> {parking.user.name}
+                    </p>
+                    <p className="text-gray-600">
+                      <strong>Contact:</strong> {parking.user.email}
+                    </p>
+                    <p className="text-gray-600">
+                      <strong>Phone:</strong> {parking.user.phone}
+                    </p>
+                  </>
+                )}
                 <button
                   className="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-                  disabled={!parking.isAvailable}
+                  disabled={!parking.available}
+                  onClick={() =>
+                    handleBooking(parking.parkingId, parking.location)
+                  }
                 >
-                  {parking.isAvailable ? "Book Now" : "Unavailable"}
+                  {parking.available ? "Book Now" : "Unavailable"}
                 </button>
               </div>
             ))
