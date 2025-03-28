@@ -24,6 +24,11 @@ public class UserController {
     }
 
     @PostMapping("/signup")
+    public Map<String, String> registerUser(@RequestBody User user) {
+        String userId = userService.registerUser(user);
+        return Map.of("userId", userId); // Return userId in JSON format
+    }
+    @PostMapping("/google-signup")
     public ResponseEntity<Map<String, String>> signupUser(@RequestBody User user) {
         String userId = userService.saveUser(user); // Returns userId
 
@@ -37,5 +42,11 @@ public class UserController {
     public ResponseEntity<User> getUserById(@PathVariable String userId) {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/login")
+    public Map<String, String> loginUser(@RequestBody Map<String, String> loginData) {
+        String userId = userService.loginUser(loginData.get("email"), loginData.get("password"));
+        return Map.of("userId", userId);
     }
 }

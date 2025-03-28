@@ -12,7 +12,7 @@ const DoBooking = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const locationId = params.get("locID");
-  const name = params.get("namr");
+  const name = params.get("name");
 
   useEffect(() => {
     const fetchParkingSlots = async () => {
@@ -25,6 +25,7 @@ const DoBooking = () => {
         console.error("Error fetching parking slots:", error);
       }
     };
+    console.log(spots);
 
     if (locationId) {
       fetchParkingSlots();
@@ -38,12 +39,37 @@ const DoBooking = () => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Booking Confirmed", { ...formData, slotId: selectedSpot.id });
-    alert("Booking Confirmed!");
-    setSelectedSpot(null); // Close form after submission
-  };
+    try {
+      await axios.put(
+        `http://localhost:8088/api/parking-slots/${selectedSpot.slotId}`,
+        {
+          available: false, // Update availability status
+        }
+      );
 
+      alert("Booking Confirmed! Slot is now unavailable.");
+
+      // Update UI to reflect changes
+      setSpots((prevSpots) =>
+        prevSpots.map((spot) =>
+          spot.id === selectedSpot.id ? { ...spot, available: false } : spot
+        )
+      );
+
+      //setSelectedSpot(null); // Close booking form
+    } catch (error) {
+      console.error("Error updating slot availability:", error);
+      alert("Failed to book slot. Please try again.");
+    }
+    e.preventDefault();
+    console.log("Booking Confirmed", {
+      ...formData,
+      slotId: selectedSpot.slotId,
+    });
+    alert("Booking Confirmed!");
+    //setSelectedSpot(null); // Close form after submission
+  };
+  console.log(selectedSpot);
   return (
     <div className="p-10 bg-gray-100 min-h-screen">
       <h2 className="text-2xl font-bold text-yellow-600 mb-6">

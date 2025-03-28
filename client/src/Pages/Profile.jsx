@@ -10,7 +10,7 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleEdit = () => {
-    navigate(`/edit-profile/${userId}`);
+    navigate(`/edit-profile?userId=${userId}`);
   };
   const handleLogout = () => {
     localStorage.removeItem("userId"); // Clear user data

@@ -19,6 +19,19 @@ public class UserService {
 
     }
 
+    public String registerUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+        User savedUser = userRepository.save(user);
+        return savedUser.getUserId(); // Return the generated userId
+    }
+
+    public User getUserById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    }
+
     public String saveUser(User user) {
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
 
@@ -30,8 +43,11 @@ public class UserService {
         }
     }
 
-    public User getUserById(String userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    public String loginUser(String email, String password) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && user.get().getPassword().equals(password)) {
+            return user.get().getUserId(); // Return userId if login is successful
+        }
+        throw new RuntimeException("Invalid email or password");
     }
 }
