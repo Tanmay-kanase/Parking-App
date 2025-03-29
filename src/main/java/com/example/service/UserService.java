@@ -50,4 +50,18 @@ public class UserService {
         }
         throw new RuntimeException("Invalid email or password");
     }
+
+    public User updateUser(String userId, User updatedUser) {
+        Optional<User> existingUser = userRepository.findById(userId);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setName(updatedUser.getName());
+            user.setEmail(updatedUser.getEmail());
+            user.setPhone(updatedUser.getPhone());
+            user.setRole(updatedUser.getRole());
+            return userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+    }
 }

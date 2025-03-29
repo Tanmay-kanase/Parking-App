@@ -12,11 +12,17 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @PutMapping("/{userId}") // Handles PUT requests to update user
+    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User updatedUser) {
+        User user = userService.updateUser(userId, updatedUser);
+        return ResponseEntity.ok(user);
+    }
 
     @GetMapping("/email/{email}")
     public Optional<User> getUserByEmail(@PathVariable String email) {
@@ -28,6 +34,7 @@ public class UserController {
         String userId = userService.registerUser(user);
         return Map.of("userId", userId); // Return userId in JSON format
     }
+
     @PostMapping("/google-signup")
     public ResponseEntity<Map<String, String>> signupUser(@RequestBody User user) {
         String userId = userService.saveUser(user); // Returns userId

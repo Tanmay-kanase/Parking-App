@@ -12,7 +12,6 @@ const Login = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
   };
@@ -114,7 +113,7 @@ const Login = () => {
 
         {/* Google Login */}
         <div className="w-full px-4 py-2">
-          <GoogleOAuthProvider clientId={`${clientId}`}>
+          <GoogleOAuthProvider clientId="543095501152-ijjcpgtomrp7lsmc7rba2mpujmtirh24.apps.googleusercontent.com">
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={() => console.log("Login Failed")}
