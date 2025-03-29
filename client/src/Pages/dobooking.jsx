@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const DoBooking = () => {
@@ -13,12 +13,15 @@ const DoBooking = () => {
   const params = new URLSearchParams(location.search);
   const locationId = params.get("locID");
   const name = params.get("name");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchParkingSlots = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/parking/${locationId}`
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/parking-slots/parking/${locationId}`
         );
         setSpots(response.data); // Storing response data in 'spots'
       } catch (error) {
@@ -41,13 +44,16 @@ const DoBooking = () => {
   const handleSubmit = async (e) => {
     try {
       await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${selectedSpot.slotId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
+          selectedSpot.slotId
+        }`,
         {
           available: false, // Update availability status
         }
       );
 
       alert("Booking Confirmed! Slot is now unavailable.");
+      navigate("/booking");
 
       // Update UI to reflect changes
       setSpots((prevSpots) =>
@@ -61,7 +67,6 @@ const DoBooking = () => {
       console.error("Error updating slot availability:", error);
       alert("Failed to book slot. Please try again.");
     }
-    e.preventDefault();
     console.log("Booking Confirmed", {
       ...formData,
       slotId: selectedSpot.slotId,
@@ -96,8 +101,9 @@ const DoBooking = () => {
               <td className="border p-2">${spot.pricePerHour}</td>
               <td className="border p-2 capitalize">{spot.vehicleType}</td>
               <td
-                className={`border p-2 font-bold ${spot.available ? "text-green-600" : "text-red-600"
-                  }`}
+                className={`border p-2 font-bold ${
+                  spot.available ? "text-green-600" : "text-red-600"
+                }`}
               >
                 {spot.available ? "Available" : "Not Available"}
               </td>
