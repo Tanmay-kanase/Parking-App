@@ -22,12 +22,21 @@ export default function UploadParkingLocations() {
     state: "",
     zipCode: "",
     totalSlots: "",
+    evCharging: false,
+    cctvCamera: false,
+    washing: false,
+    bikeSlots: "",
+    sedanSlots: "",
+    truckSlots: "",
+    busSlots: "",
   });
   useEffect(() => {
     const fetchParkings = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/user/${userId}`
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/parking-locations/user/${userId}`
         );
         setParkings(response.data); // Set the parking data
       } catch (error) {
@@ -37,6 +46,8 @@ export default function UploadParkingLocations() {
 
     if (userId) fetchParkings();
   }, [userId]);
+  console.log(parkings);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -154,6 +165,100 @@ export default function UploadParkingLocations() {
                 />
               </div>
             </div>
+            <h3 className="text-3xl font-bold text-gray-700">
+              Additional Features
+            </h3>
+            {/* Additional Features */}
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="evCharging"
+                  checked={formData.evCharging || false}
+                  onChange={(e) =>
+                    setFormData({ ...formData, evCharging: e.target.checked })
+                  }
+                  className="w-5 h-5"
+                />
+                <span className="text-gray-700 font-medium">EV Charging</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="cctvCamera"
+                  checked={formData.cctvCamera || false}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cctvCamera: e.target.checked })
+                  }
+                  className="w-5 h-5"
+                />
+                <span className="text-gray-700 font-medium">CCTV Camera</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="washing"
+                  checked={formData.washing || false}
+                  onChange={(e) =>
+                    setFormData({ ...formData, washing: e.target.checked })
+                  }
+                  className="w-5 h-5"
+                />
+                <span className="text-gray-700 font-medium">Washing</span>
+              </label>
+            </div>
+
+            {/* Slot Type Distribution */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center border border-gray-400 rounded-xl p-4 text-lg">
+                <FaHashtag className="text-blue-500 mr-4" size={26} />
+                <input
+                  type="number"
+                  name="bikeSlots"
+                  placeholder="Bike Slots"
+                  value={formData.bikeSlots}
+                  onChange={handleChange}
+                  className="w-full focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="flex items-center border border-gray-400 rounded-xl p-4 text-lg">
+                <FaHashtag className="text-green-500 mr-4" size={26} />
+                <input
+                  type="number"
+                  name="sedanSlots"
+                  placeholder="Sedan Slots"
+                  value={formData.sedanSlots}
+                  onChange={handleChange}
+                  className="w-full focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="flex items-center border border-gray-400 rounded-xl p-4 text-lg">
+                <FaHashtag className="text-yellow-500 mr-4" size={26} />
+                <input
+                  type="number"
+                  name="truckSlots"
+                  placeholder="Truck Slots"
+                  value={formData.truckSlots}
+                  onChange={handleChange}
+                  className="w-full focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="flex items-center border border-gray-400 rounded-xl p-4 text-lg">
+                <FaHashtag className="text-red-500 mr-4" size={26} />
+                <input
+                  type="number"
+                  name="busSlots"
+                  placeholder="Bus Slots"
+                  value={formData.busSlots}
+                  onChange={handleChange}
+                  className="w-full focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
 
             {/* Submit Button */}
             <button
@@ -163,31 +268,44 @@ export default function UploadParkingLocations() {
               <Upload className="mr-3" size={26} />
               Upload Location
             </button>
-          </form>)}
-        <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">My Parkings</h3>
+          </form>
+        )}
+        <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+          My Parkings
+        </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {parkings.length > 0 ? (
             parkings.map((parking) => (
               <div
-                onClick={() => navigate(`/upload-parking-slots?locationId=${parking.locationId}&name=${parking.name}`)}
+                onClick={() =>
+                  navigate(
+                    `/upload-parking-slots?locationId=${parking.locationId}&name=${parking.name}`
+                  )
+                }
                 key={parking.locationId}
                 className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200 hover:shadow-xl transition"
               >
                 <div className="flex items-center gap-3 mb-2">
                   <FaMapMarkerAlt className="text-red-500 text-lg" />
-                  <h3 className="text-xl font-semibold text-gray-800">{parking.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {parking.name}
+                  </h3>
                 </div>
                 <p className="text-gray-600">
-                  <span className="font-medium">Location:</span> {parking.address}, {parking.city}
+                  <span className="font-medium">Location:</span>{" "}
+                  {parking.address}, {parking.city}
                 </p>
                 <p className="text-gray-500">
-                  <span className="font-medium">Total Slots:</span> {parking.totalSlots}
+                  <span className="font-medium">Total Slots:</span>{" "}
+                  {parking.totalSlots}
                 </p>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 text-center col-span-full">No parkings found.</p>
+            <p className="text-gray-500 text-center col-span-full">
+              No parkings found.
+            </p>
           )}
         </div>
       </div>

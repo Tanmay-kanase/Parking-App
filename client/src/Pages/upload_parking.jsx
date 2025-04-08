@@ -25,7 +25,9 @@ const UploadParkingSpots = () => {
     const fetchParkingSlots = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/user/${userId}`
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/parking-slots/parking/${locationId}`
         );
         setSpots(response.data); // Storing response data in 'spots'
       } catch (error) {
@@ -81,7 +83,6 @@ const UploadParkingSpots = () => {
           Upload Your Parking Slot
         </h2>
         {showModal && (
-
           <form
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -127,10 +128,11 @@ const UploadParkingSpots = () => {
               ].map(({ type, icon }) => (
                 <label
                   key={type}
-                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${formData.vehicleType === type
-                    ? "bg-gray-300"
-                    : "bg-gray-100"
-                    }`}
+                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+                    formData.vehicleType === type
+                      ? "bg-gray-300"
+                      : "bg-gray-100"
+                  }`}
                 >
                   <input
                     type="radio"
@@ -156,10 +158,11 @@ const UploadParkingSpots = () => {
                   className="hidden"
                 />
                 <span
-                  className={`px-4 py-2 rounded-lg text-lg font-semibold ${formData.available
-                    ? "bg-green-500 text-white"
-                    : "bg-red-500 text-white"
-                    }`}
+                  className={`px-4 py-2 rounded-lg text-lg font-semibold ${
+                    formData.available
+                      ? "bg-green-500 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
                 >
                   {formData.available ? "Available" : "Not Available"}
                 </span>
@@ -192,8 +195,9 @@ const UploadParkingSpots = () => {
                 <td className="border p-2">${spot.pricePerHour}</td>
                 <td className="border p-2 capitalize">{spot.vehicleType}</td>
                 <td
-                  className={`border p-2 font-bold ${spot.available ? "text-green-600" : "text-red-600"
-                    }`}
+                  className={`border p-2 font-bold ${
+                    spot.available ? "text-green-600" : "text-red-600"
+                  }`}
                 >
                   {spot.available ? "Available" : "Not Available"}
                 </td>

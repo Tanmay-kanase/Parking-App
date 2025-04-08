@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  FaCar,
+  FaTruck,
+  FaMotorcycle,
+  FaBus,
+  FaAdjust,
+  FaTimesCircle,
+  FaShower,
+  FaCheckCircle,
+  FaVideo,
+  FaChargingStation,
+} from "react-icons/fa";
 
 const ShowParkings = () => {
   const navigate = useNavigate();
@@ -13,57 +25,21 @@ const ShowParkings = () => {
   const searchLocation = params.get("query");
 
   const [parkings, setParkings] = useState([]);
+  const city = "Pune"; // Or make this dynamic via input or route param
 
   useEffect(() => {
-    const fetchParkings = async () => {
-      try {
-        // Step 1: Fetch parking slots
-        const parkingResponse = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots?location=${searchLocation}`
-        );
-
-        const parkingData = parkingResponse.data;
-        console.log(parkingData);
-
-
-        // Step 2: Extract unique user IDs
-        const userIds = [...new Set(parkingData.map((p) => p.userId))].filter(
-          (id) => id
-        );
-
-        console.log(userIds);
-
-
-        // Step 3: Fetch user details
-        const userResponses = await Promise.all(
-          userIds.map((id) =>
-            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`)
-          )
-        );
-
-        // Convert users array into an object for quick lookup
-        const usersData = userResponses.reduce((acc, res) => {
-          acc[res.data.userId] = res.data;
-          return acc;
-        }, {});
-
-        // Step 4: Merge user details into parking slots
-        const mergedData = parkingData.map((p) => ({
-          ...p,
-          user: usersData[p.userId] || null, // Attach user data if available
-        }));
-        console.log(mergedData);
-        setParkings(mergedData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    if (searchLocation) {
-      fetchParkings();
-    }
+    axios
+      .get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/city/${city}`
+      )
+      .then((response) => {
+        setParkings(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching parking locations:", error);
+      });
   }, [searchLocation]);
-
+  console.log(parkings);
   return (
     <div className="min-h-screen bg-yellow-50 text-gray-900 p-10">
       <div className="max-w-6xl mx-auto">
@@ -77,29 +53,85 @@ const ShowParkings = () => {
                 key={parking.slotId}
                 className="bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between"
               >
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Slot {parking.slotNumber}
+                <h3 className="text-xl font-semibold text-emerald-950">
+                  {parking.name}
                 </h3>
-                <p className="text-gray-600">Location: {parking.location}</p>
-                <p className="text-gray-600">
-                  Price: ${parking.pricePerHour} / hr
+
+                <p className="text-gray-600 text-lg font-semibold">
+                  Total Slots: {parking.totalSlots}
                 </p>
-                <p
-                  className={
-                    parking.available
-                      ? "text-green-600 font-bold"
-                      : "text-red-600 font-bold"
-                  }
-                >
-                  {parking.available ? "Available" : "Booked"}
+
+                <p className="text-gray-600 text-lg font-semibold">
+                  Avail Slots :
                 </p>
+                {/* 🚗 Vehicle Slots Grid (2x2) */}
+                <div className="grid grid-cols-2 gap-3 text-sm font-semibold text-gray-700">
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaMotorcycle className="text-blue-600 text-lg" />
+                    <span>
+                      Bike:{" "}
+                      <span className="text-blue-700 font-bold">
+                        {parking.bikeSlots}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaCar className="text-green-600 text-lg" />
+                    <span>Sedan: {parking.sedanSlots}</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaTruck className="text-red-600 text-lg" />
+                    <span>Truck: {parking.truckSlots}</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaBus className="text-yellow-600 text-lg" />
+                    <span>Bus: {parking.busSlots}</span>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 text-lg font-semibold mb-2">
+                  Features
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* ⚡ EV Charging */}
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaChargingStation className="text-blue-600 text-lg" />
+                    <span>Charging:</span>
+                    {parking.evCharging ? (
+                      <FaCheckCircle className="text-green-500 text-lg" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg" />
+                    )}
+                  </div>
+
+                  {/* 📹 CCTV Camera */}
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaVideo className="text-yellow-600 text-lg" />
+                    <span>CCTV:</span>
+                    {parking.cctvCamera ? (
+                      <FaCheckCircle className="text-green-500 text-lg" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg" />
+                    )}
+                  </div>
+
+                  {/* 🚿 Washing */}
+                  <div className="flex items-center justify-center gap-2 border p-2 rounded-lg">
+                    <FaShower className="text-blue-400 text-lg" />
+                    <span>Washing:</span>
+                    {parking.washing ? (
+                      <FaCheckCircle className="text-green-500 text-lg" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg" />
+                    )}
+                  </div>
+                </div>
+
                 {parking.user && (
                   <>
                     <p className="text-gray-600">
                       <strong>Owner:</strong> {parking.user.name}
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Contact:</strong> {parking.user.email}
                     </p>
                     <p className="text-gray-600">
                       <strong>Phone:</strong> {parking.user.phone}
@@ -108,12 +140,12 @@ const ShowParkings = () => {
                 )}
                 <button
                   className="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-                  disabled={!parking.available}
+                  // disabled={!parking.available}
                   onClick={() =>
-                    handleBooking(parking.parkingId, parking.location)
+                    handleBooking(parking.locationId, parking.name)
                   }
                 >
-                  {parking.available ? "Book Now" : "Unavailable"}
+                  Park Here ...
                 </button>
               </div>
             ))

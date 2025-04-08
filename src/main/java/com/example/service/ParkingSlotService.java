@@ -26,7 +26,8 @@ public class ParkingSlotService {
     public List<ParkingSlot> getSlotsByUserId(String userId) {
         return parkingSlotRepository.findByUserId(userId);
     }
-
+   
+    
     
 
     public List<ParkingSlot> getAvailableSlots() {

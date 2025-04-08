@@ -53,7 +53,7 @@ const DoBooking = () => {
       );
 
       alert("Booking Confirmed! Slot is now unavailable.");
-      navigate("/booking");
+      // navigate("/booking");
 
       // Update UI to reflect changes
       setSpots((prevSpots) =>

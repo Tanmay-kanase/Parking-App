@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.ParkingLocationResponse;
 import com.example.model.ParkingLocation;
 import com.example.service.ParkingLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,9 @@ public class ParkingLocationController {
     }
 
     @GetMapping("/city/{city}")
-    public List<ParkingLocation> getParkingLocationsByCity(@PathVariable String city) {
-        return parkingLocationService.getParkingLocationsByCity(city);
+    public ResponseEntity<List<ParkingLocationResponse>> getByCity(@PathVariable String city) {
+        List<ParkingLocationResponse> list = parkingLocationService.getParkingLocationsByCity(city);
+        return ResponseEntity.ok(list);
     }
 
     @PostMapping

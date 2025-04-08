@@ -20,6 +20,15 @@ public class ParkingLocation {
     private int totalSlots; // Total number of slots available
     private List<String> slotIds; // References to parking slots
 
+    private boolean evCharging;
+    private boolean cctvCamera;
+    private boolean washing;
+
+    private int bikeSlots;
+    private int sedanSlots;
+    private int truckSlots;
+    private int busSlots;
+
     public void addSlot(String slotId) {
         this.slotIds.add(slotId);
     }
