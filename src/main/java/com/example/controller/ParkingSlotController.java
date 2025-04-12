@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.model.ParkingSlot;
+import com.example.service.EmailService;
 import com.example.service.ParkingSlotService;
 
 import java.util.List;
@@ -13,6 +14,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/parking-slots")
 public class ParkingSlotController {
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private ParkingSlotService parkingSlotService;
@@ -56,7 +60,21 @@ public class ParkingSlotController {
     @PutMapping("/{slotId}")
     public ResponseEntity<ParkingSlot> updateSlot(@PathVariable String slotId, @RequestBody ParkingSlot updatedSlot) {
         try {
+            System.out.println("\n\n\nBooking started\n\n\n");
             ParkingSlot slot = parkingSlotService.updateSlot(slotId, updatedSlot);
+
+            // Compose email content
+            // String subject = "Your Parking Slot Booking is Confirmed!";
+            // String body = "Booking Confirmed";
+
+            // try {
+            //     emailService.sendBookingConfirmation("tanmaykanase06@gmail.com", subject,
+            //             body);
+            //     System.out.println("Booking mail is sent to user.");
+            // } catch (Exception e) {
+            //     System.out.println("❌ Error sending email: " + e.getMessage());
+            //     e.printStackTrace();
+            // }
             return ResponseEntity.ok(slot);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

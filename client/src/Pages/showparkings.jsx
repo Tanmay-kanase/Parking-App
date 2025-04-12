@@ -25,12 +25,14 @@ const ShowParkings = () => {
   const searchLocation = params.get("query");
 
   const [parkings, setParkings] = useState([]);
-  const city = "Pune"; // Or make this dynamic via input or route param
+  const city = "p"; // Or make this dynamic via input or route param
 
   useEffect(() => {
     axios
       .get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/city/${city}`
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/parking-locations/city/${searchLocation}`
       )
       .then((response) => {
         setParkings(response.data);

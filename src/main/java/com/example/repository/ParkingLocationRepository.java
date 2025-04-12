@@ -10,4 +10,6 @@ import java.util.List;
 public interface ParkingLocationRepository extends MongoRepository<ParkingLocation, String> {
     List<ParkingLocation> findByCity(String city);
     List<ParkingLocation> findByUserId(String userId);
+    List<ParkingLocation> findByCityRegexIgnoreCase(String cityPattern);
+
 }

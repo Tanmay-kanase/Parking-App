@@ -22,6 +22,7 @@ const EditProfile = () => {
   const handleVehicleChange = (field, value) => {
     setVehicle((prev) => ({ ...prev, [field]: value }));
   };
+  console.log(user);
 
   const updateUser = async () => {
     try {
@@ -30,6 +31,7 @@ const EditProfile = () => {
         user
       );
       console.log("User updated:", response.data);
+      navigate("/profile");
       alert("Profile updated successfully!");
     } catch (error) {
       console.error(
@@ -320,7 +322,10 @@ const EditProfile = () => {
             >
               Save Changes
             </button>
-            <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+            <button
+              onClick={() => navigate("/profile")}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            >
               Cancel
             </button>
           </div>

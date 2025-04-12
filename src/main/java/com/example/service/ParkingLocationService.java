@@ -78,7 +78,8 @@ public class ParkingLocationService {
     }
 
     public List<ParkingLocationResponse> getParkingLocationsByCity(String city) {
-        List<ParkingLocation> locations = parkingLocationRepository.findByCity(city);
+        List<ParkingLocation> locations = parkingLocationRepository.findByCityRegexIgnoreCase(".*" + city + ".*");
+
         List<ParkingLocationResponse> responses = new ArrayList<>();
 
         for (ParkingLocation location : locations) {

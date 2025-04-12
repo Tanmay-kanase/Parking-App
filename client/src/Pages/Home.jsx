@@ -8,57 +8,16 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const handleGetDirections = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          const apiKey = import.meta.env.GOOGLE_API_KEY; // Replace with your API Key
-          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+    navigate(`/parking-spots?query=Belhe`);
+  };
+  const [input, setInput] = useState("");
 
-          try {
-            const response = await fetch(geocodeUrl);
-            const data = await response.json();
-
-            if (data.status === "OK" && data.results.length > 0) {
-              // Extract the first relevant address component (e.g., locality, city)
-              const addressComponents = data.results[0].address_components;
-              let placeName = "";
-
-              // Prioritize locality, sublocality, or a known area instead of full address
-              for (const component of addressComponents) {
-                if (
-                  component.types.includes("locality") || // City
-                  component.types.includes("sublocality") || // Area inside city
-                  component.types.includes("neighborhood") // Neighborhood
-                ) {
-                  placeName = component.long_name;
-                  break;
-                }
-              }
-
-              // If no short name found, fallback to formatted address
-              if (!placeName) {
-                placeName = data.results[0].formatted_address.split(",")[0]; // Use only first part
-              }
-
-              navigate(`/parking-spots?query=${encodeURIComponent(placeName)}`);
-            } else {
-              alert("Unable to get location name. Try again.");
-            }
-          } catch (error) {
-            console.error("Geocoding error:", error);
-            alert("Failed to fetch location name.");
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          alert("Please enable GPS and try again.");
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by this browser.");
+  const handleSearchi = () => {
+    if (input.trim()) {
+      navigate(`/show-parkings?query=${encodeURIComponent(input)}`);
     }
   };
+
   const user = useSelector((state) => state.auth.user);
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
@@ -66,7 +25,6 @@ const Home = () => {
     }
   };
   console.log("User : " + user);
-  const userId = useSelector((state) => state.auth.userId);
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
       {/* Background Grid of Parking Images */}
@@ -145,8 +103,23 @@ const Home = () => {
                 d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
               ></path>
             </svg>
-            Get Nearby Location
+            Nearby
           </button>
+          <div className="flex flex-col items-center justify-center gap-4 mt-10">
+            <input
+              type="text"
+              placeholder="Enter city name..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="w-72 px-4 py-2 rounded-lg border border-black text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            />
+            <button
+              onClick={handleSearchi}
+              className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-2 rounded-xl shadow-md transition duration-300"
+            >
+              Show Parkings
+            </button>
+          </div>
         </div>
       </div>
       <section className=" text-white py-16 px-6 pt-35">
