@@ -13,8 +13,23 @@ import {
   FaChargingStation,
 } from "react-icons/fa";
 
-const ShowParkings = () => {
+export default function Shownearbyparkings() {
   const navigate = useNavigate();
+
+  function getDistanceFromLatLng(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in km
+    return distance.toFixed(2); // rounded to 2 decimals
+  }
 
   const handleBooking = (parkingId, name) => {
     navigate(`/dobooking?locID=${parkingId}&name=${name}`);
@@ -22,23 +37,33 @@ const ShowParkings = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const searchLocation = params.get("query");
-
+  const lat = params.get("lat");
+  const lng = params.get("lng");
   const [parkings, setParkings] = useState([]);
 
   useEffect(() => {
-    axios
-      .get(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/parking-locations/city/${searchLocation}`
-      )
-      .then((response) => {
-        setParkings(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching parking locations:", error);
-      });
-  }, [searchLocation]);
+    if (lat && lng) {
+      axios
+        .get(
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/parking-locations/nearby?lat=${lat}&lng=${lng}`
+        )
+        .then((response) => {
+          const withDistance = response.data.map((parking) => ({
+            ...parking,
+            distance: getDistanceFromLatLng(lat, lng, parking.lat, parking.lng),
+          }));
+
+          const sorted = withDistance.sort((a, b) => a.distance - b.distance);
+          setParkings(sorted);
+        })
+        .catch((error) => {
+          console.error("Error fetching nearby parking locations:", error);
+        });
+    }
+  }, [lat, lng]);
+
   console.log(parkings);
   return (
     <div className="min-h-screen bg-yellow-50 text-gray-900 p-10">
@@ -56,6 +81,10 @@ const ShowParkings = () => {
                 <h3 className="text-xl font-semibold text-emerald-950">
                   {parking.name}
                 </h3>
+
+                <p className="text-gray-600 text-lg font-semibold">
+                  📍 {parking.distance} km away
+                </p>
 
                 <p className="text-gray-600 text-lg font-semibold">
                   Total Slots: {parking.totalSlots}
@@ -158,6 +187,4 @@ const ShowParkings = () => {
       </div>
     </div>
   );
-};
-
-export default ShowParkings;
+}

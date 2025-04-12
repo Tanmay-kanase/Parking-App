@@ -62,4 +62,15 @@ public class ParkingLocationController {
         parkingLocationService.addSlotToParking(id, slotId);
         return ResponseEntity.ok("Slot added successfully.");
     }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<List<ParkingLocationResponse>> getNearbyParkings(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "5") double radiusKm // default 5km
+    ) {
+        List<ParkingLocationResponse> results = parkingLocationService.getNearbyParkings(lat, lng, radiusKm);
+        return ResponseEntity.ok(results);
+    }
+
 }

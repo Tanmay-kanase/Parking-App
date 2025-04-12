@@ -14,6 +14,30 @@ export default function UploadParkingLocations() {
   const userId = localStorage.getItem("userId");
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [locationVerified, setLocationVerified] = useState(false);
+  const handleVerifyLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData({
+            ...formData,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationVerified(true); // Set location as verified
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert(
+            "Failed to get your location. Please enable location services."
+          );
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
+
   const [formData, setFormData] = useState({
     userId: `${userId}`,
     name: "",
@@ -70,6 +94,7 @@ export default function UploadParkingLocations() {
       );
     }
   };
+  console.log(formData);
 
   return (
     <div className="min-h-screen bg-[#fefae0] flex items-center justify-center p-10">
@@ -152,6 +177,7 @@ export default function UploadParkingLocations() {
                   required
                 />
               </div>
+
               <div className="flex items-center border border-gray-400 rounded-xl p-4 text-lg w-1/2">
                 <FaWarehouse className="text-gray-500 mr-4" size={26} />
                 <input
@@ -165,6 +191,25 @@ export default function UploadParkingLocations() {
                 />
               </div>
             </div>
+            <button
+              type="button"
+              onClick={handleVerifyLocation}
+              className="col-span-2 bg-yellow-500 text-white font-bold text-lg p-3 rounded-lg hover:bg-yellow-600"
+            >
+              Verify Location
+            </button>
+
+            {!locationVerified && (
+              <p className="col-span-2 text-lg text-gray-600">
+                Please stand at the parking location to verify your location.
+              </p>
+            )}
+
+            {locationVerified && (
+              <p className="col-span-2 text-lg text-green-600">
+                Location Verified
+              </p>
+            )}
             <h3 className="text-3xl font-bold text-gray-700">
               Additional Features
             </h3>

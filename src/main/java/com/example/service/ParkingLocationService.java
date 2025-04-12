@@ -9,6 +9,9 @@ import com.example.repository.ParkingSlotRepository;
 import com.example.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Metrics;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -46,7 +49,39 @@ public class ParkingLocationService {
     }
 
     public ParkingLocation addParkingLocation(ParkingLocation location) {
+        if (location.getLat() != null && location.getLng() != null) {
+            GeoJsonPoint point = new GeoJsonPoint(location.getLng(), location.getLat());
+            location.setLocation(point);
+        }
         return parkingLocationRepository.save(location);
+    }
+
+    public List<ParkingLocationResponse> getNearbyParkings(double lat, double lng, double radiusInKm) {
+        GeoJsonPoint userLocation = new GeoJsonPoint(lng, lat);
+        Distance radius = new Distance(radiusInKm, Metrics.KILOMETERS);
+
+        List<ParkingLocation> nearbyLocations = parkingLocationRepository.findByLocationNear(userLocation, radius);
+
+        List<ParkingLocationResponse> responses = new ArrayList<>();
+
+        for (ParkingLocation location : nearbyLocations) {
+            ParkingLocationResponse response = new ParkingLocationResponse();
+            BeanUtils.copyProperties(location, response);
+
+            response.setLat(location.getLocation().getY()); // latitude
+            response.setLng(location.getLocation().getX()); // longitude
+
+            userRepository.findById(location.getUserId()).ifPresent(user -> {
+                UserDTO dto = new UserDTO();
+                dto.setName(user.getName());
+                dto.setPhone(user.getPhone());
+                response.setUser(dto);
+            });
+
+            responses.add(response);
+        }
+
+        return responses;
     }
 
     public ParkingLocation updateParkingLocation(String id, ParkingLocation updatedLocation) {

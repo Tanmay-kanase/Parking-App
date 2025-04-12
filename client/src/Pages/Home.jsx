@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ParkingCircle, CreditCard, Map } from "lucide-react";
@@ -7,8 +7,16 @@ import { useSelector } from "react-redux";
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const handleGetDirections = () => {
-    navigate(`/parking-spots?query=Belhe`);
+  const handleNearby = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        navigate(`/show-parkings-nearby?lat=${latitude}&lng=${longitude}`);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
   };
   const [input, setInput] = useState("");
 
@@ -90,7 +98,7 @@ const Home = () => {
 
           {/* Get Nearby Location Button */}
           <button
-            onClick={handleGetDirections}
+            onClick={handleNearby}
             className="w-full sm:w-[110px] h-10 flex items-center justify-center gap-2 bg-yellow-400 rounded-full text-white font-semibold border-none relative cursor-pointer shadow-md pl-2 transition-all duration-500 hover:bg-yellow-500 active:scale-95"
           >
             <svg

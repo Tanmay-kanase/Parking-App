@@ -11,6 +11,7 @@ const UploadParkingSpots = () => {
   const locationId = params.get("locationId");
   const name = params.get("name");
   const [showModal, setShowModal] = useState(false);
+ 
   const [formData, setFormData] = useState({
     slotNumber: "",
     parkingId: `${locationId}`,
@@ -105,6 +106,7 @@ const UploadParkingSpots = () => {
               className="border p-3 rounded-lg text-lg"
               required
             />
+            
             <input
               type="number"
               name="pricePerHour"

@@ -18,6 +18,7 @@ import MyBookings from "./Pages/Booking";
 import UploadParkingSpots from "./Pages/upload_parking";
 import UploadParkingLocations from "./Pages/uploadparkinglocations";
 import ShowParkings from "./Pages/showparkings";
+import Shownearbyparkings from "./Pages/shownearbyparkings";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/mybookings" element={<MyBookings />} />
         <Route path="/upload-parking-slots" element={<UploadParkingSpots />} />
         <Route path="/dobooking" element={<DoBookings />} />
+        <Route path="/show-parkings-nearby" element={<Shownearbyparkings />} />
         <Route
           path="/upload-parking-location"
           element={<UploadParkingLocations />}
