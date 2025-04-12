@@ -11,11 +11,10 @@ public class Booking {
     @Id
     private String bookingId;
     private String userId;
-    private String vehicleId;
     private String slotId;
-    private Date startTime;
-    private Date endTime;
+    private String slotNumber;
+    private String location;
     private String status; // "active", "completed", "cancelled"
     private double amountPaid;
-    private double totalCost;
+    private String paymentStatus;
 }

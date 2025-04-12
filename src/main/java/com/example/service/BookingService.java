@@ -22,10 +22,6 @@ public class BookingService {
         return bookingRepository.findById(bookingId);
     }
 
-    public Optional<Booking> getBookingsByUserId(String userId) {
-        return bookingRepository.findByUserId(userId);
-    }
-
     public List<Booking> getBookingsByStatus(String status) {
         return bookingRepository.findByStatus(status);
     }
@@ -37,4 +33,9 @@ public class BookingService {
     public void deleteBooking(String bookingId) {
         bookingRepository.deleteById(bookingId);
     }
+
+    public List<Booking> getBookingsByUserId(String userId) {
+        return bookingRepository.findAllByUserId(userId);
+    }
+
 }

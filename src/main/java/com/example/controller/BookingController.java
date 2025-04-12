@@ -26,7 +26,7 @@ public class BookingController {
     }
 
     @GetMapping("/user/{userId}")
-    public Optional<Booking> getBookingsByUserId(@PathVariable String userId) {
+    public List<Booking> getBookingsByUserId(@PathVariable String userId) {
         return bookingService.getBookingsByUserId(userId);
     }
 

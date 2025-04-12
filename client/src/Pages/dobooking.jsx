@@ -5,6 +5,7 @@ import axios from "axios";
 const DoBooking = () => {
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
+  const [BookingData, setBookingData] = useState(null);
   const [formData, setFormData] = useState({
     time: 1,
     paymentMethod: "credit-card",
@@ -14,6 +15,81 @@ const DoBooking = () => {
   const locationId = params.get("locID");
   const name = params.get("name");
   const navigate = useNavigate();
+  const [showPopup, setShowPopup] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
+  const [error, setError] = useState("");
+
+  const handlePaymentClick = () => {
+    setShowPopup(true);
+    setError("");
+  };
+
+  const handleDonePayment = async () => {
+    const transactionIdPattern = /^\d{8}$/;
+
+    if (!transactionIdPattern.test(transactionId)) {
+      setError("Transaction ID must be an 8-digit number.");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
+          selectedSpot.slotId
+        }`,
+        {
+          available: false, // Update availability status
+        }
+      );
+
+      alert("Booking Confirmed! Slot is now unavailable.");
+      navigate("/booking");
+
+      const BookingData = {
+        userId: localStorage.getItem("userId"),
+        slotId: selectedSpot.slotId,
+        slotNumber: selectedSpot.slotNumber,
+        location: selectedSpot.location,
+        amountPaid: selectedSpot.pricePerHour,
+        status: "active",
+        paymentStatus: "completed",
+      };
+
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/bookings`,
+          BookingData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log("Booking created:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Error creating booking:", error);
+      }
+
+      // Update UI to reflect changes
+      setSpots((prevSpots) =>
+        prevSpots.map((spot) =>
+          spot.id === selectedSpot.id ? { ...spot, available: false } : spot
+        )
+      );
+
+      //setSelectedSpot(null); // Close booking form
+    } catch (error) {
+      console.error("Error updating slot availability:", error);
+      alert("Failed to book slot. Please try again.");
+    }
+    console.log("Booking Confirmed", {
+      ...formData,
+      slotId: selectedSpot.slotId,
+    });
+    alert("Booking Confirmed!");
+    //setSelectedSpot(null); // Close form after submission
+  };
 
   useEffect(() => {
     const fetchParkingSlots = async () => {
@@ -41,39 +117,40 @@ const DoBooking = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    try {
-      await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
-          selectedSpot.slotId
-        }`,
-        {
-          available: false, // Update availability status
-        }
-      );
+  // const handleSubmit = async (e) => {
+  //   try {
+  //     await axios.put(
+  //       `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
+  //         selectedSpot.slotId
+  //       }`,
+  //       {
+  //         available: false, // Update availability status
+  //       }
+  //     );
 
-      alert("Booking Confirmed! Slot is now unavailable.");
-      // navigate("/booking");
+  //     alert("Booking Confirmed! Slot is now unavailable.");
+  //     // navigate("/booking");
 
-      // Update UI to reflect changes
-      setSpots((prevSpots) =>
-        prevSpots.map((spot) =>
-          spot.id === selectedSpot.id ? { ...spot, available: false } : spot
-        )
-      );
+  //     // Update UI to reflect changes
+  //     setSpots((prevSpots) =>
+  //       prevSpots.map((spot) =>
+  //         spot.id === selectedSpot.id ? { ...spot, available: false } : spot
+  //       )
+  //     );
 
-      //setSelectedSpot(null); // Close booking form
-    } catch (error) {
-      console.error("Error updating slot availability:", error);
-      alert("Failed to book slot. Please try again.");
-    }
-    console.log("Booking Confirmed", {
-      ...formData,
-      slotId: selectedSpot.slotId,
-    });
-    alert("Booking Confirmed!");
-    //setSelectedSpot(null); // Close form after submission
-  };
+  //     //setSelectedSpot(null); // Close booking form
+  //   } catch (error) {
+  //     console.error("Error updating slot availability:", error);
+  //     alert("Failed to book slot. Please try again.");
+  //   }
+  //   console.log("Booking Confirmed", {
+  //     ...formData,
+  //     slotId: selectedSpot.slotId,
+  //   });
+  //   alert("Booking Confirmed!");
+  //   //setSelectedSpot(null); // Close form after submission
+  // };
+  console.log("Selected Spots");
   console.log(selectedSpot);
   return (
     <div className="p-10 bg-gray-100 min-h-screen">
@@ -125,8 +202,10 @@ const DoBooking = () => {
       {/* Booking Form */}
       {selectedSpot && (
         <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-lg shadow-md mt-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handlePaymentClick();
+          }}
         >
           <h3 className="text-xl font-semibold mb-4">
             Booking Slot {selectedSpot.slotNumber}
@@ -177,6 +256,51 @@ const DoBooking = () => {
             Cancel
           </button>
         </form>
+      )}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Scan QR & Pay
+            </h2>
+            <img
+              src={
+                "public/5aad3715-5a2d-47da-992c-18ac3f6799dd_GooglePay_QR.png"
+              }
+              alt="QR Code"
+              className="mx-auto mb-4 w-[300px] h-[300px] object-contain"
+            />
+
+            <div className="mb-4">
+              <label className="block font-semibold">
+                Transaction ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                className="border rounded w-full px-3 py-2 mt-1"
+                placeholder="Enter 8-digit Transaction ID"
+              />
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            </div>
+
+            <div className="flex justify-between">
+              <button
+                onClick={handleDonePayment}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Done Payment
+              </button>
+              <button
+                onClick={() => setShowPopup(false)}
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
