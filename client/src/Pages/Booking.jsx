@@ -29,6 +29,7 @@ const MyBookings = () => {
 
     fetchBookings();
   }, []);
+  console.log("Booking : ", bookings);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
@@ -56,33 +57,78 @@ const MyBookings = () => {
               }}
             >
               <h3 className="text-xl font-bold flex items-center gap-2">
-                <FaCar className="text-blue-500" /> MH-43-AR-0707
+                <FaCar className="text-blue-500" /> {booking.licensePlate}
               </h3>
+
               <p className="text-gray-600 flex items-center gap-2">
-                <FaParking className="text-gray-700" /> Slot: {booking.slotId}
+                <FaParking className="text-gray-700" /> Slot:{" "}
+                {booking.slotNumber}
               </p>
-              <p className="text-gray-600 flex items-center gap-2">
-                <FaClock className="text-gray-700" /> "2025-04-08T09:00:00"
+
+              <p className="text-gray-600">
+                Location:{" "}
+                <span className="font-medium">{booking.location}</span>
               </p>
+
+              <p className="text-gray-600">
+                Vehicle Type:{" "}
+                <span className="font-medium">{booking.vehicleType}</span>
+              </p>
+
+              <p className="text-gray-600">
+                Start Time:{" "}
+                <span className="font-medium">
+                  {new Date(booking.startTime).toLocaleString("en-US", {
+                    timeZone: "UTC",
+                  })}
+                </span>
+              </p>
+
+              <p className="text-gray-600">
+                End Time:{" "}
+                <span className="font-medium">
+                  {new Date(booking.startTime).toLocaleString("en-US", {
+                    timeZone: "UTC",
+                  })}
+                </span>
+              </p>
+
+              <p className="text-gray-600">
+                Payment Method:{" "}
+                <span className="font-medium">{booking.paymentMethod}</span>
+              </p>
+
+              <p className="text-gray-600">
+                Payment Status:{" "}
+                <span className="font-medium text-green-600">
+                  {booking.paymentStatus}
+                </span>
+              </p>
+
               <p
                 className={`text-lg font-semibold flex items-center gap-2 ${
-                  booking.status === "active"
-                    ? "text-green-600"
-                    : booking.status === "completed"
+                  new Date() > new Date(booking.endTime)
                     ? "text-blue-600"
-                    : "text-red-600"
+                    : new Date() < new Date(booking.startTime)
+                    ? "text-yellow-600"
+                    : "text-green-600"
                 }`}
               >
-                {booking.status === "active" ? (
+                {new Date() > new Date(booking.endTime) ? (
                   <FaCheckCircle />
-                ) : booking.status === "completed" ? (
-                  <FaCheckCircle />
+                ) : new Date() < new Date(booking.startTime) ? (
+                  <FaClock />
                 ) : (
-                  <FaTimesCircle />
+                  <FaCar />
                 )}
-                {booking.status.charAt(0).toUpperCase() +
-                  booking.status.slice(1)}
+
+                {new Date() > new Date(booking.endTime)
+                  ? "Parking Completed"
+                  : new Date() < new Date(booking.startTime)
+                  ? "Upcoming"
+                  : "Ongoing"}
               </p>
+
               <div className="flex justify-between items-center">
                 <p className="text-gray-800 font-semibold flex items-center gap-2">
                   <FaDollarSign className="text-green-600" /> Paid: $
@@ -90,7 +136,7 @@ const MyBookings = () => {
                 </p>
                 <p className="text-gray-800 font-semibold flex items-center gap-2">
                   <FaDollarSign className="text-gray-700" /> Total: $
-                  {booking.totalCost}
+                  {booking.totalCost || booking.amountPaid}
                 </p>
               </div>
             </div>

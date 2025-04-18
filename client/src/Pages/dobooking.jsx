@@ -3,13 +3,46 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const DoBooking = () => {
+  const userId = localStorage.getItem("userId");
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [BookingData, setBookingData] = useState(null);
   const [formData, setFormData] = useState({
-    time: 1,
+    time: "1",
     paymentMethod: "credit-card",
   });
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  // Fetch vehicles from the backend using userId from localStorage
+  // Handle vehicle selection change
+  const handleVehicleChange = (e) => {
+    setSelectedVehicle(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      vehicleNumber: e.target.value,
+    }));
+  };
+  useEffect(() => {
+    if (userId) {
+      axios
+        .get(`http://localhost:8088/api/vehicles/user/${userId}`)
+        .then((response) => {
+          const data = response.data;
+          setVehicles(data);
+          // If only one vehicle, set it automatically
+          if (data.length === 1) {
+            setSelectedVehicle(data[0].licensePlate);
+            setFormData((prev) => ({
+              ...prev,
+              vehicleNumber: data[0].licensePlate,
+            }));
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching vehicles:", error);
+        });
+    }
+  }, []);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const locationId = params.get("locID");
@@ -43,16 +76,20 @@ const DoBooking = () => {
       );
 
       alert("Booking Confirmed! Slot is now unavailable.");
-      navigate("/booking");
 
       const BookingData = {
         userId: localStorage.getItem("userId"),
         slotId: selectedSpot.slotId,
         slotNumber: selectedSpot.slotNumber,
         location: selectedSpot.location,
-        amountPaid: selectedSpot.pricePerHour,
-        status: "active",
-        paymentStatus: "completed",
+        amountPaid: selectedSpot.pricePerHour * formData.time,
+        startTime: formData.startTime, // Added start time
+        endTime: formData.endTime, // Added end time
+        licensePlate: formData.vehicleNumber,
+        vehicleType: selectedSpot.vehicleType,
+        paymentMethod: formData.paymentMethod,
+        paymentStatus: "Completed",
+        transactionId: transactionId,
       };
 
       try {
@@ -66,29 +103,21 @@ const DoBooking = () => {
           }
         );
         console.log("Booking created:", response.data);
+        navigate("/booking");
+        window.location.reload();
         return response.data;
       } catch (error) {
         console.error("Error creating booking:", error);
       }
-
-      // Update UI to reflect changes
-      setSpots((prevSpots) =>
-        prevSpots.map((spot) =>
-          spot.id === selectedSpot.id ? { ...spot, available: false } : spot
-        )
-      );
-
-      //setSelectedSpot(null); // Close booking form
     } catch (error) {
       console.error("Error updating slot availability:", error);
       alert("Failed to book slot. Please try again.");
     }
+
     console.log("Booking Confirmed", {
       ...formData,
       slotId: selectedSpot.slotId,
     });
-    alert("Booking Confirmed!");
-    //setSelectedSpot(null); // Close form after submission
   };
 
   useEffect(() => {
@@ -104,7 +133,7 @@ const DoBooking = () => {
         console.error("Error fetching parking slots:", error);
       }
     };
-    console.log(spots);
+    console.log("Spots : ",spots);
 
     if (locationId) {
       fetchParkingSlots();
@@ -113,7 +142,38 @@ const DoBooking = () => {
 
   // Handle form input changes
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setFormData((prev) => {
+      const updatedForm = {
+        ...prev,
+        [name]: value,
+      };
+
+      const start = updatedForm.startTime
+        ? new Date(updatedForm.startTime)
+        : null;
+      const duration = parseFloat(updatedForm.time);
+
+      if (
+        start instanceof Date &&
+        !isNaN(start.getTime()) &&
+        !isNaN(duration)
+      ) {
+        // Calculate end time in UTC
+        const endUTC = new Date(start.getTime() + duration * 60 * 60 * 1000);
+
+        // Convert to local time by adjusting for the user's timezone offset
+        const localEndTime = new Date(
+          endUTC.getTime() - endUTC.getTimezoneOffset() * 60000
+        );
+
+        // Format the local end time as 'YYYY-MM-DDTHH:MM' to set in the input field
+        updatedForm.endTime = localEndTime.toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+      }
+
+      return updatedForm;
+    });
   };
 
   // Handle form submission
@@ -152,6 +212,7 @@ const DoBooking = () => {
   // };
   console.log("Selected Spots");
   console.log(selectedSpot);
+  console.log("User Id", userId);
   return (
     <div className="p-10 bg-gray-100 min-h-screen">
       <h2 className="text-2xl font-bold text-yellow-600 mb-6">
@@ -210,6 +271,34 @@ const DoBooking = () => {
           <h3 className="text-xl font-semibold mb-4">
             Booking Slot {selectedSpot.slotNumber}
           </h3>
+
+          {/* Start Time Input */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Start Time:</label>
+            <input
+              type="datetime-local"
+              name="startTime"
+              value={formData.startTime}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+
+          {/* End Time Input */}
+          <div className="mb-4">
+            <label className="block text-gray-700">End Time:</label>
+            <input
+              type="datetime-local"
+              name="endTime"
+              value={formData.endTime}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+
+          {/* Time (in hours) */}
           <div className="mb-4">
             <label className="block text-gray-700">Time (Hours):</label>
             <input
@@ -218,16 +307,84 @@ const DoBooking = () => {
               value={formData.time}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-lg"
-              min="1"
               required
             />
           </div>
+
+          {/* Total Amount */}
           <div className="mb-4">
             <label className="block text-gray-700">Total Amount:</label>
             <p className="font-semibold">
               ${selectedSpot.pricePerHour * (formData.time || 1)}
             </p>
           </div>
+
+          {/* Vehicle Number Selection */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Vehicle Number:</label>
+
+            {/* Case 1: No vehicles */}
+            {vehicles.length === 0 ? (
+              <input
+                type="text"
+                name="vehicleNumber"
+                value={formData.vehicleNumber}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-lg"
+                placeholder="Enter your vehicle number"
+                required
+              />
+            ) : vehicles.length === 1 ? (
+              // Case 2: Only one vehicle - prefill the input
+              <input
+                type="text"
+                name="vehicleNumber"
+                value={formData.vehicleNumber}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-lg"
+                required
+              />
+            ) : (
+              // Case 3: Multiple vehicles - show dropdown and allow manual entry
+              <>
+                <select
+                  name="vehicleNumber"
+                  value={selectedVehicle}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    setSelectedVehicle(selected);
+                    setFormData({ ...formData, vehicleNumber: selected });
+                  }}
+                  className="w-full p-2 border border-gray-300 rounded-lg mb-2"
+                >
+                  <option value="">Select a vehicle</option>
+                  {vehicles.map((vehicle) => (
+                    <option
+                      key={vehicle.licensePlate}
+                      value={vehicle.licensePlate}
+                    >
+                      {vehicle.licensePlate}
+                    </option>
+                  ))}
+                  <option value="manual">Enter manually</option>
+                </select>
+
+                {selectedVehicle === "manual" && (
+                  <input
+                    type="text"
+                    name="vehicleNumber"
+                    value={formData.vehicleNumber}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    placeholder="Enter your vehicle number"
+                    required
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Payment Method */}
           <div className="mb-4">
             <label className="block text-gray-700">Payment Method:</label>
             <select
@@ -242,12 +399,16 @@ const DoBooking = () => {
               <option value="upi">UPI</option>
             </select>
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
             className="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600"
           >
             Proceed to Payment
           </button>
+
+          {/* Cancel Button */}
           <button
             type="button"
             className="ml-4 bg-gray-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500"
