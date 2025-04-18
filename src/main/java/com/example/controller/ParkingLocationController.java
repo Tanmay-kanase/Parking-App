@@ -67,7 +67,7 @@ public class ParkingLocationController {
     public ResponseEntity<List<ParkingLocationResponse>> getNearbyParkings(
             @RequestParam double lat,
             @RequestParam double lng,
-            @RequestParam(defaultValue = "5") double radiusKm // default 5km
+            @RequestParam(defaultValue = "500000") double radiusKm // default 50km
     ) {
         List<ParkingLocationResponse> results = parkingLocationService.getNearbyParkings(lat, lng, radiusKm);
         return ResponseEntity.ok(results);

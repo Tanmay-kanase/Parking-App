@@ -30,11 +30,6 @@ public class BookingController {
         return bookingService.getBookingsByUserId(userId);
     }
 
-    @GetMapping("/status/{status}")
-    public List<Booking> getBookingsByStatus(@PathVariable String status) {
-        return bookingService.getBookingsByStatus(status);
-    }
-
     @PutMapping
     public Booking updateBooking(@RequestBody Booking booking) {
         return bookingService.updateBooking(booking);

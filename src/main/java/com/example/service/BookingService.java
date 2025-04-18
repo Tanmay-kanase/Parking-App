@@ -22,9 +22,7 @@ public class BookingService {
         return bookingRepository.findById(bookingId);
     }
 
-    public List<Booking> getBookingsByStatus(String status) {
-        return bookingRepository.findByStatus(status);
-    }
+    
 
     public Booking updateBooking(Booking booking) {
         return bookingRepository.save(booking);

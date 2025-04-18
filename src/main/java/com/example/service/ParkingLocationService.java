@@ -57,6 +57,10 @@ public class ParkingLocationService {
     }
 
     public List<ParkingLocationResponse> getNearbyParkings(double lat, double lng, double radiusInKm) {
+        System.out.println("🔍 Finding nearby parkings...");
+        System.out.println("📍 Latitude: " + lat);
+        System.out.println("📍 Longitude: " + lng);
+        System.out.println("📏 Radius (KM): " + radiusInKm);
         GeoJsonPoint userLocation = new GeoJsonPoint(lng, lat);
         Distance radius = new Distance(radiusInKm, Metrics.KILOMETERS);
 
@@ -65,6 +69,8 @@ public class ParkingLocationService {
         List<ParkingLocationResponse> responses = new ArrayList<>();
 
         for (ParkingLocation location : nearbyLocations) {
+            System.out.println(
+                    "    Location (lat,lng): " + location.getLocation().getY() + ", " + location.getLocation().getX());
             ParkingLocationResponse response = new ParkingLocationResponse();
             BeanUtils.copyProperties(location, response);
 

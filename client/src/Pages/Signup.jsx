@@ -11,7 +11,8 @@ const Signup = () => {
     email: "",
     phone: "",
     password: "",
-    role: "customer",
+    role: "",
+    confirmPassword: "",
   });
 
   const [error, setError] = useState("");
@@ -24,10 +25,12 @@ const Signup = () => {
     e.preventDefault();
     setError("");
 
+    const { confirmPassword, ...userData } = formData; // remove confirmPassword
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
-        formData
+        userData
       );
       if (response.data.userId) {
         localStorage.setItem("userId", response.data.userId);
@@ -103,6 +106,20 @@ const Signup = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Password"
+              className="w-full ml-2 outline-none bg-transparent"
+              required
+            />
+          </div>
+
+          {/* Confirm Password */}
+          <div className="flex items-center border rounded-md px-3 py-2 focus-within:ring-2 focus-within:ring-yellow-500 mt-4">
+            <FaKey className="text-gray-500" />
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm Password"
               className="w-full ml-2 outline-none bg-transparent"
               required
             />

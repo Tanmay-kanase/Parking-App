@@ -26,9 +26,6 @@ public class ParkingSlotService {
     public List<ParkingSlot> getSlotsByUserId(String userId) {
         return parkingSlotRepository.findByUserId(userId);
     }
-   
-    
-    
 
     public List<ParkingSlot> getAvailableSlots() {
         return parkingSlotRepository.findByIsAvailable(true);
@@ -46,11 +43,18 @@ public class ParkingSlotService {
 
     public ParkingSlot updateSlot(String slotId, ParkingSlot updatedSlot) {
         return parkingSlotRepository.findById(slotId).map(slot -> {
-            slot.setSlotNumber(updatedSlot.getSlotNumber());
-            slot.setLocation(updatedSlot.getLocation());
-            slot.setPricePerHour(updatedSlot.getPricePerHour());
-            slot.setVehicleType(updatedSlot.getVehicleType());
+            if (updatedSlot.getSlotNumber() != null)
+                slot.setSlotNumber(updatedSlot.getSlotNumber());
+            if (updatedSlot.getLocation() != null)
+                slot.setLocation(updatedSlot.getLocation());
+            if (updatedSlot.getPricePerHour() != 0.0)
+                slot.setPricePerHour(updatedSlot.getPricePerHour());
+            if (updatedSlot.getVehicleType() != null)
+                slot.setVehicleType(updatedSlot.getVehicleType());
+
+            // Always update availability if sent
             slot.setAvailable(updatedSlot.isAvailable());
+
             return parkingSlotRepository.save(slot);
         }).orElseThrow(() -> new RuntimeException("Parking Slot not found"));
     }
