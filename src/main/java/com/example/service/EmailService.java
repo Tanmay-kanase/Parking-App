@@ -1,9 +1,18 @@
 package com.example.service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import com.example.model.Booking;
+import com.example.utils.ICalGenerator;
+import com.example.utils.PdfGenerator;
+import com.example.utils.QrCodeGenerator;
 
 @Service
 public class EmailService {
@@ -11,12 +20,36 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendBookingConfirmation(String toEmail, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("tanmaykanase07@gmail.com");
-        message.setTo(toEmail);
-        message.setSubject(subject);
-        message.setText(body);
-        mailSender.send(message);
+    public void sendBookingConfirmation(String toEmail, String subject, String htmlBody, Booking booking)
+            throws Exception {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setFrom("tanmaykanase07@gmail.com"); // Replace with your verified sender
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true); // 'true' enables HTML
+
+            // 1. Generate PDF
+            byte[] pdfBytes = PdfGenerator.generateReceipt(booking);
+            helper.addAttachment("ParkEasy_Receipt.pdf", new ByteArrayResource(pdfBytes));
+
+            // 2. Generate QR Code
+            // byte[] qrCodeBytes =
+            // QrCodeGenerator.generateQRCodeImage(booking.getSlotId());
+            // helper.addAttachment("ParkingQRCode.png", new
+            // ByteArrayResource(qrCodeBytes));
+
+            // 3. Generate iCal Invite
+            byte[] icsFile = ICalGenerator.generateCalendarInvite(booking);
+            helper.addAttachment("ParkingEvent.ics", new ByteArrayResource(icsFile));
+
+            mailSender.send(message);
+            System.out.println("✅ HTML Email sent successfully to " + toEmail);
+        } catch (MessagingException e) {
+            System.out.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

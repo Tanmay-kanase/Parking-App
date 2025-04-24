@@ -62,19 +62,6 @@ public class ParkingSlotController {
         try {
             System.out.println("\n\n\nBooking started\n\n\n");
             ParkingSlot slot = parkingSlotService.updateSlot(slotId, updatedSlot);
-
-            // Compose email content
-            // String subject = "Your Parking Slot Booking is Confirmed!";
-            // String body = "Booking Confirmed";
-
-            // try {
-            //     emailService.sendBookingConfirmation("tanmaykanase06@gmail.com", subject,
-            //             body);
-            //     System.out.println("Booking mail is sent to user.");
-            // } catch (Exception e) {
-            //     System.out.println("❌ Error sending email: " + e.getMessage());
-            //     e.printStackTrace();
-            // }
             return ResponseEntity.ok(slot);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

@@ -35,6 +35,17 @@ public class UserController {
         return Map.of("userId", userId); // Return userId in JSON format
     }
 
+    // Endpoint to get email by userId
+    @GetMapping("/{userId}/email")
+    public ResponseEntity<String> getEmailByUserId(@PathVariable String userId) {
+        try {
+            String email = userService.getEmailByUserId(userId);
+            return ResponseEntity.ok(email); // Return email
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage()); // User not found
+        }
+    }
+
     @PostMapping("/google-signup")
     public ResponseEntity<Map<String, String>> signupUser(@RequestBody User user) {
         String userId = userService.saveUser(user); // Returns userId

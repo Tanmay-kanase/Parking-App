@@ -12,6 +12,7 @@ public class Booking {
     private String bookingId;
     private String userId;
     private String slotId;
+    private String email;
     private String slotNumber;
     private String transactionId;
     private String location;

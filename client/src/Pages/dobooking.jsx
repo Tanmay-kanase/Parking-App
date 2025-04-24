@@ -22,10 +22,18 @@ const DoBooking = () => {
       vehicleNumber: e.target.value,
     }));
   };
+
+  let email = "";
+
+  axios
+    .get(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/email`)
+    .then((response) => (email = response.data)) // Store the email in the variable
+    .catch((error) => console.error("Error fetching email:", error));
+
   useEffect(() => {
     if (userId) {
       axios
-        .get(`http://localhost:8088/api/vehicles/user/${userId}`)
+        .get(`${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${userId}`)
         .then((response) => {
           const data = response.data;
           setVehicles(data);
@@ -79,6 +87,7 @@ const DoBooking = () => {
 
       const BookingData = {
         userId: localStorage.getItem("userId"),
+        email: email,
         slotId: selectedSpot.slotId,
         slotNumber: selectedSpot.slotNumber,
         location: selectedSpot.location,
@@ -133,7 +142,7 @@ const DoBooking = () => {
         console.error("Error fetching parking slots:", error);
       }
     };
-    console.log("Spots : ",spots);
+    console.log("Spots : ", spots);
 
     if (locationId) {
       fetchParkingSlots();

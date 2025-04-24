@@ -64,4 +64,13 @@ public class UserService {
             throw new RuntimeException("User not found with ID: " + userId);
         }
     }
+
+    // Method to retrieve the user's email by userId
+    public String getEmailByUserId(String userId) {
+        User user = userRepository.findByUserId(userId);
+        if (user != null) {
+            return user.getEmail(); // Return email if user found
+        }
+        throw new RuntimeException("User not found with userId: " + userId); // Handle case where user is not found
+    }
 }
