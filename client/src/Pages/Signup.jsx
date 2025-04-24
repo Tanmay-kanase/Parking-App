@@ -6,6 +6,8 @@ import { FaUser, FaLock, FaKey } from "react-icons/fa";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,6 +18,62 @@ const Signup = () => {
   });
 
   const [error, setError] = useState("");
+
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
+
+  // Send OTP
+
+  const sendOtp = async () => {
+    try {
+      if (!formData.email) {
+        setError("Please enter an email before sending OTP.");
+        return;
+      }
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/send-otp`,
+        {
+          email: formData.email,
+        }
+      );
+      console.log(res);
+
+      if (res.data.message) {
+        setOtpSent(true);
+        setError("");
+        alert("OTP sent to your email!");
+      }
+    } catch (err) {
+      setError("Failed to send OTP. Try again.");
+    }
+  };
+
+  // Verify OTP
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/verify-otp`,
+        {
+          email: formData.email,
+          otp,
+        }
+      );
+      if (res.data.verified) {
+        setIsVerified(true);
+        setError("");
+        alert("✅ Email verified successfully!");
+      } else {
+        setError("❌ Invalid OTP");
+      }
+    } catch (err) {
+      setError("Verification failed.");
+    }
+  };
+
+  console.log(otpSent);
+  console.log(isVerified);
+  console.log(otp);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -83,6 +141,40 @@ const Signup = () => {
             />
           </div>
 
+          {/* Send OTP Button */}
+          {!otpSent && (
+            <button
+              type="button"
+              onClick={sendOtp}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md"
+            >
+              Send OTP to Email
+            </button>
+          )}
+
+          {/* OTP Input and Verify Button */}
+          {otpSent && !isVerified && (
+            <>
+              <div className="flex items-center border rounded-md px-3 py-2 mt-2 focus-within:ring-2 focus-within:ring-yellow-500">
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  className="w-full outline-none bg-transparent"
+                  required
+                />
+              </div>
+              <button
+                type="button"
+                onClick={verifyOtp}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 mt-2 rounded-md"
+              >
+                Verify OTP
+              </button>
+            </>
+          )}
+
           {/* Phone Input */}
           <div className="flex items-center border rounded-md px-3 py-2 focus-within:ring-2 focus-within:ring-yellow-500">
             <Phone className="text-gray-500" />
@@ -142,7 +234,12 @@ const Signup = () => {
           {/* Signup Button */}
           <button
             type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded-md transition flex justify-center items-center gap-2"
+            disabled={!isVerified}
+            className={`w-full text-white font-bold py-2 rounded-md transition flex justify-center items-center gap-2 ${
+              isVerified
+                ? "bg-yellow-500 hover:bg-yellow-600"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
           >
             <UserCheck /> Sign Up
           </button>

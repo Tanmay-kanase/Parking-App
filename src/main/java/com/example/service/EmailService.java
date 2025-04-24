@@ -3,8 +3,13 @@ package com.example.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -19,6 +24,8 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
 
     public void sendBookingConfirmation(String toEmail, String subject, String htmlBody, Booking booking)
             throws Exception {
@@ -51,5 +58,31 @@ public class EmailService {
             System.out.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
         }
+
+    }
+
+    public void sendOtpEmail(String toEmail) {
+        String otp = generateOTP();
+        otpStorage.put(toEmail, otp);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Your OTP for Registration");
+        message.setText("Your OTP is: " + otp + "\nValid for 5 minutes.");
+
+        mailSender.send(message);
+    }
+
+    public String generateOTP() {
+        return String.format("%06d", new Random().nextInt(999999));
+    }
+
+    public boolean verifyOtp(String email, String otp) {
+        String storedOtp = otpStorage.get(email);
+        return storedOtp != null && storedOtp.equals(otp);
+    }
+
+    public void clearOtp(String email) {
+        otpStorage.remove(email);
     }
 }
