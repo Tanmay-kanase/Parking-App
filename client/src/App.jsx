@@ -19,6 +19,7 @@ import UploadParkingSpots from "./Pages/upload_parking";
 import UploadParkingLocations from "./Pages/uploadparkinglocations";
 import ShowParkings from "./Pages/showparkings";
 import Shownearbyparkings from "./Pages/shownearbyparkings";
+import Verify from "./Pages/verify";
 
 function App() {
   return (
@@ -45,6 +46,8 @@ function App() {
           element={<UploadParkingLocations />}
         />
         <Route path="/show-parkings" element={<ShowParkings />} />
+        <Route path="/verify" element={<Verify />} />
+
       </Routes>
       <HowItWorks />
       <Footer />
