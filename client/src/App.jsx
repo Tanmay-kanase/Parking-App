@@ -1,25 +1,26 @@
 import Home from "./Pages/Home";
 import { Routes, Route } from "react-router-dom";
-import Signup from "./Pages/Signup";
+import Signup from "./Pages/Auth/Signup";
 import Navbar from "./components/Navbar";
-import Login from "./Pages/Login";
+import Login from "./Pages/Auth/Login";
 import Footer from "./components/Footer";
 import Contact_Footer from "./components/Contact_Footer";
-import ParkingSpots from "./Pages/Parking_Spots";
-import Profile from "./Pages/Profile";
-import ParkingSlots from "./Pages/parking_slots";
-import EditProfile from "./Pages/editprofile";
+import ParkingSpots from "./Pages/parkings/Parking_Spots";
+import Profile from "./Pages/Profile/Profile";
+import ParkingSlots from "./Pages/parkings/parking_slots";
+import EditProfile from "./Pages/Profile/editprofile";
 import HowItWorks from "./components/Howitworks";
-import ParkingHistory from "./Pages/parkhistoy";
-import Payments from "./Pages/Payments";
-import Bookings from "./Pages/Booking";
-import DoBookings from "./Pages/dobooking";
-import MyBookings from "./Pages/Booking";
-import UploadParkingSpots from "./Pages/upload_parking";
-import UploadParkingLocations from "./Pages/uploadparkinglocations";
-import ShowParkings from "./Pages/showparkings";
-import Shownearbyparkings from "./Pages/shownearbyparkings";
-import Verify from "./Pages/verify";
+import ParkingHistory from "./Pages/parkings/parkhistoy";
+import Payments from "./Pages/Bookings/Payments";
+import Bookings from "./Pages/Bookings/Booking";
+import DoBookings from "./Pages/Bookings/dobooking";
+//import MyBookings from "./Pages/Booking";
+import UploadParkingSpots from "./Pages/Parking_Service/upload_parking";
+import UploadParkingLocations from "./Pages/Parking_Service/uploadparkinglocations";
+import ShowParkings from "./Pages/Parking_Service/showparkings";
+import Shownearbyparkings from "./Pages/Parking_Service/shownearbyparkings";
+import Verify from "./Pages/Parking_Service/verify";
+import MyBookings from "./Pages/Bookings/Booking";
 
 function App() {
   return (
@@ -47,7 +48,6 @@ function App() {
         />
         <Route path="/show-parkings" element={<ShowParkings />} />
         <Route path="/verify" element={<Verify />} />
-
       </Routes>
       <HowItWorks />
       <Footer />

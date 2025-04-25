@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getLatLng, getNearbyParkings } from "../services/mapService";
+import { getLatLng, getNearbyParkings } from "../../services/mapService";
 import { FaHeart, FaCheckCircle, FaCar, FaDirections } from "react-icons/fa";
 
 const ParkingSpots = () => {

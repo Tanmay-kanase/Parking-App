@@ -1,12 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Phone, UserCheck } from "lucide-react";
+import { Mail, Phone, UserCheck } from "lucide-react";
 import { FaUser, FaLock, FaKey } from "react-icons/fa";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,8 +44,8 @@ const Signup = () => {
         setError("");
         alert("OTP sent to your email!");
       }
-    } catch (err) {
-      setError("Failed to send OTP. Try again.");
+    } catch (error) {
+      setError("Failed to send OTP. Try again.",error);
     }
   };
 
@@ -66,8 +66,8 @@ const Signup = () => {
       } else {
         setError("❌ Invalid OTP");
       }
-    } catch (err) {
-      setError("Verification failed.");
+    } catch (error) {
+      setError("Verification failed.",error);
     }
   };
 

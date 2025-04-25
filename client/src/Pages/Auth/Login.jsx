@@ -1,16 +1,12 @@
-import { useDispatch } from "react-redux";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { loginSuccess } from "../redux/authSlice";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
 const Login = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -123,7 +119,7 @@ const Login = () => {
 
         {/* Signup Link */}
         <div className="text-center mt-2 text-gray-600">
-          <p>Don't have an account?</p>
+          <p>Don&apos;t have an account?</p>
           <a
             href="signup"
             className="text-yellow-500 font-semibold hover:underline"
