@@ -6,7 +6,6 @@ import { useState } from "react";
 import { uploadBytesResumable } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import api from "../../config/axios";
 const SignUpForm = () => {
   const [otpVisible, setOtpVisible] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -185,6 +184,9 @@ const SignUpForm = () => {
     const password = formData.get("password");
     const confirmPassword = formData.get("confirmPassword");
     const imageFile = formData.get("profileImage");
+    const phone = formData.get("phone");
+    const role = formData.get("role");
+
     console.log("Image file:", imageFile);
 
     if (password !== confirmPassword) {
@@ -192,38 +194,44 @@ const SignUpForm = () => {
       return;
     }
 
-    let profileUrl = "";
+    let profileUrl = "fgdgfg";
 
-    if (imageFile) {
-      try {
-        setImageUploading(true);
-        const imageRef = ref(
-          storage,
-          `profiles/${Date.now()}-${imageFile.name}`
-        );
-        const uploadTask = uploadBytesResumable(imageRef, imageFile);
+    // if (imageFile) {
+    //   try {
+    //     setImageUploading(true);
+    //     const imageRef = ref(
+    //       storage,
+    //       `profiles/${Date.now()}-${imageFile.name}`
+    //     );
+    //     const uploadTask = uploadBytesResumable(imageRef, imageFile);
 
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadProgress(Math.round(progress));
-            },
-            (error) => reject(error),
-            async () => {
-              profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              setImageUploading(false);
-              resolve();
-            }
-          );
-        });
-        console.log("Image uploaded. URL:", profileUrl);
-      } catch (uploadError) {
-        console.error("Image upload failed:", uploadError);
-      }
-    }
+    //     await new Promise((resolve, reject) => {
+    //       uploadTask.on(
+    //         "state_changed",
+    //         (snapshot) => {
+    //           const progress =
+    //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    //           setUploadProgress(Math.round(progress));
+    //         },
+    //         (error) => reject(error),
+    //         async () => {
+    //           profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+    //           setImageUploading(false);
+    //           resolve();
+    //         }
+    //       );
+    //     });
+    //     console.log("Image uploaded. URL:", profileUrl);
+    //   } catch (uploadError) {
+    //     console.error("Image upload failed:", uploadError);
+    //   }
+    // }
+
+    // if (!otpVerified) {
+    //   setError("Please verify your email before submitting.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
       const response = await axios.post(
@@ -237,15 +245,18 @@ const SignUpForm = () => {
           role,
         }
       );
+      console.log(response);
       if (response.data.userId) {
         localStorage.setItem("userId", response.data.userId);
+        localStorage.setItem("token", response.data.token);
         console.log("User registered with ID:", response.data.userId);
         navigate("/");
         window.location.reload();
       }
     } catch (error) {
+      setLoading(false);
       setError(
-        error.response?.data?.error || "Signup failed. Please try again."
+        error.response?.data?.message || error.message || "Signup failed."
       );
     }
   };

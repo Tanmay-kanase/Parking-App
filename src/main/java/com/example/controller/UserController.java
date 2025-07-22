@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.model.User;
 import com.example.service.EmailService;
 import com.example.service.UserService;
+import com.example.utils.JwtUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,9 @@ public class UserController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PutMapping("/{userId}") // Handles PUT requests to update user
     public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User updatedUser) {
         User user = userService.updateUser(userId, updatedUser);
@@ -35,9 +39,14 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public Map<String, String> registerUser(@RequestBody User user) {
-        String userId = userService.registerUser(user);
-        return Map.of("userId", userId); // Return userId in JSON format
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            Map<String, String> result = userService.registerUser(user);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
     }
 
     // Endpoint to get email by userId
@@ -52,13 +61,11 @@ public class UserController {
     }
 
     @PostMapping("/google-signup")
-    public ResponseEntity<Map<String, String>> signupUser(@RequestBody User user) {
-        String userId = userService.saveUser(user); // Returns userId
+    public ResponseEntity<?> signupUser(@RequestBody User user) {
+        String userId = userService.saveUser(user);
+        String token = jwtUtil.generateToken(userId, user.getEmail(), user.getRole());
 
-        Map<String, String> response = new HashMap<>();
-        response.put("userId", userId);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("userId", userId, "token", token));
     }
 
     @GetMapping("/{userId}")
@@ -68,9 +75,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> loginUser(@RequestBody Map<String, String> loginData) {
-        String userId = userService.loginUser(loginData.get("email"), loginData.get("password"));
-        return Map.of("userId", userId);
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
+        try {
+            Map<String, String> result = userService.loginUser(loginData.get("email"), loginData.get("password"));
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping("/send-otp")

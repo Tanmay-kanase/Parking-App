@@ -15,6 +15,6 @@ public class User {
     private String password;
     private String phone;
     private String photo;
-    private String role;  // "customer", "parking host"
+    private String role;  // "user", "parking_host"
     private List<String> vehicles; // List of vehicle IDs
 }

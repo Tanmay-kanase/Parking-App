@@ -1,15 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import api from "../../config/axios";
+import jwtDecode from "jwt-decode";
 
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 const SignInForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
   // const handleLogin = async (e) => {
   //   e.preventDefault();
   //   setLoading(true);
@@ -78,6 +86,7 @@ const SignInForm = () => {
 
       console.log("User logged in:", data);
       localStorage.setItem("userId", data.userId);
+      
 
       navigate("/");
       window.location.reload();

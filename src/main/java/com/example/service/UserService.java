@@ -1,10 +1,13 @@
 package com.example.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.model.User;
 import com.example.repository.UserRepository;
+import com.example.utils.JwtUtil;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -13,18 +16,31 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     public Optional<User> getUserByEmail(String email) {
         Optional<User> User = userRepository.findByEmail(email);
         return User;
 
     }
 
-    public String registerUser(User user) {
+    public Map<String, String> registerUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        return savedUser.getUserId(); // Return the generated userId
+
+        String token = jwtUtil.generateToken(savedUser.getUserId(), savedUser.getEmail(), savedUser.getRole());
+
+        return Map.of(
+                "userId", savedUser.getUserId(),
+                "token", token);
     }
 
     public User getUserById(String userId) {
@@ -43,12 +59,22 @@ public class UserService {
         }
     }
 
-    public String loginUser(String email, String password) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
-            return user.get().getUserId(); // Return userId if login is successful
+    public Map<String, String> loginUser(String email, String rawPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Invalid email");
         }
-        throw new RuntimeException("Invalid email or password");
+
+        User user = userOpt.get();
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new RuntimeException("Wrong password");
+        }
+
+        String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+
+        return Map.of(
+                "userId", user.getUserId(),
+                "token", token);
     }
 
     public User updateUser(String userId, User updatedUser) {
