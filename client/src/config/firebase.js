@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getStorage } from "firebase/storage";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAGc8QgiFA-fungwCLYdNDMoLjMvFHBy18",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
 
   authDomain: "parking-app-fdfcf.firebaseapp.com",
 
@@ -16,9 +17,5 @@ const firebaseConfig = {
   measurementId: "G-163B0WL570",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-export { auth, provider, signInWithPopup };
+export const storage = getStorage(app);

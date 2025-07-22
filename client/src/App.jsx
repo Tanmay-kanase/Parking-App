@@ -21,6 +21,7 @@ import ShowParkings from "./Pages/Parking_Service/showparkings";
 import Shownearbyparkings from "./Pages/Parking_Service/shownearbyparkings";
 import Verify from "./Pages/Parking_Service/verify";
 import MyBookings from "./Pages/Bookings/Booking";
+import SlidingLoginSignup from "./Pages/Auth/SlidingLoginSignup";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         />
         <Route path="/show-parkings" element={<ShowParkings />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="/get-started" element={<SlidingLoginSignup />} />
       </Routes>
       <HowItWorks />
       <Footer />
