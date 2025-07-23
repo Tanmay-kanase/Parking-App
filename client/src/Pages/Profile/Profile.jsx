@@ -3,7 +3,7 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../redux/authSlice";
+
 const Profile = () => {
   const [user, setUser] = useState(null);
   const userId = localStorage.getItem("userId"); // Retrieve userId from localStorage
@@ -14,7 +14,6 @@ const Profile = () => {
   };
   const handleLogout = () => {
     localStorage.removeItem("userId"); // Clear user data
-    dispatch(logout());
     navigate("/"); // Redirect to login
     window.location.reload();
   };

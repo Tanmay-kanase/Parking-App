@@ -57,7 +57,7 @@ const SignInForm = () => {
         }
       );
       if (response.data.userId) {
-        localStorage.setItem("userId", response.data.userId);
+        localStorage.setItem("token", response.data.token);
         console.log("User logged in with ID:", response.data.userId);
         navigate("/");
         window.location.reload();
@@ -80,12 +80,12 @@ const SignInForm = () => {
 
       const userData = { name, email, userId: googleUserId, photo: picture };
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-signup`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
         userData
       );
 
       console.log("User logged in:", data);
-      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("token", data.token);
 
       navigate("/");
       window.location.reload();

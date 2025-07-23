@@ -247,7 +247,6 @@ const SignUpForm = () => {
       );
       console.log(response);
       if (response.data.userId) {
-        localStorage.setItem("userId", response.data.userId);
         localStorage.setItem("token", response.data.token);
         console.log("User registered with ID:", response.data.userId);
         navigate("/");

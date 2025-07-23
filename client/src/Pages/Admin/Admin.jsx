@@ -52,16 +52,6 @@ const initialProducts = [
 
 const Admin = () => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-
-    if (!user || user.role !== "admin") {
-      navigate("/"); // redirect to home
-      window.location.reload(); // optional: to fully reload state
-    }
-  }, [navigate]);
   const [activeTab, setActiveTab] = useState("users"); // 'users', 'services', 'products'
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState(initialServices);
@@ -259,8 +249,11 @@ const Admin = () => {
       try {
         setLoading(true);
         setShowSpinnerForDuration(true); // Start showing spinner
-        const res = await axios.get(`/axios/users/getAllUsers`);
-        setUsers(res.data.data);
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/getAllUsers`
+        );
+        setUsers(res.data);
+        console.log("Users", res.data);
       } catch (error) {
         console.error("Error fetching users:", error.message);
         showMessage("Failed to fetch users.", "error");
@@ -299,17 +292,23 @@ const Admin = () => {
       try {
         if (action === "makeAdmin") {
           console.log("Admin change request called for user ID:", id);
-          await axios.put(`/axios/users/make-admin/${id}`);
+          await axios.put(
+            `${import.meta.env.VITE_BACKEND_URL}/api/users/make-admin/${id}`
+          );
           showMessage("User role updated to Admin!", "success");
         } else if (action === "delete") {
-          await axios.delete(`/axios/users/delete/${id}`);
+          await axios.delete(
+            `${import.meta.env.VITE_BACKEND_URL}/api/users/delete/${id}`
+          );
           setUsers(users.filter((user) => user._id !== id)); // Optimistic update
           showMessage("User deleted successfully!", "success");
         }
 
         // ✅ Fix: Axios doesn't need .json()
-        const res = await axios.get("/axios/users/getAllUsers");
-        const data = res.data.data; // or res.data.data if your backend wraps it
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/getAllUsers`
+        );
+        const data = res.data; // or res.data.data if your backend wraps it
         setUsers(data);
       } catch (err) {
         console.error(`Error performing ${action} on user:`, err);
@@ -453,7 +452,7 @@ const Admin = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
                   <motion.tr
-                    key={user._id} // Assuming user._id from backend
+                    key={user.userId} // Assuming user._id from backend
                     variants={itemVariants}
                     whileHover={{ scale: 1.01, backgroundColor: "#f9fafb" }}
                   >
@@ -468,11 +467,11 @@ const Admin = () => {
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString()}
+                      {user.phone}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button
-                        onClick={() => handleUserAction(user._id, "delete")}
+                        onClick={() => handleUserAction(user.userId, "delete")}
                         className="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1"
                       >
                         <Trash2 size={16} /> Delete
@@ -480,7 +479,9 @@ const Admin = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span
-                        onClick={() => handleUserAction(user._id, "makeAdmin")}
+                        onClick={() =>
+                          handleUserAction(user.userId, "makeAdmin")
+                        }
                         className={`cursor-pointer px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition`}
                       >
                         Make Admin

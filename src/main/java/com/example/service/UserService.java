@@ -7,6 +7,7 @@ import com.example.model.User;
 import com.example.repository.UserRepository;
 import com.example.utils.JwtUtil;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -99,4 +100,19 @@ public class UserService {
         }
         throw new RuntimeException("User not found with userId: " + userId); // Handle case where user is not found
     }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public void deleteUserById(String userId) {
+        userRepository.deleteById(userId);
+    }
+
+    public void makeUserAdmin(String userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        user.setRole("admin");
+        userRepository.save(user);
+    }
+
 }

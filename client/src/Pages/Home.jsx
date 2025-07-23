@@ -26,7 +26,7 @@ const Home = () => {
     }
   };
 
-  const user = useSelector((state) => state.auth.user);
+  const user = localStorage.getItem("user");
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
       navigate(`/parking-spots?query=${encodeURIComponent(searchQuery)}`);
