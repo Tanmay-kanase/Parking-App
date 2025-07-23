@@ -196,42 +196,42 @@ const SignUpForm = () => {
 
     let profileUrl = "fgdgfg";
 
-    // if (imageFile) {
-    //   try {
-    //     setImageUploading(true);
-    //     const imageRef = ref(
-    //       storage,
-    //       `profiles/${Date.now()}-${imageFile.name}`
-    //     );
-    //     const uploadTask = uploadBytesResumable(imageRef, imageFile);
+    if (imageFile) {
+      try {
+        setImageUploading(true);
+        const imageRef = ref(
+          storage,
+          `profiles/${Date.now()}-${imageFile.name}`
+        );
+        const uploadTask = uploadBytesResumable(imageRef, imageFile);
 
-    //     await new Promise((resolve, reject) => {
-    //       uploadTask.on(
-    //         "state_changed",
-    //         (snapshot) => {
-    //           const progress =
-    //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    //           setUploadProgress(Math.round(progress));
-    //         },
-    //         (error) => reject(error),
-    //         async () => {
-    //           profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-    //           setImageUploading(false);
-    //           resolve();
-    //         }
-    //       );
-    //     });
-    //     console.log("Image uploaded. URL:", profileUrl);
-    //   } catch (uploadError) {
-    //     console.error("Image upload failed:", uploadError);
-    //   }
-    // }
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              setUploadProgress(Math.round(progress));
+            },
+            (error) => reject(error),
+            async () => {
+              profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              setImageUploading(false);
+              resolve();
+            }
+          );
+        });
+        console.log("Image uploaded. URL:", profileUrl);
+      } catch (uploadError) {
+        console.error("Image upload failed:", uploadError);
+      }
+    }
 
-    // if (!otpVerified) {
-    //   setError("Please verify your email before submitting.");
-    //   setLoading(false);
-    //   return;
-    // }
+    if (!otpVerified) {
+      setError("Please verify your email before submitting.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await axios.post(
@@ -479,14 +479,18 @@ const SignUpForm = () => {
                   ></path>
                 </svg>
               </div>
-              <input
-                type="text"
+              <select
                 name="role"
                 id="role"
-                className="bg-[#d5f2ec] border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-brightColor focus:border-brightColor block w-full pl-10 p-3 transition-all duration-200 shadow-sm"
-                placeholder="Enter role as user or parking_owner"
+                className="bg-[#d5f2ec] border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-brightColor focus:border-brightColor block w-full pl-9 pr-3 py-3  transition-all duration-200 shadow-sm"
                 required
-              />
+              >
+                <option value="" disabled selected>
+                  Select role
+                </option>
+                <option value="user">User</option>
+                <option value="Parking_Owner">Parking Owner</option>
+              </select>
             </div>
           </div>
 

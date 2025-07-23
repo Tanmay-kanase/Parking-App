@@ -3,18 +3,11 @@ import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-
-  authDomain: "parking-app-fdfcf.firebaseapp.com",
-
-  projectId: "parking-app-fdfcf",
-
-  storageBucket: "parking-app-fdfcf.firebasestorage.app",
-
-  messagingSenderId: "543095501152",
-
-  appId: "1:543095501152:web:d2a6c1074414534b3cae05",
-
-  measurementId: "G-163B0WL570",
+  authDomain: "mern-estate-9967e.firebaseapp.com",
+  projectId: "mern-estate-9967e",
+  storageBucket: "mern-estate-9967e.appspot.com",
+  messagingSenderId: "527361866180",
+  appId: "1:527361866180:web:4f045909ee5b0cd85c0c91",
 };
 
 const app = initializeApp(firebaseConfig);
