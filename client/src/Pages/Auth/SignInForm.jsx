@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
-
+import useAuth from "../../context/useAuth";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 const SignInForm = () => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,50 +19,13 @@ const SignInForm = () => {
     }
   }, [errorMessage]);
 
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   setErrorMessage(""); // reset any previous error
-
-  //   try {
-  //     const res = await api.post(`/api/users/login`, {
-  //       email,
-  //       password,
-  //     });
-
-  //     localStorage.setItem("token", res.data.token);
-  //     localStorage.setItem("user", JSON.stringify(res.data.user));
-  //     navigate("/");
-  //   } catch (err) {
-  //     const msg = err?.response?.data?.message;
-  //     if (msg === "Invalid email") {
-  //       setErrorMessage("Email not found. Please register first.");
-  //     } else if (msg === "Wrong password") {
-  //       setErrorMessage("Password is incorrect.");
-  //     } else {
-  //       setErrorMessage("Login failed. Please try again.");
-  //     }
-  //   }
-  // };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage(""); // reset any previous error
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
-        {
-          email,
-          password,
-        }
-      );
-      if (response.data.userId) {
-        localStorage.setItem("token", response.data.token);
-        console.log("User logged in with ID:", response.data.userId);
-        navigate("/");
-        window.location.reload();
-      }
+      await login({ email, password }); // call context login properly
+      navigate("/"); // redirect on success
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
     } finally {
@@ -85,10 +49,8 @@ const SignInForm = () => {
       );
 
       console.log("User logged in:", data);
-      localStorage.setItem("token", data.token);
-
+      login(data.token, data); // store user and token
       navigate("/");
-      window.location.reload();
     } catch (error) {
       console.error("Login failed", error);
     }

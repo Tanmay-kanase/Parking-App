@@ -60,7 +60,7 @@ public class UserService {
         }
     }
 
-    public Map<String, String> loginUser(String email, String rawPassword) {
+    public Map<String, Object> loginUser(String email, String rawPassword) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             throw new RuntimeException("Invalid email");
@@ -74,7 +74,7 @@ public class UserService {
         String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
 
         return Map.of(
-                "userId", user.getUserId(),
+                "user", user,
                 "token", token);
     }
 

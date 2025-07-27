@@ -15,11 +15,25 @@ import {
   Bookmark,
 } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const user = localStorage.getItem("userId");
+  const { user, logout } = useAuth();
+  
+
+  const isTokenExpired = () => {
+    if (!token) return true;
+
+    try {
+      const decoded = jwtDecode(token);
+      return decoded.exp * 1000 < Date.now(); // If token expired
+    } catch (err) {
+      return true;
+    }
+  };
+
   return (
     <nav className="bg-[#F8FBFF] text-gray-900 shadow-lg font-mono">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

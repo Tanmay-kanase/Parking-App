@@ -9,6 +9,8 @@ import com.example.repository.UserRepository;
 import com.example.service.EmailService;
 import com.example.service.UserService;
 import com.example.utils.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,8 +50,6 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
             Map<String, String> result = userService.registerUser(user);
-            String token = jwtUtil.generateToken(result.get("userId"), user.getEmail(), user.getRole());
-            result.put("token", token);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             System.err.println(e.getMessage());
@@ -58,16 +58,55 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
-        try {
-            Map<String, String> result = userService.loginUser(loginData.get("email"), loginData.get("password"));
-            String token = jwtUtil.generateToken(result.get("userId"), result.get("email"), result.get("role"));
-            result.put("token", token);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
-        }
+public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData, HttpServletResponse response) {
+    try {
+        Map<String, Object> result = userService.loginUser(loginData.get("email"), loginData.get("password"));
+        String token = (String) result.get("token");
+
+        Cookie cookie = new Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // use HTTPS in production
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60); // 1 day
+
+        response.addCookie(cookie);
+
+        System.out.println(result);
+        System.out.println(cookie);
+        return ResponseEntity.ok(result);
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
     }
+}
+
+// UserController.java
+
+@GetMapping("/me")
+public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required = false) String token) {
+    if (token == null || token.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "No token provided"));
+    }
+
+    try {
+        String userId = jwtUtil.extractUserId(token);
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "User not found"));
+        }
+
+        // Remove sensitive info before sending
+        user.setPassword(null);  // to avoid sending password
+
+        return ResponseEntity.ok(user);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Invalid token"));
+    }
+}
+
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {

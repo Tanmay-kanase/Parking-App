@@ -14,8 +14,6 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // Store this securely (like in env or config). It must be at least 256-bit for
-    // HS256
     private final SecretKey secretKey = Keys.hmacShaKeyFor("your-256-bit-secret-your-256-bit-secret".getBytes());
 
     public String generateToken(String userId, String email, String role) {
@@ -29,16 +27,22 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String extractUserId(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId", String.class);
+    }
+
     public Claims parseToken(String token) {
         try {
-            Jws<Claims> claimsJws = Jwts.parserBuilder()
+            Jws<Claims> claimsJws = Jwts.parser()
                     .setSigningKey(secretKey)
-                    .build()
                     .parseClaimsJws(token);
             return claimsJws.getBody();
         } catch (JwtException e) {
-            throw new RuntimeException("Invalid JWT token");
+            throw new RuntimeException("Invalid JWT token", e);
         }
     }
-
 }

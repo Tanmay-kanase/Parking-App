@@ -1,7 +1,7 @@
 import React from "react";
 import { storage } from "../../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import axios from "axios";
+import axios from "../../config/axiosInstance";
 import { useState } from "react";
 import { uploadBytesResumable } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
@@ -11,29 +11,20 @@ const SignUpForm = () => {
   const [verifying, setVerifying] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
   const [otp, setOtp] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const buttonClasses = `w-full text-white bg-[#03C9D7] hover:bg-[#039BAB] focus:ring-4 focus:outline-none 
     focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all 
     duration-200 transform hover:scale-[1.02] hover:shadow-md`;
-  // const buttonForGFT = `inline-flex w-full justify-center items-center rounded-lg border border-gray-300 bg-white
-  //   py-2.5 px-4 text-sm font-medium text-gray-500 hover:bg-gray-50 shadow-sm transition-all
-  //   duration-200 hover:shadow hover:border-gray-400`;
+
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
-  // const handleSendOtp = async () => {
-  //   if (!email) return alert("Enter email first");
-  //   try {
-  //     await api.post(`/api/users/otp/send`, { email });
-  //     setOtpVisible(true);
-  //   } catch (err) {
-  //     alert("Failed to send OTP");
-  //   }
-  // };
 
   const handleSendOtp = async () => {
+    setIsSending(true);
     try {
       if (!email) {
         setError("Please enter an email before sending OTP.");
@@ -51,27 +42,14 @@ const SignUpForm = () => {
         setOtpVisible(true);
         setError("");
         alert("OTP sent to your email!");
+        setIsSending(false);
       }
     } catch (error) {
       setError("Failed to send OTP. Try again.", error);
+    } finally {
+      setIsSending(false);
     }
   };
-
-  // const handleVerifyOtp = async () => {
-  //   if (!email) return alert("Enter email first");
-  //   setVerifying(true);
-  //   try {
-  //     await api.post(`/api/users/otp/verify`, {
-  //       email,
-  //       otp,
-  //     });
-  //     setOtpVerified(true);
-  //     setOtpVisible(false);
-  //   } catch (err) {
-  //     alert("Invalid OTP");
-  //   }
-  //   setVerifying(false);
-  // };
 
   const handleVerifyOtp = async () => {
     try {
@@ -94,84 +72,6 @@ const SignUpForm = () => {
       setError("Verification failed.", error);
     }
   };
-
-  // const handleSubmit = async (e) => {
-  //   setLoading(true);
-
-  //   console.log("Handle submit called");
-
-  //   e.preventDefault();
-
-  //   const formData = new FormData(e.target);
-  //   const fullName = formData.get("fullName");
-  //   const email = formData.get("email");
-  //   const password = formData.get("password");
-  //   const confirmPassword = formData.get("confirmPassword");
-  //   const imageFile = formData.get("profileImage");
-  //   console.log("Image file:", imageFile);
-
-  //   if (password !== confirmPassword) {
-  //     alert("Passwords do not match");
-  //     return;
-  //   }
-
-  //   let profileUrl = "";
-
-  //   if (imageFile) {
-  //     try {
-  //       setImageUploading(true);
-  //       const imageRef = ref(
-  //         storage,
-  //         `profiles/${Date.now()}-${imageFile.name}`
-  //       );
-  //       const uploadTask = uploadBytesResumable(imageRef, imageFile);
-
-  //       await new Promise((resolve, reject) => {
-  //         uploadTask.on(
-  //           "state_changed",
-  //           (snapshot) => {
-  //             const progress =
-  //               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //             setUploadProgress(Math.round(progress));
-  //           },
-  //           (error) => reject(error),
-  //           async () => {
-  //             profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-  //             setImageUploading(false);
-  //             resolve();
-  //           }
-  //         );
-  //       });
-  //       console.log("Image uploaded. URL:", profileUrl);
-  //     } catch (uploadError) {
-  //       console.error("Image upload failed:", uploadError);
-  //     }
-  //   }
-
-  //   console.log(fullName, email, password, profileUrl);
-
-  //   try {
-  //     const res = await api.post("/api/users/register", {
-  //       name: fullName,
-  //       email,
-  //       password,
-  //       profileUrl,
-  //     });
-
-  //     console.log("User registered:", res.data);
-  //     alert("Registration successful!");
-  //     setLoading(false);
-  //     setUploadProgress(0);
-  //     localStorage.setItem("token", res.data.token);
-  //     localStorage.setItem("user", JSON.stringify(res.data.user));
-  //     navigate("/");
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Registration failed.");
-  //     setLoading(false);
-  //     setUploadProgress(0);
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     setLoading(true);
@@ -196,67 +96,63 @@ const SignUpForm = () => {
 
     let profileUrl = "fgdgfg";
 
-    if (imageFile) {
-      try {
-        setImageUploading(true);
-        const imageRef = ref(
-          storage,
-          `profiles/${Date.now()}-${imageFile.name}`
-        );
-        const uploadTask = uploadBytesResumable(imageRef, imageFile);
+    // if (imageFile) {
+    //   try {
+    //     setImageUploading(true);
+    //     const imageRef = ref(
+    //       storage,
+    //       `profiles/${Date.now()}-${imageFile.name}`
+    //     );
+    //     const uploadTask = uploadBytesResumable(imageRef, imageFile);
 
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadProgress(Math.round(progress));
-            },
-            (error) => reject(error),
-            async () => {
-              profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              setImageUploading(false);
-              resolve();
-            }
-          );
-        });
-        console.log("Image uploaded. URL:", profileUrl);
-      } catch (uploadError) {
-        console.error("Image upload failed:", uploadError);
-      }
-    }
+    //     await new Promise((resolve, reject) => {
+    //       uploadTask.on(
+    //         "state_changed",
+    //         (snapshot) => {
+    //           const progress =
+    //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    //           setUploadProgress(Math.round(progress));
+    //         },
+    //         (error) => reject(error),
+    //         async () => {
+    //           profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+    //           setImageUploading(false);
+    //           resolve();
+    //         }
+    //       );
+    //     });
+    //     console.log("Image uploaded. URL:", profileUrl);
+    //   } catch (uploadError) {
+    //     console.error("Image upload failed:", uploadError);
+    //   }
+    // }
 
-    if (!otpVerified) {
-      setError("Please verify your email before submitting.");
-      setLoading(false);
-      return;
-    }
+    // if (!otpVerified) {
+    //   setError("Please verify your email before submitting.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
-        {
-          name: fullName,
-          email,
-          phone,
-          password,
-          profileUrl,
-          role,
-        }
-      );
-      console.log(response);
-      if (response.data.userId) {
-        localStorage.setItem("token", response.data.token);
-        console.log("User registered with ID:", response.data.userId);
+      const response = await axios.post("/api/users/signup", {
+        name: fullName,
+        email,
+        phone,
+        password,
+        photo: profileUrl,
+        role,
+      });
+
+      try {
+        await login(); // safely handle login errors
         navigate("/");
-        window.location.reload();
+      } catch {
+        setError(
+          "Signup succeeded, but login failed. Please try logging in manually."
+        );
       }
     } catch (error) {
-      setLoading(false);
-      setError(
-        error.response?.data?.message || error.message || "Signup failed."
-      );
+      setError(error.response?.data?.message || "Signup failed.");
     }
   };
 
@@ -310,7 +206,7 @@ const SignUpForm = () => {
                 id="profileImage"
                 accept="image/*"
                 className="block w-full text-sm text-gray-900 bg-[#d5f2ec] border border-gray-300 rounded-lg cursor-pointer p-2"
-                required
+                
               />
             </div>
 
@@ -375,14 +271,42 @@ const SignUpForm = () => {
                 />
                 <button
                   type="button"
-                  onClick={handleVerifyOtp}
-                  disabled={verifying}
-                  className="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700"
+                  onClick={handleSendOtp}
+                  disabled={otpVerified || isSending}
+                  className={`ml-2 text-sm font-medium px-3 py-2 rounded-lg flex items-center justify-center gap-2 ${
+                    otpVerified
+                      ? "bg-green-500 text-white cursor-default"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
                 >
-                  {verifying ? (
-                    <AiOutlineLoading3Quarters className="animate-spin h-5 w-5 mx-auto" />
+                  {otpVerified ? (
+                    "Verified ✅"
+                  ) : isSending ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                        ></path>
+                      </svg>
+                      Sending...
+                    </>
                   ) : (
-                    "Verify"
+                    "Send OTP"
                   )}
                 </button>
               </div>
@@ -442,15 +366,17 @@ const SignUpForm = () => {
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
                   className="w-5 h-5 text-gray-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                    clipRule="evenodd"
-                  ></path>
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 5a2 2 0 012-2h3.586a1 1 0 01.707.293l2.414 2.414a1 1 0 010 1.414L10.414 8a1 1 0 000 1.414l4.172 4.172a1 1 0 001.414 0l1.879-1.879a1 1 0 011.414 0l2.414 2.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-1c-8.837 0-16-7.163-16-16V5z"
+                  />
                 </svg>
               </div>
               <input
@@ -467,15 +393,17 @@ const SignUpForm = () => {
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
                   className="w-5 h-5 text-gray-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                    clipRule="evenodd"
-                  ></path>
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.121 17.804A4 4 0 017.757 16h8.486a4 4 0 012.636 1.804M15 11a3 3 0 10-6 0 3 3 0 006 0z"
+                  />
                 </svg>
               </div>
               <select
