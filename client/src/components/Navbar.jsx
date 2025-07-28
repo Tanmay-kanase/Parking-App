@@ -21,7 +21,6 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
-  
 
   const isTokenExpired = () => {
     if (!token) return true;
@@ -56,18 +55,6 @@ const Navbar = () => {
                 <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
               </span>
             </a>
-
-            {/* Features */}
-            {/* <a href="/" className="flex flex-col items-center group">
-              <List
-                size={24}
-                className="group-hover:text-yellow-400 transition duration-300"
-              />
-              <span className="text-sm relative">
-                Features
-                <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
-              </span>
-            </a> */}
 
             {user ? (
               <>
@@ -142,18 +129,6 @@ const Navbar = () => {
               </span>
             </a>
 
-            {/* About */}
-            {/* <a href="login" className="flex flex-col items-center group">
-              <Info
-                size={24}
-                className="group-hover:text-yellow-400 transition duration-300"
-              />
-              <span className="text-sm relative">
-                About
-                <span className="absolute left-0 right-0 bottom-0 top-7 h-0.5 bg-yellow-400 scale-x-0 group-hover:scale-x-200 transition-transform duration-500"></span>
-              </span>
-            </a> */}
-
             {/* Signin / Profile Dropdown */}
             {user ? (
               <div className="relative">
@@ -197,7 +172,10 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <a href="login" className="flex flex-col items-center group">
+              <a
+                href="get-started"
+                className="flex flex-col items-center group"
+              >
                 <Info
                   size={24}
                   className="group-hover:text-yellow-400 transition duration-300"
@@ -274,26 +252,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-{
-  /* From Uiverse.io by jubayer-10 */
-}
-{
-  /* <div className="p-5 overflow-hidden w-[60px] h-[60px] hover:w-[270px] bg-[#4070f4] shadow-[2px_2px_20px_rgba(0,0,0,0.08)] rounded-full flex group items-center hover:duration-300 duration-300">
-<div className="flex items-center justify-center fill-white">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    id="Isolation_Mode"
-    data-name="Isolation Mode"
-    viewBox="0 0 24 24"
-    width="22"
-    height="22"
-  >
-    <path d="M18.9,16.776A10.539,10.539,0,1,0,16.776,18.9l5.1,5.1L24,21.88ZM10.5,18A7.5,7.5,0,1,1,18,10.5,7.507,7.507,0,0,1,10.5,18Z"></path>
-  </svg>
-</div>
-<input
-  type="text"
-  className="outline-none text-[20px] bg-transparent w-full text-white font-normal px-4"
-/>
-</div> */
-}

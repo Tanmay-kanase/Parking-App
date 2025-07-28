@@ -7,15 +7,25 @@ import {
   FaWarehouse,
 } from "react-icons/fa";
 import { MapPin, Building, Upload } from "lucide-react";
-import axios from "axios";
+import axios from "../../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 export default function UploadParkingLocations() {
   const [parkings, setParkings] = useState([]);
-  const userId = localStorage.getItem("userId");
+  const [uploading, setUploading] = useState(false);
+  const { user, loading } = useAuth();
+  const [loadingVerification, setLoadingVerification] = useState(false);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
+  useEffect(() => {
+    if (!loading && user?.userId) {
+      setFormData((prev) => ({ ...prev, userId: user.userId }));
+    }
+  }, [user, loading]);
+
   const handleVerifyLocation = () => {
+    setLoadingVerification(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -25,6 +35,7 @@ export default function UploadParkingLocations() {
             lng: position.coords.longitude,
           });
           setLocationVerified(true); // Set location as verified
+          setLoadingVerification(false);
         },
         (error) => {
           console.error("Geolocation error:", error);
@@ -35,11 +46,12 @@ export default function UploadParkingLocations() {
       );
     } else {
       alert("Geolocation is not supported by this browser.");
+      setLoadingVerification(false);
     }
   };
 
   const [formData, setFormData] = useState({
-    userId: `${userId}`,
+    userId: "",
     name: "",
     address: "",
     city: "",
@@ -55,12 +67,13 @@ export default function UploadParkingLocations() {
     busSlots: "",
   });
   useEffect(() => {
+    if (loading || !user?.userId) return;
     const fetchParkings = async () => {
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/parking-locations/user/${userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/user/${
+            user.userId
+          }`
         );
         setParkings(response.data); // Set the parking data
       } catch (error) {
@@ -68,8 +81,8 @@ export default function UploadParkingLocations() {
       }
     };
 
-    if (userId) fetchParkings();
-  }, [userId]);
+    if (user) fetchParkings();
+  }, [user, loading]);
   console.log(parkings);
 
   const handleChange = (e) => {
@@ -79,6 +92,7 @@ export default function UploadParkingLocations() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setUploading(true);
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations`,
         formData
@@ -88,17 +102,20 @@ export default function UploadParkingLocations() {
         `/upload-parking-slots?locationId=${response.data.locationId}&name=${response.data.name}`
       );
     } catch (error) {
+      setUploading(false);
       console.error(
         "Error uploading parking location:",
         error.response?.data || error.message
       );
+    } finally {
+      setUploading(false);
     }
   };
   console.log(formData);
 
   return (
     <div className="min-h-screen bg-[#fefae0] flex items-center justify-center p-10">
-      <div className="bg-white shadow-2xl rounded-3xl p-10 w-full max-w-2xl">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md w-full max-w-2xl overflow-y-auto max-h-[90vh]">
         <button
           onClick={() => setShowModal(true)}
           className="bg-yellow-500 text-white font-bold p-3 rounded-lg hover:bg-yellow-600"
@@ -194,9 +211,32 @@ export default function UploadParkingLocations() {
             <button
               type="button"
               onClick={handleVerifyLocation}
-              className="col-span-2 bg-yellow-500 text-white font-bold text-lg p-3 rounded-lg hover:bg-yellow-600"
+              className="col-span-2 bg-yellow-500 text-white font-bold text-lg p-3 rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loadingVerification}
             >
-              Verify Location
+              {loadingVerification && (
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              )}
+              {loadingVerification ? "Verifying..." : "Verify Location"}
             </button>
 
             {!locationVerified && (
@@ -308,10 +348,34 @@ export default function UploadParkingLocations() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full flex items-center justify-center bg-yellow-500 text-white p-4 rounded-xl text-xl font-semibold hover:bg-yellow-600 transition duration-300"
+              className="w-full flex items-center justify-center bg-yellow-500 text-white p-4 rounded-xl text-xl font-semibold hover:bg-yellow-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={uploading}
             >
-              <Upload className="mr-3" size={26} />
-              Upload Location
+              {uploading ? (
+                <svg
+                  className="animate-spin h-6 w-6 mr-3 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              ) : (
+                <Upload className="mr-3" size={26} />
+              )}
+              {uploading ? "Uploading..." : "Upload Location"}
             </button>
           </form>
         )}

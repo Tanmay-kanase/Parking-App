@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import axios from "../../config/axiosInstance";
 import {
   PlusCircle,
   Edit,

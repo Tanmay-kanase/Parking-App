@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Html5Qrcode } from "html5-qrcode";
 import { useEffect, useRef } from "react";
-import axios from "axios";
+import axios from "../../config/axiosInstance";
 
 const Verify = () => {
   const [scanned, setScanned] = useState(false);

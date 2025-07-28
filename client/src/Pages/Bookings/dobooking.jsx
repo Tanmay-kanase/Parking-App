@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../config/axiosInstance";
 
 const DoBooking = () => {
   const userId = localStorage.getItem("userId");

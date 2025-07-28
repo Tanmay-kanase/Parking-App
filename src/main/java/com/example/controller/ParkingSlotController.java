@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.model.ParkingSlot;
 import com.example.service.EmailService;
 import com.example.service.ParkingSlotService;
-
+import com.example.repository.ParkingSlotRepository;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +20,9 @@ public class ParkingSlotController {
 
     @Autowired
     private ParkingSlotService parkingSlotService;
+
+    @Autowired
+    private ParkingSlotRepository parkingSlotRepository;
 
     @GetMapping
     public List<ParkingSlot> getAllSlots() {
@@ -73,4 +76,11 @@ public class ParkingSlotController {
         parkingSlotService.deleteSlot(slotId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/batch")
+public ResponseEntity<?> addParkingSlots(@RequestBody List<ParkingSlot> slots) {
+    List<ParkingSlot> savedSlots = parkingSlotRepository.saveAll(slots);
+    return ResponseEntity.ok(savedSlots);
+}
+
 }

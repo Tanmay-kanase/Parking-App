@@ -1,8 +1,8 @@
 import Home from "./Pages/Home";
 import { Routes, Route } from "react-router-dom";
-import Signup from "./Pages/Auth/Signup";
+
 import Navbar from "./components/Navbar";
-import Login from "./Pages/Auth/Login";
+
 import Footer from "./components/Footer";
 import Contact_Footer from "./components/Contact_Footer";
 import ParkingSpots from "./Pages/parkings/Parking_Spots";
@@ -14,7 +14,6 @@ import ParkingHistory from "./Pages/parkings/parkhistoy";
 import Payments from "./Pages/Bookings/Payments";
 import Bookings from "./Pages/Bookings/Booking";
 import DoBookings from "./Pages/Bookings/dobooking";
-//import MyBookings from "./Pages/Booking";
 import UploadParkingSpots from "./Pages/Parking_Service/upload_parking";
 import UploadParkingLocations from "./Pages/Parking_Service/uploadparkinglocations";
 import ShowParkings from "./Pages/Parking_Service/showparkings";
@@ -30,8 +29,6 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/parking-spots" element={<ParkingSpots />} />
         <Route path="/parking-slots" element={<ParkingSlots />} />
         <Route path="/profile" element={<Profile />} />

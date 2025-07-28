@@ -8,12 +8,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Collections;
 
@@ -24,30 +23,39 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+protected void doFilterInternal(HttpServletRequest request,
+                                HttpServletResponse response,
+                                FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            try {
-                Claims claims = jwtUtil.parseToken(token);
+    String token = null;
 
-                String userId = claims.get("userId", String.class);
-                String role = claims.get("role", String.class);
-
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId,
-                        null, Collections.emptyList());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            } catch (Exception e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-                return;
+    // 🔽 1. Read token from HttpOnly cookie named "token"
+    if (request.getCookies() != null) {
+        for (Cookie cookie : request.getCookies()) {
+            if ("token".equals(cookie.getName())) {
+                token = cookie.getValue();
+                break;
             }
         }
-
-        filterChain.doFilter(request, response);
     }
+
+    if (token != null) {
+        try {
+            Claims claims = jwtUtil.parseToken(token);
+            String userId = claims.get("userId", String.class);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+            return;
+        }
+    }
+
+    filterChain.doFilter(request, response);
+}
+
 }

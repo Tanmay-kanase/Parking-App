@@ -34,27 +34,52 @@ const SignInForm = () => {
   };
 
   const handleSuccess = async (response) => {
-    try {
-      const { credential } = response;
-      const decodedToken = jwtDecode(credential);
-      console.log("Decoded User:", decodedToken);
+  try {
+    const { credential } = response;
+    const userInfo = jwtDecode(credential);
+    const { name, email, sub: googleUserId, picture } = userInfo;
 
-      const userInfo = JSON.parse(atob(credential.split(".")[1]));
-      const { name, email, sub: googleUserId, picture } = userInfo;
+    // Check if user already exists
+    const checkRes = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${email}`
+    );
 
-      const userData = { name, email, userId: googleUserId, photo: picture };
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
-        userData
-      );
+    const isNewUser = !checkRes?.data?.email; // if response is empty or invalid
 
-      console.log("User logged in:", data);
-      login(data.token, data); // store user and token
-      navigate("/");
-    } catch (error) {
-      console.error("Login failed", error);
+    let password = "";
+
+    if (isNewUser) {
+      password = prompt("Set your password (only once):");
+      if (!password) {
+        alert("Password is required to continue.");
+        return;
+      }
     }
-  };
+
+    const userData = {
+      name,
+      email,
+      userId: googleUserId,
+      photo: picture,
+      password, // send only if new
+    };
+
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
+      userData,
+      { withCredentials: true } // send cookies
+    );
+
+    // Refetch user context
+    await login({ email, password: password || "dummy" }); // will skip login route if already authenticated
+
+    navigate("/");
+  } catch (error) {
+    console.error("Google login error:", error);
+  }
+};
+
+
   const buttonClasses = `w-full text-white bg-[#03C9D7] hover:bg-[#039BAB] focus:ring-4 focus:outline-none 
     focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all 
     duration-200 transform hover:scale-[1.02] hover:shadow-md`;

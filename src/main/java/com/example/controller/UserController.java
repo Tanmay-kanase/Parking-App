@@ -11,7 +11,7 @@ import com.example.service.UserService;
 import com.example.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +33,9 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @PutMapping("/{userId}")
@@ -47,15 +50,43 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        try {
-            Map<String, String> result = userService.registerUser(user);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
-        }
+public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpServletResponse response) {
+    String name = request.get("name");
+    String email = request.get("email");
+    String password = request.get("password");
+    String photo = request.get("photo");
+
+    if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+        return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
     }
+
+    if (userRepository.findByEmail(email).isPresent()) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "User already exists"));
+    }
+
+    User user = new User();
+    user.setUserId(UUID.randomUUID().toString());
+    user.setName(name);
+    user.setEmail(email);
+    user.setPhoto(photo);
+    user.setRole("user");
+    user.setPassword(passwordEncoder.encode(password)); // Hash password
+
+    userRepository.save(user);
+
+    String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+
+    // Set HttpOnly cookie
+    Cookie cookie = new Cookie("token", token);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+    response.addCookie(cookie);
+
+    return ResponseEntity.ok(Map.of("message", "Signup successful"));
+}
+
+
 
     @PostMapping("/login")
 public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData, HttpServletResponse response) {
@@ -165,41 +196,49 @@ public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required =
     }
 
     @PostMapping("/google-login")
-    public ResponseEntity<Map<String, String>> googleLogin(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String name = request.get("name");
-        String photo = request.get("photo");
-        String userId = request.get("userId");
+public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request, HttpServletResponse response) {
+    String email = request.get("email");
+    String name = request.get("name");
+    String photo = request.get("photo");
+    String googleUserId = request.get("userId");
+    String password = request.get("password"); // Provided from frontend in single hit
 
-        if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Email is required"));
-        }
-
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        User user;
-
-        if (userOptional.isEmpty()) {
-            // 👇 Create new user
-            user = new User();
-            user.setUserId(UUID.randomUUID().toString()); // or use Google `userId` if needed
-            user.setName(name);
-            user.setEmail(email);
-            user.setPhoto(photo);
-            user.setRole("user"); // default role
-
-            userRepository.save(user);
-        } else {
-            user = userOptional.get();
-        }
-
-        // 👇 Generate JWT token
-        String token = jwtUtil.generateToken(
-                user.getUserId(),
-                user.getEmail(),
-                user.getRole());
-
-        return ResponseEntity.ok(Collections.singletonMap("token", token));
+    if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+        return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
     }
+
+    Optional<User> userOptional = userRepository.findByEmail(email);
+    User user;
+
+    if (userOptional.isEmpty()) {
+        // New Google user -> Create account
+        user = new User();
+        user.setUserId(UUID.randomUUID().toString());
+        user.setName(name);
+        user.setEmail(email);
+        user.setPhoto(photo);
+        user.setPassword(passwordEncoder.encode(password)); // Save provided password
+        user.setRole("user");
+
+        userRepository.save(user);
+    } else {
+        user = userOptional.get();
+    }
+
+    String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+
+    // Set HttpOnly cookie
+    Cookie cookie = new Cookie("token", token);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+    response.addCookie(cookie);
+
+    return ResponseEntity.ok(Map.of("message", "Login successful"));
+}
+
+
+
 
     @DeleteMapping("/delete/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable String userId) {
@@ -212,5 +251,20 @@ public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required =
         userService.makeUserAdmin(userId);
         return ResponseEntity.ok(Map.of("message", "User promoted to admin"));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(HttpServletResponse response) {
+        // Invalidate the token cookie
+        Cookie cookie = new Cookie("token", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // same as login
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // delete the cookie
+    
+        response.addCookie(cookie);
+    
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+    }
+
 
 }
