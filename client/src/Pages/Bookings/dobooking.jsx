@@ -2,6 +2,23 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "../../config/axiosInstance";
 
+const formatVehicleNumber = (input) => {
+  let cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  let formatted = "";
+
+  if (cleaned.length > 0) formatted += cleaned.substring(0, 2);
+  if (cleaned.length > 2) formatted += "-" + cleaned.substring(2, 4);
+  if (cleaned.length > 4) formatted += "-" + cleaned.substring(4, 6);
+  if (cleaned.length > 6) formatted += "-" + cleaned.substring(6, 10);
+
+  return formatted;
+};
+
+const validateVehicleNumber = (number) => {
+  const regex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
+  return regex.test(number);
+};
+
 const DoBooking = () => {
   const userId = localStorage.getItem("userId");
   const [spots, setSpots] = useState([]);
@@ -15,6 +32,7 @@ const DoBooking = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   // Fetch vehicles from the backend using userId from localStorage
   // Handle vehicle selection change
+
   const handleVehicleChange = (e) => {
     setSelectedVehicle(e.target.value);
     setFormData((prev) => ({
@@ -379,15 +397,35 @@ const DoBooking = () => {
                 </select>
 
                 {selectedVehicle === "manual" && (
-                  <input
-                    type="text"
-                    name="vehicleNumber"
-                    value={formData.vehicleNumber}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    placeholder="Enter your vehicle number"
-                    required
-                  />
+                  <>
+                    <input
+                      type="text"
+                      name="vehicleNumber"
+                      value={formData.vehicleNumber}
+                      onChange={(e) => {
+                        const formatted = formatVehicleNumber(e.target.value);
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          vehicleNumber: formatted,
+                        }));
+
+                        if (!validateVehicleNumber(formatted)) {
+                          setError("Invalid format! Use: MH-43-AR-0707");
+                        } else {
+                          setError("");
+                        }
+                      }}
+                      className={`w-full p-2 border rounded-lg ${
+                        error ? "border-red-500" : "border-gray-300"
+                      }`}
+                      placeholder="Enter your vehicle number"
+                      required
+                    />
+                    {error && (
+                      <p className="text-red-500 text-sm mt-1">{error}</p>
+                    )}
+                  </>
                 )}
               </>
             )}

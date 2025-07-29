@@ -47,7 +47,8 @@ export default function Shownearbyparkings() {
         .get(
           `${
             import.meta.env.VITE_BACKEND_URL
-          }/api/parking-locations/nearby?lat=${lat}&lng=${lng}`
+          }/api/parking-locations/nearby?lat=${lat}&lng=${lng}`,
+          { withCredentials: true }
         )
         .then((response) => {
           const withDistance = response.data.map((parking) => ({

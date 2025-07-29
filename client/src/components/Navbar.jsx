@@ -138,7 +138,7 @@ const Navbar = () => {
                 >
                   {user.photo ? (
                     <img
-                      src={user.profilePic}
+                      src={user.photo}
                       alt="Profile"
                       className="w-8 h-8 rounded-full border-2 border-yellow-400 group-hover:border-yellow-500 transition duration-300"
                     />

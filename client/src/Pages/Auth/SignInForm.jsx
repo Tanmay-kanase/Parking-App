@@ -6,7 +6,7 @@ import jwtDecode from "jwt-decode";
 import useAuth from "../../context/useAuth";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 const SignInForm = () => {
-  const { login } = useAuth();
+  const { login, fetchUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,51 +34,56 @@ const SignInForm = () => {
   };
 
   const handleSuccess = async (response) => {
-  try {
-    const { credential } = response;
-    const userInfo = jwtDecode(credential);
-    const { name, email, sub: googleUserId, picture } = userInfo;
+    try {
+      const { credential } = response;
+      const userInfo = jwtDecode(credential);
+      const { name, email, sub: googleUserId, picture } = userInfo;
 
-    // Check if user already exists
-    const checkRes = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${email}`
-    );
+      // Check if user already exists
+      const checkRes = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${email}`
+      );
 
-    const isNewUser = !checkRes?.data?.email; // if response is empty or invalid
+      console.log("Response Checking email exist or not : ", checkRes);
 
-    let password = "";
+      const isNewUser = !checkRes?.data?.email; // if response is empty or invalid
 
-    if (isNewUser) {
-      password = prompt("Set your password (only once):");
-      if (!password) {
-        alert("Password is required to continue.");
-        return;
+      let password = "";
+
+      if (isNewUser) {
+        password = prompt("Set your password (only once):");
+        if (!password) {
+          alert("Password is required to continue.");
+          return;
+        }
       }
+
+      const userData = {
+        name,
+        email,
+        userId: googleUserId,
+        photo: picture,
+        password, // send only if new
+      };
+
+      console.log("checking user Data before hit request ", userData);
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
+        userData,
+        {
+          withCredentials: true, // ✅ This is critical
+        }
+      );
+      console.log(res);
+      console.log("success");
+      await fetchUser();
+      console.log("User is fetched proceed to home");
+      navigate("/");
+    } catch (error) {
+      console.error("Google login error:", error);
     }
-
-    const userData = {
-      name,
-      email,
-      userId: googleUserId,
-      photo: picture,
-      password, // send only if new
-    };
-
-    await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
-      userData,
-      { withCredentials: true } // send cookies
-    );
-
-    // Refetch user context
-    await login({ email, password: password || "dummy" }); // will skip login route if already authenticated
-
-    navigate("/");
-  } catch (error) {
-    console.error("Google login error:", error);
-  }
-};
-
+  };
 
   const buttonClasses = `w-full text-white bg-[#03C9D7] hover:bg-[#039BAB] focus:ring-4 focus:outline-none 
     focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all 

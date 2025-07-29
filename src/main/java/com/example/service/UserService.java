@@ -29,7 +29,7 @@ public class UserService {
 
     }
 
-    public Map<String, String> registerUser(User user) {
+    public Map<String, Object> registerUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
@@ -40,7 +40,7 @@ public class UserService {
         String token = jwtUtil.generateToken(savedUser.getUserId(), savedUser.getEmail(), savedUser.getRole());
 
         return Map.of(
-                "userId", savedUser.getUserId(),
+                "user", savedUser,
                 "token", token);
     }
 

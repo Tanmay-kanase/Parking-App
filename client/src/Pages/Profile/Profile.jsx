@@ -58,7 +58,7 @@ const Profile = () => {
         <div className="w-full md:w-1/3 flex justify-center mb-6 md:mb-0">
           <div className="w-60 h-60 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-yellow-500">
             <img
-              src="https://img.freepik.com/premium-vector/avatar-profile-icon-flat-style-male-user-profile-vector-illustration-isolated-background-man-profile-sign-business-concept_157943-38764.jpg"
+              src={user.photo}
               alt="Profile"
               className="w-full h-full object-cover"
             />
@@ -80,7 +80,7 @@ const Profile = () => {
           </div>
 
           {/* Conditionally Render Sections */}
-          {user.role === "User" && (
+          {user.role === "user" && (
             <>
               <h3 className="text-3xl font-bold text-gray-900 mt-8 mb-4">
                 My Vehicles
