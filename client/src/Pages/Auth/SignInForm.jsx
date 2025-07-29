@@ -10,6 +10,7 @@ const SignInForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
@@ -28,6 +29,7 @@ const SignInForm = () => {
       navigate("/"); // redirect on success
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -152,9 +154,9 @@ const SignInForm = () => {
               required
             />
           </div>
-          {errorMessage && (
+          {error && (
             <span className="block text-red-600 text-sm text-center mt-2 animate-pulse">
-              {errorMessage}
+              {error}
             </span>
           )}
 

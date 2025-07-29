@@ -22,6 +22,7 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
 
+  console.log(user);
   const isTokenExpired = () => {
     if (!token) return true;
 

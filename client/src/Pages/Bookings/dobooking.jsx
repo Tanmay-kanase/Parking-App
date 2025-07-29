@@ -203,40 +203,40 @@ const DoBooking = () => {
     });
   };
 
-  // Handle form submission
-  // const handleSubmit = async (e) => {
-  //   try {
-  //     await axios.put(
-  //       `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
-  //         selectedSpot.slotId
-  //       }`,
-  //       {
-  //         available: false, // Update availability status
-  //       }
-  //     );
+ // Handle form submission
+  const handleSubmit = async (e) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
+          selectedSpot.slotId
+        }`,
+        {
+          available: false, // Update availability status
+        }
+      );
 
-  //     alert("Booking Confirmed! Slot is now unavailable.");
-  //     // navigate("/booking");
+      alert("Booking Confirmed! Slot is now unavailable.");
+      // navigate("/booking");
 
-  //     // Update UI to reflect changes
-  //     setSpots((prevSpots) =>
-  //       prevSpots.map((spot) =>
-  //         spot.id === selectedSpot.id ? { ...spot, available: false } : spot
-  //       )
-  //     );
+      // Update UI to reflect changes
+      setSpots((prevSpots) =>
+        prevSpots.map((spot) =>
+          spot.id === selectedSpot.id ? { ...spot, available: false } : spot
+        )
+      );
 
-  //     //setSelectedSpot(null); // Close booking form
-  //   } catch (error) {
-  //     console.error("Error updating slot availability:", error);
-  //     alert("Failed to book slot. Please try again.");
-  //   }
-  //   console.log("Booking Confirmed", {
-  //     ...formData,
-  //     slotId: selectedSpot.slotId,
-  //   });
-  //   alert("Booking Confirmed!");
-  //   //setSelectedSpot(null); // Close form after submission
-  // };
+      //setSelectedSpot(null); // Close booking form
+    } catch (error) {
+      console.error("Error updating slot availability:", error);
+      alert("Failed to book slot. Please try again.");
+    }
+    console.log("Booking Confirmed", {
+      ...formData,
+      slotId: selectedSpot.slotId,
+    });
+    
+    //setSelectedSpot(null); // Close form after submission
+  };
   console.log("Selected Spots");
   console.log(selectedSpot);
   console.log("User Id", userId);

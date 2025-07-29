@@ -1,11 +1,11 @@
 import React from "react";
 import { storage } from "../../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import axios from "../../config/axiosInstance";
+import axios from "axios";
 import { useState } from "react";
 import { uploadBytesResumable } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useAuth } from "../../context/AuthContext";
 const SignUpForm = () => {
   const [otpVisible, setOtpVisible] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -22,7 +22,7 @@ const SignUpForm = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
-
+  const { setUser, fetchUser } = useAuth();
   const handleSendOtp = async () => {
     setIsSending(true);
     try {
@@ -74,90 +74,94 @@ const SignUpForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    setLoading(true);
-    e.preventDefault();
-    setError("");
-
-    const formData = new FormData(e.target);
-    const fullName = formData.get("fullName");
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const confirmPassword = formData.get("confirmPassword");
-    const imageFile = formData.get("profileImage");
-    const phone = formData.get("phone");
-    const role = formData.get("role");
-
-    console.log("Image file:", imageFile);
-
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    let profileUrl = "fgdgfg";
-
-    // if (imageFile) {
-    //   try {
-    //     setImageUploading(true);
-    //     const imageRef = ref(
-    //       storage,
-    //       `profiles/${Date.now()}-${imageFile.name}`
-    //     );
-    //     const uploadTask = uploadBytesResumable(imageRef, imageFile);
-
-    //     await new Promise((resolve, reject) => {
-    //       uploadTask.on(
-    //         "state_changed",
-    //         (snapshot) => {
-    //           const progress =
-    //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    //           setUploadProgress(Math.round(progress));
-    //         },
-    //         (error) => reject(error),
-    //         async () => {
-    //           profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-    //           setImageUploading(false);
-    //           resolve();
-    //         }
-    //       );
-    //     });
-    //     console.log("Image uploaded. URL:", profileUrl);
-    //   } catch (uploadError) {
-    //     console.error("Image upload failed:", uploadError);
-    //   }
-    // }
-
-    // if (!otpVerified) {
-    //   setError("Please verify your email before submitting.");
-    //   setLoading(false);
-    //   return;
-    // }
-
     try {
-      const response = await axios.post("/api/users/signup", {
-        name: fullName,
-        email,
-        phone,
-        password,
-        photo: profileUrl,
-        role,
-      });
+      setLoading(true);
+      e.preventDefault();
+      setError("");
+
+      const formData = new FormData(e.target);
+      const fullName = formData.get("fullName");
+      const email = formData.get("email");
+      const password = formData.get("password");
+      const confirmPassword = formData.get("confirmPassword");
+      const imageFile = formData.get("profileImage");
+      const phone = formData.get("phone");
+      const role = formData.get("role");
+
+      console.log("Image file:", imageFile);
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
+
+      let profileUrl = "fgdgfg";
+
+      // if (imageFile) {
+      //   try {
+      //     setImageUploading(true);
+      //     const imageRef = ref(
+      //       storage,
+      //       `profiles/${Date.now()}-${imageFile.name}`
+      //     );
+      //     const uploadTask = uploadBytesResumable(imageRef, imageFile);
+
+      //     await new Promise((resolve, reject) => {
+      //       uploadTask.on(
+      //         "state_changed",
+      //         (snapshot) => {
+      //           const progress =
+      //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      //           setUploadProgress(Math.round(progress));
+      //         },
+      //         (error) => reject(error),
+      //         async () => {
+      //           profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+      //           setImageUploading(false);
+      //           resolve();
+      //         }
+      //       );
+      //     });
+      //     console.log("Image uploaded. URL:", profileUrl);
+      //   } catch (uploadError) {
+      //     console.error("Image upload failed:", uploadError);
+      //   }
+      // }
+
+      // if (!otpVerified) {
+      //   setError("Please verify your email before submitting.");
+      //   setLoading(false);
+      //   return;
+      // }
+
+      console.log("Going to hit the backend");
 
       try {
-        await login(); // safely handle login errors
-        navigate("/");
-      } catch {
-        setError(
-          "Signup succeeded, but login failed. Please try logging in manually."
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
+          {
+            name: fullName,
+            email,
+            phone,
+            password,
+            photo: profileUrl,
+            role,
+          },
+          { withCredentials: true }
         );
+        console.log("Request hitted!!!");
+        await setUser(response.data.user);
+        navigate("/");
+      } catch (error) {
+        setError(error.response?.data?.message || "Signup failed.");
       }
     } catch (error) {
-      setError(error.response?.data?.message || "Signup failed.");
+      console.log(error);
     }
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-lg shadow-2xl md:mt-0 xl:p-0 border border-gray-200 mx-auto">
+    <div className="w-full sm:grid-cols-1  max-w-md bg-white rounded-lg shadow-2xl md:mt-0 xl:p-0 border border-gray-200 mx-auto px-4">
       <div className="p-6 space-y-6 md:space-y-7 sm:p-8">
         <h1 className="text-xl font-bold leading-tight tracking-tight text-backgroundColor md:text-2xl text-center">
           Create Account
@@ -167,7 +171,7 @@ const SignUpForm = () => {
         </h1>
 
         <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 gap-5 md:gap-6">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
@@ -206,7 +210,6 @@ const SignUpForm = () => {
                 id="profileImage"
                 accept="image/*"
                 className="block w-full text-sm text-gray-900 bg-[#d5f2ec] border border-gray-300 rounded-lg cursor-pointer p-2"
-                
               />
             </div>
 
@@ -222,9 +225,9 @@ const SignUpForm = () => {
               </div>
             )}
 
-            <div className="flex justify-between items-center gap-2 ">
-              <div className="relative w-full">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none ">
+            <div className="flex bg-[#d5f2ec] border rounded-2xl border-gray-300 justify-between items-center gap-2 ">
+              <div className="relative w-full  ">
+                <div className="absolute  inset-y-0 left-0 flex items-center pl-3 pointer-events-none ">
                   <svg
                     className="w-5 h-5 text-gray-500"
                     fill="currentColor"
@@ -239,8 +242,9 @@ const SignUpForm = () => {
                   name="email"
                   id="email"
                   value={email}
+                  disabled={otpVerified}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-[#d5f2ec] border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-brightColor focus:border-brightColor block w-full pl-10 p-3"
+                  className="bg-[#d5f2ec] border-l-0 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-brightColor focus:border-brightColor block w-full pl-10 p-3"
                   placeholder="Email address"
                   required
                 />
@@ -249,39 +253,61 @@ const SignUpForm = () => {
               <button
                 type="button"
                 onClick={handleSendOtp}
-                disabled={otpVerified}
-                className={`ml-2 text-sm font-medium px-3 py-2 rounded-lg ${
+                disabled={otpVerified || isSending}
+                className={`ml-2 text-sm font-medium rounded-lg flex items-center gap-2 ${
                   otpVerified
                     ? "bg-green-500 text-white cursor-default"
                     : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               >
-                {otpVerified ? "Verified ✅" : "Send OTP"}
+                {otpVerified ? (
+                  "Verified ✅"
+                ) : isSending ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                      ></path>
+                    </svg>
+                    Sending...
+                  </>
+                ) : (
+                  "Send OTP"
+                )}
               </button>
             </div>
-            {otpVisible && (
-              <div className="flex items-center gap-3 mt-3">
+            {otpVisible && !otpVerified && (
+              <div className="flex items-center bg-[#d5f2ec] border rounded-2xl border-gray-300 gap-3 mt-3">
                 <input
                   type="text"
                   name="otp"
                   placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  className="flex-1 bg-[#d5f2ec] border border-gray-300 text-gray-900 sm:text-sm rounded-lg p-3"
+                  className="flex-1 bg-[#d5f2ec] text-gray-900 sm:text-sm rounded-lg p-3"
                 />
                 <button
                   type="button"
-                  onClick={handleSendOtp}
-                  disabled={otpVerified || isSending}
-                  className={`ml-2 text-sm font-medium px-3 py-2 rounded-lg flex items-center justify-center gap-2 ${
-                    otpVerified
-                      ? "bg-green-500 text-white cursor-default"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  }`}
+                  onClick={handleVerifyOtp}
+                  disabled={isSending}
+                  className="ml-2 text-sm font-medium px-1 py-1 rounded-lg bg-green-600 text-white hover:bg-green-700"
                 >
-                  {otpVerified ? (
-                    "Verified ✅"
-                  ) : isSending ? (
+                  {isSending ? (
                     <>
                       <svg
                         className="animate-spin h-4 w-4 text-white"
@@ -303,10 +329,10 @@ const SignUpForm = () => {
                           d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
                         ></path>
                       </svg>
-                      Sending...
+                      Verifying...
                     </>
                   ) : (
-                    "Send OTP"
+                    "Verify OTP"
                   )}
                 </button>
               </div>
@@ -416,7 +442,7 @@ const SignUpForm = () => {
                   Select role
                 </option>
                 <option value="user">User</option>
-                <option value="Parking_Owner">Parking Owner</option>
+                <option value="parking_owner">Parking Owner</option>
               </select>
             </div>
           </div>
@@ -511,59 +537,11 @@ const SignUpForm = () => {
           </button>
         </form>
 
-        {/* <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or sign up with</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3">
-         
-          <button type="button" className={buttonForGFT}>
-            <svg
-              className="h-5 w-5"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-            </svg>
-          </button>
-
-         
-          <button type="button" className={buttonForGFT}>
-            <svg
-              className="h-5 w-5"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fillRule="evenodd"
-                d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-
-          
-          <button type="button" className={buttonForGFT}>
-            <svg
-              className="h-5 w-5"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M13.6823 10.6218L20.2391 3H18.6854L12.9921 9.61788L8.44486 3H3.2002L10.0765 13.0074L3.2002 21H4.75404L10.7663 14.0113L15.5685 21H20.8131L13.6819 10.6218H13.6823ZM11.5541 13.0956L10.8574 12.0991L5.31391 4.16971H7.70053L12.1742 10.5689L12.8709 11.5655L18.6861 19.8835H16.2995L11.5541 13.096V13.0956Z" />
-            </svg>
-          </button>
-        </div> */}
-
         <p className="text-sm text-center text-gray-600 mt-4 border-t border-gray-100 pt-4">
-          Already have an account? Sign in
+          Already have an account?{" "}
+          <a href="get-started" className="text-black none">
+            Sign in
+          </a>
         </p>
       </div>
     </div>
