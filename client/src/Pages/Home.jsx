@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ParkingCircle, CreditCard, Map } from "lucide-react";
-import { useSelector } from "react-redux";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,14 +24,11 @@ const Home = () => {
       navigate(`/show-parkings?query=${encodeURIComponent(input)}`);
     }
   };
-
-  const user = localStorage.getItem("user");
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
       navigate(`/parking-spots?query=${encodeURIComponent(searchQuery)}`);
     }
   };
-  console.log("User : " + user);
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
       {/* Background Grid of Parking Images */}
@@ -235,5 +231,3 @@ const Home = () => {
 
 export default Home;
 
-// value={searchQuery}
-//             onChange={(e) => setSearchQuery(e.target.value)} onClick={handleSearch}

@@ -22,8 +22,20 @@ import Verify from "./Pages/Parking_Service/verify";
 import MyBookings from "./Pages/Bookings/Booking";
 import SlidingLoginSignup from "./Pages/Auth/SlidingLoginSignup";
 import Admin from "./Pages/Admin/Admin";
+import SkeletonLoader from "./components/SkeletonLoader";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <SkeletonLoader />
+      </>
+    );
+  }
   return (
     <>
       <Navbar />

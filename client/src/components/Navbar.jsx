@@ -20,7 +20,15 @@ import { useAuth } from "../context/AuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <nav className="bg-[#F8FBFF] text-gray-900 shadow-lg font-mono h-16 flex items-center justify-center">
+        <div className="animate-pulse w-32 h-6 bg-gray-300 rounded"></div>
+      </nav>
+    );
+  }
 
   console.log(user);
   const isTokenExpired = () => {
@@ -160,13 +168,22 @@ const Navbar = () => {
                 </button>
                 {dropdownOpen && (
                   <div className="absolute mt-2 w-40 bg-gray-800 text-white rounded-md shadow-lg">
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-700">
+                    <a
+                      href="profile"
+                      className="block px-4 py-2 hover:bg-gray-700"
+                    >
                       My Account
                     </a>
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-700">
+                    <a
+                      href="profile"
+                      className="block px-4 py-2 hover:bg-gray-700"
+                    >
                       Settings
                     </a>
-                    <a href="#" className="block px-4 py-2 hover:bg-red-500">
+                    <a
+                      href="profile"
+                      className="block px-4 py-2 hover:bg-red-500"
+                    >
                       Logout
                     </a>
                   </div>
@@ -205,40 +222,34 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-gray-800 text-white">
           <a
-            href="#"
+            href="/"
             className="block py-3 px-4 hover:bg-yellow-400 flex flex-col items-center"
           >
             <Home size={24} className="mb-1" />
             Home
           </a>
           <a
-            href="#"
+            href="upload-parking-location"
             className="block py-3 px-4 hover:bg-yellow-400 flex flex-col items-center"
           >
             <List size={24} className="mb-1" />
-            Features
+            Parkings
           </a>
           <a
-            href="#"
+            href="/mybookings"
             className="block py-3 px-4 hover:bg-yellow-400 flex flex-col items-center"
           >
             <DollarSign size={24} className="mb-1" />
-            Pricing
+            Bookings
           </a>
           <a
-            href="#"
+            href="/payments"
             className="block py-3 px-4 hover:bg-yellow-400 flex flex-col items-center"
           >
             <HelpCircle size={24} className="mb-1" />
-            Support
+            Payments
           </a>
-          <a
-            href="#"
-            className="block py-3 px-4 hover:bg-yellow-400 flex flex-col items-center"
-          >
-            <Info size={24} className="mb-1" />
-            About
-          </a>
+
           <a
             href="#"
             className="block py-3 px-4 hover:bg-yellow-400 flex flex-col items-center"
