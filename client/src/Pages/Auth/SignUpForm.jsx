@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { storage } from "../../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import axios from "axios";
@@ -23,6 +23,11 @@ const SignUpForm = () => {
   const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const { setUser, fetchUser } = useAuth();
+  const showError = (msg) => {
+    setError(msg);
+    setTimeout(() => setError(""), 5000); // Hide error after 5 seconds
+  };
+
   const handleSendOtp = async () => {
     setIsSending(true);
     try {
@@ -75,7 +80,6 @@ const SignUpForm = () => {
 
   const handleSubmit = async (e) => {
     try {
-      setLoading(true);
       e.preventDefault();
       setError("");
 
@@ -90,53 +94,84 @@ const SignUpForm = () => {
 
       console.log("Image file:", imageFile);
 
-      if (password !== confirmPassword) {
-        alert("Passwords do not match");
+      e.preventDefault();
+
+      if (!fullName || !email || !password || !phone || !role) {
+        showError("All fields are required.");
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError("Invalid email format.");
         return;
       }
 
-      let profileUrl = "fgdgfg";
+      if (password.length < 8) {
+        showError("Password must be at least 8 characters.");
+        return;
+      }
+      const mobileRegex = /^[0-9]{10}$/;
+      if (!mobileRegex.test(phone)) {
+        showError("Mobile number must be exactly 10 digits.");
+        return;
+      }
 
-      // if (imageFile) {
-      //   try {
-      //     setImageUploading(true);
-      //     const imageRef = ref(
-      //       storage,
-      //       `profiles/${Date.now()}-${imageFile.name}`
-      //     );
-      //     const uploadTask = uploadBytesResumable(imageRef, imageFile);
-
-      //     await new Promise((resolve, reject) => {
-      //       uploadTask.on(
-      //         "state_changed",
-      //         (snapshot) => {
-      //           const progress =
-      //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      //           setUploadProgress(Math.round(progress));
-      //         },
-      //         (error) => reject(error),
-      //         async () => {
-      //           profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-      //           setImageUploading(false);
-      //           resolve();
-      //         }
-      //       );
-      //     });
-      //     console.log("Image uploaded. URL:", profileUrl);
-      //   } catch (uploadError) {
-      //     console.error("Image upload failed:", uploadError);
-      //   }
-      // }
-
-      // if (!otpVerified) {
-      //   setError("Please verify your email before submitting.");
-      //   setLoading(false);
-      //   return;
-      // }
-
-      console.log("Going to hit the backend");
+      let profileUrl = "";
 
       try {
+        if (imageFile) {
+          try {
+            setImageUploading(true);
+            const imageRef = ref(
+              storage,
+              `profiles/${Date.now()}-${imageFile.name}`
+            );
+            const uploadTask = uploadBytesResumable(imageRef, imageFile);
+
+            await new Promise((resolve, reject) => {
+              uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                  const progress =
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                  setUploadProgress(Math.round(progress));
+                },
+                (error) => reject(error),
+                async () => {
+                  profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                  setImageUploading(false);
+                  resolve();
+                }
+              );
+            });
+            console.log("Image uploaded. URL:", profileUrl);
+          } catch (uploadError) {
+            console.error("Image upload failed:", uploadError);
+          }
+        }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+
+      if (!otpVerified) {
+        setError("Please verify your email before submitting.");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Going to hit the backend");
+      console.log({
+        name: fullName,
+        email,
+        phone,
+        password,
+        photo: profileUrl,
+        role,
+      });
+      try {
+        setLoading(true);
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
           {
@@ -151,11 +186,14 @@ const SignUpForm = () => {
         );
         console.log("Request hitted!!!");
         await setUser(response.data.user);
+        setLoading(false);
         navigate("/");
       } catch (error) {
+        console.error("Signup error:", error);
         setError(error.response?.data?.message || "Signup failed.");
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
@@ -172,6 +210,11 @@ const SignUpForm = () => {
 
         <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-5 md:gap-6">
+            {error && (
+              <p className="animate-pulse text-red-400 font-semibold text-sm mb-2">
+                {error}
+              </p>
+            )}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg

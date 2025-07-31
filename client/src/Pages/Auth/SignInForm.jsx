@@ -13,12 +13,15 @@ const SignInForm = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
-  useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => setErrorMessage(""), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [errorMessage]);
+  const showError = (err) => {
+    const message =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err?.message ||
+      "Something went wrong";
+    setError(message);
+    setTimeout(() => setError(""), 5000);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,7 +32,7 @@ const SignInForm = () => {
       navigate("/"); // redirect on success
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
-      setError(error.message);
+      showError(error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -83,6 +86,7 @@ const SignInForm = () => {
       console.log("User is fetched proceed to home");
       navigate("/");
     } catch (error) {
+      showError(error.message);
       console.error("Google login error:", error);
     }
   };

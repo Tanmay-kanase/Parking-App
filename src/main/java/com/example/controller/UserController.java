@@ -83,12 +83,14 @@ public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpSe
         cookie.setMaxAge(24 * 60 * 60); // 1 day
 
         response.addCookie(cookie);
-
+        
         System.out.println(result);
         System.out.println(cookie);
+        System.out.println("User is signed up");
         return ResponseEntity.ok(result);
         
     } catch (RuntimeException e){
+      System.out.println(e.getMessage());
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
     }
 }
