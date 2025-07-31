@@ -48,7 +48,7 @@ const HowItWorks = () => {
             </div>
 
             {/* Step Number (Now Touching the Line) */}
-            <div className="w-1/2 flex justify-center relative">
+            <div className="relative">
               <div
                 className="absolute bg-blue-600 w-10 h-10 text-white flex items-center justify-center rounded-full font-bold 
                 left-1/2 transform -translate-x-1/2 -translate-y-1/2"

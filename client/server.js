@@ -4,7 +4,7 @@ const __dirname = path.resolve();
 
 const app = express();
 
-app.listen(8888, () => {
+app.listen(5173, () => {
   console.log("server is running on port 8888!!!!!");
 });
 
