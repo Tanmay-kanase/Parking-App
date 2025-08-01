@@ -233,7 +233,7 @@ const SignInForm = () => {
         </div>
 
         <div className="w-full px-4 py-2">
-          <GoogleOAuthProvider clientId="543095501152-ijjcpgtomrp7lsmc7rba2mpujmtirh24.apps.googleusercontent.com">
+          <GoogleOAuthProvider clientId="526992097258-an7ps4j6qetf8mcjcd0g0d8deok1lmsf.apps.googleusercontent.com">
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={() => console.log("Login Failed")}
