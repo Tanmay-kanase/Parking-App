@@ -96,16 +96,6 @@ const SignUpForm = () => {
 
       e.preventDefault();
 
-      if (!fullName || !email || !password || !phone || !role) {
-        showError("All fields are required.");
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        showError("Invalid email format.");
-        return;
-      }
-
       if (password.length < 8) {
         showError("Password must be at least 8 characters.");
         return;
