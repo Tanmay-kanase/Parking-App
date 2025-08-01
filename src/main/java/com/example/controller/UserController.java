@@ -49,6 +49,11 @@ public class UserController {
         return userService.getUserByEmail(email);
     }
 
+    @GetMapping("/hello")
+    public String sayHello() {
+        return "Hello from Spring Boot!";
+    }
+
     @PostMapping("/signup")
 public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpServletResponse response) {
     String name = request.get("name");
