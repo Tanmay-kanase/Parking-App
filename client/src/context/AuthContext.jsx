@@ -1,50 +1,49 @@
 // AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
-import axios from "../config/axiosInstance";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get("/api/users/me");
-      setUser(res.data);
-      console.log("Response from fetched user", res.data);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ✅ Restore user on app load
   useEffect(() => {
-    fetchUser();
+    const storedUser = localStorage.getItem("user");
+    console.log("Use Effect called for user auth");
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user:", e);
+      }
+    }
   }, []);
 
   const login = async (credentials) => {
     console.log("credentials : ", credentials);
-    await axios.post("/api/users/login", credentials);
-    await fetchUser();
+    const res = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
+      credentials
+    );
+    console.log(res);
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+    setUser(JSON.stringify(res.data.user));
   };
 
   const signup = async (userData) => {
-    await axios.post("/api/users/signup", userData);
-    await fetchUser();
+    setUser(userData);
   };
 
   const logout = async () => {
-    await axios.post("/api/users/logout", {}, { withCredentials: true });
-
+    localStorage.clear();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, login, logout, signup, fetchUser, setUser }}
-    >
+    <AuthContext.Provider value={{ user, login, logout, signup, setUser }}>
       {children}
     </AuthContext.Provider>
   );

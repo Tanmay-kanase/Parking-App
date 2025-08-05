@@ -6,12 +6,13 @@ import jwtDecode from "jwt-decode";
 import useAuth from "../../context/useAuth";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 const SignInForm = () => {
-  const { login, fetchUser } = useAuth();
+  const { login, setUser, fetchUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
   const [errorMessage, setErrorMessage] = useState("");
   const showError = (err) => {
     const message =
@@ -82,7 +83,9 @@ const SignInForm = () => {
       );
       console.log(res);
       console.log("success");
-      await fetchUser();
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", response.data.user);
+      await setUser(JSON.stringify(res.data.user));
       console.log("User is fetched proceed to home");
       navigate("/");
     } catch (error) {

@@ -60,23 +60,34 @@ public class UserService {
         }
     }
 
-    public Map<String, Object> loginUser(String email, String rawPassword) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Invalid email");
-        }
+   
 
-        User user = userOpt.get();
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new RuntimeException("Wrong password");
-        }
-
-        String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
-
-        return Map.of(
-                "user", user,
-                "token", token);
+public Map<String, Object> loginUser(String email, String password) {
+    Optional<User> userOpt = userRepository.findByEmail(email);
+    if (userOpt.isEmpty()) {
+        throw new RuntimeException("User not found");
     }
+
+    User user = userOpt.get();
+
+    System.out.println("Raw password: " + password);
+System.out.println("Encoded password from DB: " + user.getPassword());
+System.out.println("Matches: " + passwordEncoder.matches(password, user.getPassword()));
+
+    // ✅ THIS IS THE CORRECT COMPARISON
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+        
+        throw new RuntimeException("Wrong password");
+    }
+
+    String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+
+    return Map.of(
+        "user", user,
+        "token", token
+    );
+}
+
 
     public User updateUser(String userId, User updatedUser) {
         Optional<User> existingUser = userRepository.findById(userId);

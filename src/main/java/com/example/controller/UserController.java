@@ -76,22 +76,9 @@ public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpSe
     user.setEmail(email);
     user.setPhoto(photo);
     user.setRole(role);
-    user.setPassword(passwordEncoder.encode(password)); // Hash password
+    user.setPassword(password);
     try{
       Map<String, Object> result = userService.registerUser(user);
-        String token = (String) result.get("token");
-
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // use HTTPS in production
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); // 1 day
-
-        response.addCookie(cookie);
-        
-        System.out.println(result);
-        System.out.println(cookie);
-        System.out.println("User is signed up");
         return ResponseEntity.ok(result);
         
     } catch (RuntimeException e){
@@ -106,18 +93,6 @@ public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpSe
 public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData, HttpServletResponse response) {
     try {
         Map<String, Object> result = userService.loginUser(loginData.get("email"), loginData.get("password"));
-        String token = (String) result.get("token");
-
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // use HTTPS in production
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); // 1 day
-
-        response.addCookie(cookie);
-
-        System.out.println(result);
-        System.out.println(cookie);
         return ResponseEntity.ok(result);
     } catch (RuntimeException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
@@ -210,73 +185,37 @@ public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required =
     }
 
     @PostMapping("/google-login")
-public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request, HttpServletResponse response) {
+public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request) {
     String email = request.get("email");
     String name = request.get("name");
     String photo = request.get("photo");
-    String password = request.get("password"); 
+    String password = request.get("password");
 
     if (email == null || email.isEmpty()) {
         return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
     }
 
-    if (userRepository.findByEmail(email).isPresent()) {
-        try{
-           Optional<User> userOpt = userRepository.findByEmail(email);
-if (userOpt.isEmpty()) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-}
+    Optional<User> userOpt = userRepository.findByEmail(email);
 
-User user = userOpt.get();
-
-// Generate JWT token
-String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
-
-// Set the cookie
-Cookie cookie = new Cookie("token", token);
-cookie.setHttpOnly(true);
-cookie.setSecure(true); // Use HTTPS in production
-cookie.setPath("/");
-cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-response.addCookie(cookie);
-
-// Prepare response body (return token and user details)
-Map<String, Object> responseBody = new HashMap<>();
-responseBody.put("token", token);
-responseBody.put("user", user);  // Make sure User has no sensitive fields or override toString/json serialization if needed
-
-return ResponseEntity.ok(responseBody);
-
-        }catch(RuntimeException e){
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
+    try {
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+            Map<String, Object> result = Map.of("token", token, "user", user);
+            return ResponseEntity.ok(result);
+        } else {
+            User user = new User();
+            user.setUserId(UUID.randomUUID().toString());
+            user.setName(name);
+            user.setEmail(email);
+            user.setPhoto(photo);
+            user.setRole("user");
+            user.setPassword(passwordEncoder.encode(password));
+            Map<String, Object> result = userService.registerUser(user);
+            return ResponseEntity.ok(result); // returns token and user
         }
-    } else {
-        User user = new User();
-    user.setUserId(UUID.randomUUID().toString());
-    user.setName(name);
-    user.setEmail(email);
-    user.setPhoto(photo);
-    user.setRole("user");
-    user.setPassword(passwordEncoder.encode(password)); // Hash password
-    try{
-      Map<String, Object> result = userService.registerUser(user);
-        String token = (String) result.get("token");
-
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // use HTTPS in production
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); // 1 day
-
-        response.addCookie(cookie);
-
-        System.out.println(result);
-        System.out.println(cookie);
-        return ResponseEntity.ok(result);
-        
-    } catch (RuntimeException e){
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
-    }
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
     }
 }
 

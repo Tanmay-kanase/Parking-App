@@ -8,7 +8,7 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
       {/* Background Grid of Parking Images */}
-      <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-5 gap-4 rotate-[-29deg]">
+      {/* <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-5 gap-4 rotate-[-29deg]">
         {[
           "https://images.pexels.com/photos/2402235/pexels-photo-2402235.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
           "https://images.pexels.com/photos/2417466/pexels-photo-2417466.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -24,7 +24,7 @@ const Hero = () => {
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <div className="relative z-10 text-center max-w-3xl px-6">

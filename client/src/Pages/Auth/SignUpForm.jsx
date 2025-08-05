@@ -145,11 +145,11 @@ const SignUpForm = () => {
         setLoading(false);
       }
 
-      if (!otpVerified) {
-        setError("Please verify your email before submitting.");
-        setLoading(false);
-        return;
-      }
+      // if (!otpVerified) {
+      //   setError("Please verify your email before submitting.");
+      //   setLoading(false);
+      //   return;
+      // }
 
       console.log("Going to hit the backend");
       console.log({
@@ -171,11 +171,12 @@ const SignUpForm = () => {
             password,
             photo: profileUrl,
             role,
-          },
-          { withCredentials: true }
+          }
         );
         console.log("Request hitted!!!");
-        await setUser(response.data.user);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        await setUser(JSON.stringify(res.data.user));
         setLoading(false);
         navigate("/");
       } catch (error) {
@@ -185,6 +186,8 @@ const SignUpForm = () => {
     } catch (error) {
       setLoading(false);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 

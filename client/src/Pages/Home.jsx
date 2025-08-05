@@ -1,233 +1,303 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ParkingCircle, CreditCard, Map } from "lucide-react";
+import {
+  ParkingCircle,
+  CreditCard,
+  MapPin,
+  Search,
+  CheckCircle2,
+  Clock,
+  QrCode,
+  Headphones,
+  Moon,
+  Sun,
+} from "lucide-react";
 
+// Use Tailwind CSS to define styles
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [darkMode, setDarkMode] = useState(true);
   const navigate = useNavigate();
-  const handleNearby = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        navigate(`/show-parkings-nearby?lat=${latitude}&lng=${longitude}`);
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-      }
-    );
-  };
-  const [input, setInput] = useState("");
 
-  const handleSearchi = () => {
-    if (input.trim()) {
-      navigate(`/show-parkings?query=${encodeURIComponent(input)}`);
-    }
+  // Use a custom modal for alerts
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const showAlert = (message) => {
+    setAlertMessage(message);
+    setIsAlertVisible(true);
   };
+
+  console.log(darkMode);
+
+  // Handles search for a specific location
   const handleSearch = () => {
-    if (searchQuery.trim() !== "") {
-      navigate(`/parking-spots?query=${encodeURIComponent(searchQuery)}`);
+    if (searchQuery.trim()) {
+      navigate(`/show-parkings?query=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  // Handles finding nearby parking spots using geolocation
+  const handleNearby = () => {
+    // Check if the browser supports geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          navigate(`/show-parkings-nearby?lat=${latitude}&lng=${longitude}`);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          // Fallback or user-friendly message
+          showAlert(
+            "Unable to get your location. Please try again or search manually."
+          );
+        }
+      );
+    } else {
+      showAlert("Geolocation is not supported by your browser.");
+    }
+  };
+
+  const featureVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
-      {/* Background Grid of Parking Images */}
-
-      <div className="absolute inset-0 hidden sm:grid grid grid-cols-3 md:grid-cols-5 gap-4 rotate-[-29deg]">
-        {[
-          "https://images.pexels.com/photos/2402235/pexels-photo-2402235.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          "https://images.pexels.com/photos/938580/pexels-photo-938580.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          "https://images.pexels.com/photos/2417466/pexels-photo-2417466.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          "https://images.pexels.com/photos/965877/pexels-photo-965877.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-        ].map((image, index) => (
-          <motion.div
-            key={index}
-            className="w-48 h-48 bg-cover bg-center rounded-lg shadow-lg border-2 border-yellow-400"
-            style={{ backgroundImage: `url(${image})` }}
-            whileHover={{ scale: 1.1, rotate: [0, 55, -5, 0] }}
-            animate={{ y: [0, -10, 0] }} // Floating effect
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 text-center max-w-3xl px-6 pt-40">
-        <p className="text-4xl md:text-6xl font-extrabold leading-tight text-black">
-          Revolutionizing <span className="text-yellow-400">Parking</span>, One
-          Spot at a Time!
-        </p>
-        <p className="text-lg md:text-xl text-black mt-4">
-          Smart parking solutions that save time, reduce stress, and optimize
-          space.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
-          {/* Search Input */}
-          <div className="p-5 overflow-hidden w-full sm:w-[60px] h-[60px] sm:hover:w-[270px] bg-yellow-400 shadow-[2px_2px_20px_rgba(0,0,0,0.08)] rounded-full flex group items-center hover:duration-300 duration-300 hover:bg-yellow-500">
-            <div className="flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                id="Isolation_Mode"
-                data-name="Isolation Mode"
-                viewBox="0 0 24 24"
-                width="22"
-                height="22"
-              >
-                <path d="M18.9,16.776A10.539,10.539,0,1,0,16.776,18.9l5.1,5.1L24,21.88ZM10.5,18A7.5,7.5,0,1,1,18,10.5,7.507,7.507,0,0,1,10.5,18Z"></path>
-              </svg>
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch();
-                }
-              }}
-              onClick={handleSearch}
-              className="outline-none text-[18px] w-full text-white font-normal px-4 bg-transparent"
-            />
-          </div>
-
-          {/* Get Nearby Location Button */}
-          <button
-            onClick={handleNearby}
-            className="w-full sm:w-[110px] h-10 flex items-center justify-center gap-2 bg-yellow-400 rounded-full text-white font-semibold border-none relative cursor-pointer shadow-md pl-2 transition-all duration-500 hover:bg-yellow-500 active:scale-95"
-          >
-            <svg
-              className="h-6 transition-transform duration-[1500ms] group-hover:rotate-[250deg]"
-              viewBox="0 0 512 512"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="currentColor"
-                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
-              ></path>
-            </svg>
-            Nearby
-          </button>
-          <div className="flex flex-col items-center justify-center gap-4 mt-10">
-            <input
-              type="text"
-              placeholder="Enter city name..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="w-72 px-4 py-2 rounded-lg border border-black text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
+    <div className={`${darkMode ? "dark" : ""} min-h-screen font-sans`}>
+      {/* Alert Modal */}
+      {isAlertVisible && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              Notification
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300">{alertMessage}</p>
             <button
-              onClick={handleSearchi}
-              className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-2 rounded-xl shadow-md transition duration-300"
+              onClick={() => setIsAlertVisible(false)}
+              className="mt-6 w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition duration-300"
             >
-              Show Parkings
+              OK
             </button>
           </div>
         </div>
-      </div>
-      <section className=" text-white py-16 px-6 pt-35">
-        <div className="max-w-6xl mx-auto text-center">
-          {/* Section Header */}
+      )}
+
+      {/* Header/Navbar */}
+      <nav className="fixed top-0 left-0 w-full z-20 bg-white dark:bg-gray-900 shadow-sm dark:shadow-lg transition-colors duration-300">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <ParkingCircle className="text-yellow-500" size={32} />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Smart<span className="text-yellow-500">Park</span>
+            </h1>
+          </div>
+          <div className="flex items-center space-x-6">
+            <a
+              href="#"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-300"
+            >
+              Home
+            </a>
+            <a
+              href="#"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-300"
+            >
+              About
+            </a>
+            <a
+              href="#"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-300"
+            >
+              Contact
+            </a>
+
+            {/* Dark Mode Toggle Button */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-full text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 flex flex-col items-center justify-center text-center bg-white dark:bg-gray-800 border-b-2 border-gray-100 dark:border-gray-700 transition-colors duration-300">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl px-4"
+        >
+          <h2 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900 dark:text-white">
+            Find Your <span className="text-yellow-500">Perfect Spot</span>,
+            Instantly.
+          </h2>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
+            Our smart parking solutions help you find, reserve, and pay for
+            parking spots with ease, saving you time and stress.
+          </p>
+
+          {/* Combined Search Bar and Buttons */}
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
+            {/* Search Input Container */}
+            <div className="relative flex-grow w-full max-w-xl">
+              <input
+                type="text"
+                placeholder="Search for a city, address, or landmark..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition duration-300"
+              />
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                size={20}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 w-full sm:w-auto mt-4 sm:mt-0">
+              <button
+                onClick={handleSearch}
+                className="w-full sm:w-auto px-6 py-3 bg-gray-900 hover:bg-gray-800 dark:bg-yellow-600 dark:hover:bg-yellow-500 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
+              >
+                Search
+              </button>
+              <button
+                onClick={handleNearby}
+                className="w-full sm:w-auto px-6 py-3 flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
+              >
+                <MapPin size={20} />
+                Nearby
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Features Section */}
+      <section className="bg-gray-50 dark:bg-gray-900 py-16 px-6 transition-colors duration-300">
+        <div className="container mx-auto text-center">
           <motion.h2
-            className="text-4xl font-bold mb-6 text-black"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-3xl md:text-4xl font-bold mb-12 text-gray-900 dark:text-white"
           >
-            Why Choose <span className="text-yellow-400">Our Parking App?</span>
+            Why Choose <span className="text-yellow-500">Our App?</span>
           </motion.h2>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-12 mt-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {/* Feature 1: Smart Parking */}
             <motion.div
-              className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              variants={featureVariants}
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
-              <ParkingCircle size={50} className="text-yellow-400" />
-              <h3 className="text-xl font-semibold mt-4">Smart Parking</h3>
-              <p className="text-gray-300 mt-2">
+              <CheckCircle2 size={50} className="text-yellow-500 mx-auto" />
+              <h3 className="text-xl font-semibold mt-6 text-gray-900 dark:text-white">
+                Smart Parking
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
                 Find and reserve your parking spot in seconds with AI-powered
                 recommendations.
               </p>
             </motion.div>
 
+            {/* Feature 2: Secure Payments */}
             <motion.div
-              className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              variants={featureVariants}
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
-              <CreditCard size={50} className="text-yellow-400" />
-              <h3 className="text-xl font-semibold mt-4">Secure Payment</h3>
-              <p className="text-gray-300 mt-2">
-                Pay securely using multiple payment options with one-tap
-                checkout.
+              <CreditCard size={50} className="text-yellow-500 mx-auto" />
+              <h3 className="text-xl font-semibold mt-6 text-gray-900 dark:text-white">
+                Secure Payments
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Pay securely using multiple payment options with a quick,
+                hassle-free checkout.
               </p>
             </motion.div>
 
+            {/* Feature 3: Live Tracking */}
             <motion.div
-              className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              variants={featureVariants}
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
-              <Map size={50} className="text-yellow-400" />
-              <h3 className="text-xl font-semibold mt-4">Live Tracking</h3>
-              <p className="text-gray-300 mt-2">
-                Track your parking spot in real-time and navigate with ease.
+              <MapPin size={50} className="text-yellow-500 mx-auto" />
+              <h3 className="text-xl font-semibold mt-6 text-gray-900 dark:text-white">
+                Live Navigation
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Get real-time directions and easily navigate to your reserved
+                parking spot.
               </p>
             </motion.div>
 
+            {/* Feature 4: 24/7 Support */}
             <motion.div
-              className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              variants={featureVariants}
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
-              <ParkingCircle size={50} className="text-yellow-400" />
-              <h3 className="text-xl font-semibold mt-4">AI Predictions</h3>
-              <p className="text-gray-300 mt-2">
-                Get AI-driven suggestions for the best parking spots based on
-                real-time data.
+              <Headphones size={50} className="text-yellow-500 mx-auto" />
+              <h3 className="text-xl font-semibold mt-6 text-gray-900 dark:text-white">
+                24/7 Support
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Our team is always available to help with any parking-related
+                queries or issues.
               </p>
             </motion.div>
 
+            {/* Feature 5: AI Predictions */}
             <motion.div
-              className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 1 }}
+              variants={featureVariants}
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
-              <CreditCard size={50} className="text-yellow-400" />
-              <h3 className="text-xl font-semibold mt-4">Contactless Access</h3>
-              <p className="text-gray-300 mt-2">
-                Enter and exit parking lots seamlessly with QR-based or NFC
-                access.
+              <Clock size={50} className="text-yellow-500 mx-auto" />
+              <h3 className="text-xl font-semibold mt-6 text-gray-900 dark:text-white">
+                AI Predictions
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Leverage AI-driven predictions for the best parking spots based
+                on real-time data.
               </p>
             </motion.div>
 
+            {/* Feature 6: Contactless Access */}
             <motion.div
-              className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 1.2 }}
+              variants={featureVariants}
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
-              <Map size={50} className="text-yellow-400" />
-              <h3 className="text-xl font-semibold mt-4">24/7 Support</h3>
-              <p className="text-gray-300 mt-2">
-                Get round-the-clock support for any parking-related queries or
-                issues.
+              <QrCode size={50} className="text-yellow-500 mx-auto" />
+              <h3 className="text-xl font-semibold mt-6 text-gray-900 dark:text-white">
+                Contactless Access
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Seamlessly enter and exit parking lots using QR codes or NFC
+                technology.
               </p>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </section>
-    </section>
+    </div>
   );
 };
 
 export default Home;
-
