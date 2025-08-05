@@ -14,6 +14,11 @@ public class ParkingHistoryController {
     @Autowired
     private ParkingHistoryService parkingHistoryService;
 
+    @PostMapping
+public ParkingHistory createParkingHistory(@RequestBody ParkingHistory parkingHistory) {
+    return parkingHistoryService.saveParkingHistory(parkingHistory);
+}
+
     @GetMapping("/user/{userId}")
     public List<ParkingHistory> getHistoryByUserId(@PathVariable String userId) {
         return parkingHistoryService.getHistoryByUserId(userId);

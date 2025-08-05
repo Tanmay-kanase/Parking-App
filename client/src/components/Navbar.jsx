@@ -20,14 +20,8 @@ import { useAuth } from "../context/AuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { logout, loading, user } = useAuth();
-  if (loading) {
-    return (
-      <nav className="bg-white text-gray-800 shadow-md h-20 flex items-center justify-center">
-        <div className="animate-pulse w-48 h-8 bg-gray-200 rounded-lg"></div>
-      </nav>
-    );
-  }
+  const { logout, user } = useAuth();
+ 
 
   console.log(user);
   const isTokenExpired = () => {

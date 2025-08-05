@@ -23,4 +23,10 @@ public class PaymentController {
     public List<Payment> getPaymentsByStatus(@PathVariable String status) {
         return paymentService.getPaymentsByStatus(status);
     }
+
+    @PostMapping
+public Payment createPayment(@RequestBody Payment payment) {
+    return paymentService.savePayment(payment);
+}
+
 }

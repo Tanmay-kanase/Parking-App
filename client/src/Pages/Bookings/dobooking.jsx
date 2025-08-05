@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "../../config/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
 const formatVehicleNumber = (input) => {
   let cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -20,7 +21,12 @@ const validateVehicleNumber = (number) => {
 };
 
 const DoBooking = () => {
-  const userId = localStorage.getItem("userId");
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading user info...</div>;
+  }
+
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [BookingData, setBookingData] = useState(null);
@@ -41,17 +47,15 @@ const DoBooking = () => {
     }));
   };
 
-  let email = "";
-
-  axios
-    .get(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/email`)
-    .then((response) => (email = response.data)) // Store the email in the variable
-    .catch((error) => console.error("Error fetching email:", error));
+  let email = user.email;
 
   useEffect(() => {
-    if (userId) {
+    if (!user || !user.userId) return;
+    if (user.userId) {
       axios
-        .get(`${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${userId}`)
+        .get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${user.userId}`
+        )
         .then((response) => {
           const data = response.data;
           setVehicles(data);
@@ -102,10 +106,40 @@ const DoBooking = () => {
       );
 
       alert("Booking Confirmed! Slot is now unavailable.");
+      // Post to Parking History
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/parking-history`,
+          {
+            userId: user.userId,
+            vehicleId: formData.vehicleNumber, // Assuming license plate as ID if not available
+            parking_lot_id: locationId,
+            slotId: selectedSpot.slotNumber,
+            paymentId: transactionId,
+            entryTime: formData.startTime,
+            exitTime: formData.endTime,
+            amountPaid: (selectedSpot.pricePerHour * formData.time).toFixed(2),
+          }
+        );
+        console.log("Parking history recorded.");
+      } catch (historyError) {
+        console.log("Error saving parking history:", historyError);
+      }
+      try {
+        await axios.post("/api/payments", {
+          userId: user.userId,
+          paymentMethod: formData.paymentMethod,
+          status: "completed",
+          paymentTime: new Date().toISOString(),
+          amount: selectedSpot.pricePerHour * formData.time,
+        });
+      } catch (error) {
+        console.log("Error in adding payment history", error);
+      }
 
       const BookingData = {
-        userId: localStorage.getItem("userId"),
-        email: email,
+        userId: user.userId,
+        email: user.email,
         slotId: selectedSpot.slotId,
         slotNumber: selectedSpot.slotNumber,
         location: selectedSpot.location,
@@ -122,12 +156,7 @@ const DoBooking = () => {
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/bookings`,
-          BookingData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+          BookingData
         );
         console.log("Booking created:", response.data);
         navigate("/booking");
@@ -155,12 +184,24 @@ const DoBooking = () => {
             import.meta.env.VITE_BACKEND_URL
           }/api/parking-slots/parking/${locationId}`
         );
-        setSpots(response.data); // Storing response data in 'spots'
+
+        const grouped = response.data.reduce((acc, slot) => {
+          const type = slot.vehicleType;
+          if (!acc[type]) {
+            acc[type] = {
+              vehicleType: type,
+              slots: [],
+            };
+          }
+          acc[type].slots.push(slot);
+          return acc;
+        }, {});
+
+        setSpots(Object.values(grouped));
       } catch (error) {
         console.error("Error fetching parking slots:", error);
       }
     };
-    console.log("Spots : ", spots);
 
     if (locationId) {
       fetchParkingSlots();
@@ -203,7 +244,7 @@ const DoBooking = () => {
     });
   };
 
- // Handle form submission
+  // Handle form submission
   const handleSubmit = async (e) => {
     try {
       await axios.put(
@@ -234,58 +275,76 @@ const DoBooking = () => {
       ...formData,
       slotId: selectedSpot.slotId,
     });
-    
+
     //setSelectedSpot(null); // Close form after submission
   };
   console.log("Selected Spots");
   console.log(selectedSpot);
-  console.log("User Id", userId);
+  console.log("User Id", user.userId);
+
   return (
     <div className="p-10 bg-gray-100 min-h-screen">
       <h2 className="text-2xl font-bold text-yellow-600 mb-6">
         Booking for Location {name}
       </h2>
 
-      {/* Table */}
-      <table className="w-full mt-6 border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-yellow-100">
-            <th className="border p-2">Slot Number</th>
-            <th className="border p-2">Location</th>
-            <th className="border p-2">Price (Per Hour)</th>
-            <th className="border p-2">Vehicle Type</th>
-            <th className="border p-2">Availability</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {spots.map((spot) => (
-            <tr key={spot.id} className="text-center">
-              <td className="border p-2">{spot.slotNumber}</td>
-              <td className="border p-2">{spot.location}</td>
-              <td className="border p-2">${spot.pricePerHour}</td>
-              <td className="border p-2 capitalize">{spot.vehicleType}</td>
-              <td
-                className={`border p-2 font-bold ${
-                  spot.available ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {spot.available ? "Available" : "Not Available"}
-              </td>
-              <td className="border p-2">
-                {spot.available && (
+      {/* Cards instead of Table for responsive layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+        {spots.map((group) => {
+          const { vehicleType, slots } = group;
+          const availableCount = slots.filter((s) => s.available).length;
+          const totalCount = slots.length;
+          const avgPrice = (
+            slots.reduce((sum, s) => sum + s.pricePerHour, 0) / totalCount
+          ).toFixed(2);
+
+          return (
+            <div
+              key={vehicleType}
+              className="flex flex-col p-6 rounded-xl shadow-lg border-2 bg-white border-blue-400 transition-transform transform hover:scale-105"
+            >
+              <div className="flex-grow">
+                <h3 className="text-xl font-bold mb-2 capitalize">
+                  Vehicle Type: {vehicleType}
+                </h3>
+                <p className="text-gray-600">
+                  <span className="font-semibold">Total Slots:</span>{" "}
+                  {totalCount}
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-semibold">Available Slots:</span>{" "}
+                  {availableCount}
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-semibold">Avg. Price:</span> ${avgPrice}{" "}
+                  / hr
+                </p>
+              </div>
+
+              <div className="mt-4 text-center">
+                {availableCount > 0 ? (
                   <button
-                    className="bg-yellow-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-yellow-600"
-                    onClick={() => setSelectedSpot(spot)}
+                    className="w-full bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
+                    onClick={() => {
+                      // Pick first available slot from this group
+                      const firstAvailable = slots.find((s) => s.available);
+                      if (firstAvailable) {
+                        setSelectedSpot(firstAvailable);
+                      }
+                    }}
                   >
-                    Book
+                    Book Now
                   </button>
+                ) : (
+                  <span className="text-red-600 font-bold">
+                    No Slots Available
+                  </span>
                 )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Booking Form */}
       {selectedSpot && (

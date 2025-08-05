@@ -6,29 +6,60 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import axios from "../../config/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
-const payments = [
-  {
-    paymentId: "PAY001",
-    userId: "USER123",
-    reservationId: "RES789",
-    amount: 25.99,
-    paymentMethod: "credit_card",
-    status: "completed",
-    paymentTime: "2025-03-22 12:45 PM",
-  },
-  {
-    paymentId: "PAY002",
-    userId: "USER456",
-    reservationId: "RES456",
-    amount: 40.5,
-    paymentMethod: "paypal",
-    status: "failed",
-    paymentTime: "2025-03-20 10:30 AM",
-  },
-];
+// const payments = [
+//   {
+//     paymentId: "PAY001",
+//     userId: "USER123",
+//     reservationId: "RES789",
+//     amount: 25.99,
+//     paymentMethod: "credit_card",
+//     status: "completed",
+//     paymentTime: "2025-03-22 12:45 PM",
+//   },
+//   {
+//     paymentId: "PAY002",
+//     userId: "USER456",
+//     reservationId: "RES456",
+//     amount: 40.5,
+//     paymentMethod: "paypal",
+//     status: "failed",
+//     paymentTime: "2025-03-20 10:30 AM",
+//   },
+// ];
 
 const Payments = () => {
+  const { user, loading } = useAuth();
+  const [payments, setPayments] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchPayments = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/payments/user/${user.userId}`
+        );
+        setPayments(res.data);
+        console.log("Response from the backend ", res.data);
+      } catch (error) {
+        console.error("Failed to fetch payments:", error);
+      }
+    };
+
+    fetchPayments();
+  }, [user]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-yellow-100 text-center text-xl p-20">
+        Loading your payment history...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-yellow-100 text-gray-900 p-8">
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">

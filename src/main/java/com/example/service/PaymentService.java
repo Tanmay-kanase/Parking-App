@@ -20,4 +20,8 @@ public class PaymentService {
     public List<Payment> getPaymentsByStatus(String status) {
         return paymentRepository.findByStatus(status);
     }
+    public Payment savePayment(Payment payment) {
+    return paymentRepository.save(payment);
+}
+
 }

@@ -29,31 +29,38 @@ protected void doFilterInternal(HttpServletRequest request,
 
     String token = null;
 
-    // 🔽 1. Read token from HttpOnly cookie named "token"
-    if (request.getCookies() != null) {
-        for (Cookie cookie : request.getCookies()) {
-            if ("token".equals(cookie.getName())) {
-                token = cookie.getValue();
-                break;
-            }
+// Check Authorization header
+String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7);
+}
+
+// If no header, check cookie
+if (token == null && request.getCookies() != null) {
+    for (Cookie cookie : request.getCookies()) {
+        if ("token".equals(cookie.getName())) {
+            token = cookie.getValue();
+            break;
         }
     }
+}
 
-    if (token != null) {
-        try {
-            Claims claims = jwtUtil.parseToken(token);
-            String userId = claims.get("userId", String.class);
+if (token != null) {
+    try {
+        Claims claims = jwtUtil.parseToken(token);
+        String userId = claims.get("userId", String.class);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-            return;
-        }
+    } catch (Exception e) {
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+        return;
     }
+}
+
 
     filterChain.doFilter(request, response);
 }

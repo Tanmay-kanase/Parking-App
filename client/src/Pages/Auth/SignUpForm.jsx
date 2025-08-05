@@ -145,11 +145,11 @@ const SignUpForm = () => {
         setLoading(false);
       }
 
-      // if (!otpVerified) {
-      //   setError("Please verify your email before submitting.");
-      //   setLoading(false);
-      //   return;
-      // }
+      if (!otpVerified) {
+        setError("Please verify your email before submitting.");
+        setLoading(false);
+        return;
+      }
 
       console.log("Going to hit the backend");
       console.log({

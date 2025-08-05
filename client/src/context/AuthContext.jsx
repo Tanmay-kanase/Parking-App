@@ -6,19 +6,18 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-
+  const [loading, setLoading] = useState(true);
   // ✅ Restore user on app load
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    console.log("Use Effect called for user auth");
-
-    if (storedUser) {
+    if (storedUser && storedUser !== "undefined") {
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
-        console.error("Failed to parse user:", e);
+        console.log("Failed to parse user:", e);
       }
     }
+    setLoading(false);
   }, []);
 
   const login = async (credentials) => {
@@ -43,7 +42,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, signup, setUser }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, signup, loading, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

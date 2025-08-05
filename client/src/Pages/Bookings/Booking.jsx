@@ -9,18 +9,22 @@ import {
   FaTimesCircle,
   FaParking,
 } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
-
+  const { user } = useAuth();
   useEffect(() => {
+    if (!user || !user.userId) return;
     const fetchBookings = async () => {
-      const userId = localStorage.getItem("userId");
-      if (!userId) return;
+      console.log("Fetchin user for userid", user);
+      console.log("Fetching bookings for userId:", user.userId);
+
+      if (!user.userId) return;
 
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/bookings/user/${userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/bookings/user/${user.userId}`
         );
         setBookings(response.data);
       } catch (error) {
@@ -29,7 +33,7 @@ const MyBookings = () => {
     };
 
     fetchBookings();
-  }, []);
+  }, [user]);
   console.log("Booking : ", bookings);
 
   return (

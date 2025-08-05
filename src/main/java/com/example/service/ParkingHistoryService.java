@@ -20,4 +20,9 @@ public class ParkingHistoryService {
     public List<ParkingHistory> getHistoryByVehicleId(String vehicleId) {
         return parkingHistoryRepository.findByVehicleId(vehicleId);
     }
+
+    public ParkingHistory saveParkingHistory(ParkingHistory parkingHistory) {
+    return parkingHistoryRepository.save(parkingHistory);
+}
+
 }

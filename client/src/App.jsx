@@ -24,6 +24,7 @@ import Admin from "./Pages/Admin/Admin";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoutes";
+import Signup from "./Pages/Auth/Signup";
 
 function App() {
   const { user, loading } = useAuth();
@@ -50,6 +51,7 @@ function App() {
         <Route path="/show-parkings" element={<ShowParkings />} />
         <Route path="/show-parkings-nearby" element={<Shownearbyparkings />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="signup" element={<Signup />} />
 
         {/* Protected Routes - Any Authenticated User */}
         <Route

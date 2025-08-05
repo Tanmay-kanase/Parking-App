@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -37,6 +37,20 @@ const Home = () => {
       navigate(`/show-parkings?query=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  // This useEffect hook is the core of the dark mode fix.
+  // It adds or removes the 'dark' class from the HTML element,
+  // which enables all Tailwind CSS 'dark:' variants.
+  useEffect(() => {
+    console.log("USe Efffect called");
+    
+    const htmlElement = document.documentElement;
+    if (darkMode) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   // Handles finding nearby parking spots using geolocation
   const handleNearby = () => {

@@ -12,7 +12,7 @@ public class ParkingHistory {
     private String histroy_id;
     private String userId;
     private String vehicleId;
-    private String parking_lotid;
+    private String parking_lot_id;
     private String slotId;
     private String paymentId;
     private String entryTime;
