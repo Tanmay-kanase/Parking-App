@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     console.log(res);
     localStorage.setItem("token", res.data.token);
     localStorage.setItem("user", JSON.stringify(res.data.user));
-    setUser(JSON.stringify(res.data.user));
+    setUser(res.data.user); // ✅ Use object here, not stringified
   };
 
   const signup = async (userData) => {

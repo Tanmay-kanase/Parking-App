@@ -13,6 +13,8 @@ import {
   History,
   RussianRuble,
   Bookmark,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useAuth } from "../context/AuthContext";
@@ -21,8 +23,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { logout, user } = useAuth();
- 
-
+  const [darkMode, setDarkMode] = useState(true);
   console.log(user);
   const isTokenExpired = () => {
     if (!token) return true;
@@ -79,6 +80,14 @@ const Navbar = () => {
                 ))}
               </>
             )}
+            {/* Dark Mode Toggle Button */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-full text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
 
             {/* Signin / Profile Dropdown */}
             {user ? (

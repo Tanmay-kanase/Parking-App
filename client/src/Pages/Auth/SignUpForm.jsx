@@ -176,7 +176,7 @@ const SignUpForm = () => {
         console.log("Request hitted!!!");
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        await setUser(JSON.stringify(response.data.user));
+        await setUser(response.data.user);
         setLoading(false);
         navigate("/");
       } catch (error) {

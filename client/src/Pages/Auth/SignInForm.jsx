@@ -81,8 +81,8 @@ const SignInForm = () => {
       console.log(res);
       console.log("success");
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", res.data.user);
-      await setUser(JSON.stringify(res.data.user));
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      await setUser(res.data.user);
       console.log("User is fetched proceed to home");
       navigate("/");
     } catch (error) {
