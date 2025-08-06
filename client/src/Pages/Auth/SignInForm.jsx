@@ -76,15 +76,12 @@ const SignInForm = () => {
 
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
-        userData,
-        {
-          withCredentials: true, // ✅ This is critical
-        }
+        userData
       );
       console.log(res);
       console.log("success");
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", response.data.user);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", res.data.user);
       await setUser(JSON.stringify(res.data.user));
       console.log("User is fetched proceed to home");
       navigate("/");

@@ -145,11 +145,11 @@ const SignUpForm = () => {
         setLoading(false);
       }
 
-      if (!otpVerified) {
-        setError("Please verify your email before submitting.");
-        setLoading(false);
-        return;
-      }
+      // if (!otpVerified) {
+      //   setError("Please verify your email before submitting.");
+      //   setLoading(false);
+      //   return;
+      // }
 
       console.log("Going to hit the backend");
       console.log({
@@ -176,7 +176,7 @@ const SignUpForm = () => {
         console.log("Request hitted!!!");
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        await setUser(JSON.stringify(res.data.user));
+        await setUser(JSON.stringify(response.data.user));
         setLoading(false);
         navigate("/");
       } catch (error) {
