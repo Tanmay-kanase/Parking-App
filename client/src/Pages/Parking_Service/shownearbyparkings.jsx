@@ -16,6 +16,8 @@ import {
 export default function Shownearbyparkings() {
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(true);
+
   function getDistanceFromLatLng(lat1, lng1, lat2, lng2) {
     const R = 6371; // Radius of the earth in km
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -32,7 +34,7 @@ export default function Shownearbyparkings() {
   }
 
   const handleBooking = (parkingId, name) => {
-    navigate(`/dobooking?locID=${parkingId}&name=${name}`);
+    navigate(`/do-booking?locID=${parkingId}&name=${name}`);
   };
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -42,6 +44,7 @@ export default function Shownearbyparkings() {
   const [parkings, setParkings] = useState([]);
 
   useEffect(() => {
+    setLoading(true);
     if (lat && lng) {
       axios
         .get(
@@ -58,14 +61,36 @@ export default function Shownearbyparkings() {
 
           const sorted = withDistance.sort((a, b) => a.distance - b.distance);
           setParkings(sorted);
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Error fetching nearby parking locations:", error);
+          setLoading(false)
         });
     }
   }, [lat, lng]);
 
   console.log(parkings);
+
+  if (loading)
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-sm transition-opacity duration-300">
+        <div className="flex flex-col items-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-2xl space-y-4">
+          {/* Loading Spinner */}
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 dark:border-blue-400"></div>
+
+          {/* Loading Message */}
+          <p className="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-4 text-center">
+            Loading Parking ...
+          </p>
+
+          {/* Optional: Add a subtle loading bar for perceived progress, if actual progress is not available */}
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+            <div className="w-full h-full bg-blue-400 animate-pulse-width"></div>
+          </div>
+        </div>
+      </div>
+    );
   return (
     <div className="min-h-screen bg-yellow-50 text-gray-900 p-10">
       <div className="max-w-6xl mx-auto">

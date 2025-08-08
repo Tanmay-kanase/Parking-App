@@ -19,12 +19,12 @@ import UploadParkingLocations from "./Pages/Parking_Service/uploadparkinglocatio
 import ShowParkings from "./Pages/Parking_Service/showparkings";
 import Shownearbyparkings from "./Pages/Parking_Service/shownearbyparkings";
 import Verify from "./Pages/Parking_Service/verify";
-import SlidingLoginSignup from "./Pages/Auth/SlidingLoginSignup";
 import Admin from "./Pages/Admin/Admin";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Signup from "./Pages/Auth/Signup";
+import Signin from "./Pages/Auth/Signin";
 
 function App() {
   const { user, loading } = useAuth();
@@ -44,7 +44,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/get-started" element={<SlidingLoginSignup />} />
+        <Route path="/signin" element={<Signin />} />
         <Route path="/parking-spots" element={<ParkingSpots />} />
         <Route path="/parking-slots" element={<ParkingSlots />} />
         <Route path="/park-history" element={<ParkingHistory />} />

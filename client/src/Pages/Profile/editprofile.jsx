@@ -118,7 +118,7 @@ const EditProfile = () => {
 
   // Fetch parking locations
   useEffect(() => {
-    if (user.role !== "parking host") return;
+    if (user.role !== "parking_owner") return;
 
     const fetchParkings = async () => {
       try {
@@ -190,8 +190,8 @@ const EditProfile = () => {
                 onChange={(e) => setUser({ ...user, role: e.target.value })}
                 className="w-full ml-2 outline-none bg-transparent cursor-pointer"
               >
-                <option value="customer">Customer</option>
-                <option value="parking host">Parking Host</option>
+                <option value="user">User</option>
+                <option value="parking_owner">Parking Owner</option>
               </select>
             </div>
           </div>

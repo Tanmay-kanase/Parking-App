@@ -22,7 +22,8 @@ const validateVehicleNumber = (number) => {
 
 const DoBooking = () => {
   const { user, loading } = useAuth();
-
+  const [message, setMessage] = useState("Processing your booking...");
+  const [loadingbooking, setLoadingBooking] = useState(false);
   if (loading) {
     return <div>Loading user info...</div>;
   }
@@ -96,6 +97,9 @@ const DoBooking = () => {
     }
 
     try {
+      setLoadingBooking(true);
+      setMessage("Reserving your slot...");
+
       await axios.put(
         `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
           selectedSpot.slotId
@@ -104,10 +108,10 @@ const DoBooking = () => {
           available: false, // Update availability status
         }
       );
-
-      alert("Booking Confirmed! Slot is now unavailable.");
       // Post to Parking History
       try {
+        setMessage("Saving parking history...");
+
         await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/parking-history`,
           {
@@ -126,6 +130,8 @@ const DoBooking = () => {
         console.log("Error saving parking history:", historyError);
       }
       try {
+        setMessage("Processing payment...");
+
         await axios.post("/api/payments", {
           userId: user.userId,
           paymentMethod: formData.paymentMethod,
@@ -154,6 +160,8 @@ const DoBooking = () => {
       };
 
       try {
+        setMessage("Finalizing booking...");
+
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/bookings`,
           BookingData
@@ -167,13 +175,14 @@ const DoBooking = () => {
       }
     } catch (error) {
       console.error("Error updating slot availability:", error);
-      alert("Failed to book slot. Please try again.");
+      setMessage("Error occurred while booking. Please try again.");
     }
 
     console.log("Booking Confirmed", {
       ...formData,
       slotId: selectedSpot.slotId,
     });
+    setLoadingBooking(false);
   };
 
   useEffect(() => {
@@ -281,7 +290,25 @@ const DoBooking = () => {
   console.log("Selected Spots");
   console.log(selectedSpot);
   console.log("User Id", user.userId);
+  if (loadingbooking)
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white bg-opacity-10 backdrop-blur-lg transition-opacity duration-300">
+        <div className="flex flex-col items-center p-6 sm:p-8 max-w-sm mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl space-y-4">
+          {/* Loading Spinner */}
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 dark:border-blue-400"></div>
 
+          {/* Loading Message */}
+          <p className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mt-4 text-center">
+            {message}
+          </p>
+
+          {/* Optional: Add a subtle loading bar for perceived progress, if actual progress is not available */}
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+            <div className="w-full h-full bg-blue-400 animate-pulse-width"></div>
+          </div>
+        </div>
+      </div>
+    );
   return (
     <div className="p-10 bg-gray-100 min-h-screen">
       <h2 className="text-2xl font-bold text-yellow-600 mb-6">
