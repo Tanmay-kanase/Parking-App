@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./Pages/Home";
@@ -29,10 +29,29 @@ import Signin from "./Pages/Auth/Signin";
 function App() {
   const { user, loading } = useAuth();
 
+  const [darkMode, setDarkMode] = useState(() => {
+    // Load from localStorage or system preference
+    return (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    );
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.theme = "dark";
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.theme = "light";
+    }
+  }, [darkMode]);
+
   if (loading) {
     return (
       <>
-        <Navbar />
+        <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <SkeletonLoader />
       </>
     );
@@ -40,7 +59,7 @@ function App() {
 
   return (
     <>
-      <Navbar />
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />

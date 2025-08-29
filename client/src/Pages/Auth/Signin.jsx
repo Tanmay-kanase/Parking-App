@@ -111,12 +111,12 @@ const Signin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-4 font-inter">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-100 mx-auto p-6 md:p-8 transform transition-all duration-300 hover:scale-[1.005]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-4 font-inter dark:from-gray-900 dark:to-gray-800">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-100 mx-auto p-6 md:p-8 transform transition-all duration-300 hover:scale-[1.005] dark:bg-gray-800 dark:border-gray-700">
         <div className="space-y-6 md:space-y-7">
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-4xl text-center">
+          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-4xl text-center dark:text-white">
             Welcome Back
-            <p className="text-base font-medium text-gray-500 mt-2">
+            <p className="text-base font-medium text-gray-500 mt-2 dark:text-gray-400">
               Sign in to your account
             </p>
           </h1>
@@ -124,12 +124,12 @@ const Signin = () => {
           <form className="space-y-5 md:space-y-6" onSubmit={handleLogin}>
             {/* Error and Message Display */}
             {error && (
-              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300">
+              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300 dark:bg-red-950 dark:border-red-700 dark:text-red-300">
                 <p className="font-semibold text-sm">{error}</p>
               </div>
             )}
             {message && (
-              <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300">
+              <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300 dark:bg-green-950 dark:border-green-700 dark:text-green-300">
                 <p className="font-semibold text-sm">{message}</p>
               </div>
             )}
@@ -138,7 +138,7 @@ const Signin = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -153,7 +153,7 @@ const Signin = () => {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Email Address"
                 required
               />
@@ -163,7 +163,7 @@ const Signin = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -181,7 +181,7 @@ const Signin = () => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Password"
                 required
               />
@@ -194,13 +194,13 @@ const Signin = () => {
                     id="remember"
                     aria-describedby="remember"
                     type="checkbox"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
                   />
                 </div>
                 <div className="ml-3 text-sm">
                   <label
                     htmlFor="remember"
-                    className="text-gray-600 cursor-pointer"
+                    className="text-gray-600 cursor-pointer dark:text-gray-400"
                   >
                     Remember me
                   </label>
@@ -208,7 +208,7 @@ const Signin = () => {
               </div>
               <a
                 href="#"
-                className="text-sm font-medium text-blue-600 hover:underline transition-colors duration-200"
+                className="text-sm font-medium text-blue-600 hover:underline transition-colors duration-200 dark:text-blue-400 dark:hover:underline"
               >
                 Forgot password?
               </a>
@@ -216,7 +216,7 @@ const Signin = () => {
 
             <button
               type="submit"
-              className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-lg px-6 py-3.5 text-center transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-lg px-6 py-3.5 text-center transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               disabled={loading}
             >
               {loading ? (
@@ -250,10 +250,10 @@ const Signin = () => {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white text-gray-500 font-medium">
+              <span className="px-3 bg-white text-gray-500 font-medium dark:bg-gray-800 dark:text-gray-400">
                 Or continue with
               </span>
             </div>
@@ -267,18 +267,18 @@ const Signin = () => {
                 onError={() =>
                   showError("Google login failed. Please try again.")
                 }
-                text="continue_with" // Adds 'Continue with Google' text
-                size="large" // Makes the button larger
-                width="100%" // Attempts to make the button full width
+                text="continue_with"
+                size="large"
+                width="100%"
               />
             </GoogleOAuthProvider>
           </div>
 
-          <p className="text-sm text-center text-gray-600 mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-center text-gray-600 mt-4 pt-4 border-t border-gray-200 dark:text-gray-400 dark:border-gray-700">
             Don't have an account?{" "}
             <a
               href="signup"
-              className="text-blue-600 hover:underline font-semibold transition-colors duration-200"
+              className="text-blue-600 hover:underline font-semibold transition-colors duration-200 dark:text-blue-400 dark:hover:underline"
             >
               Sign Up
             </a>

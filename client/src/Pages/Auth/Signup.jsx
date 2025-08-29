@@ -202,12 +202,12 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-4 font-inter">
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-2xl border border-gray-100 mx-auto p-6 md:p-8 transform transition-all duration-300 hover:scale-[1.005]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-4 font-inter dark:from-gray-900 dark:to-gray-800">
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-2xl border border-gray-100 mx-auto p-6 md:p-8 transform transition-all duration-300 hover:scale-[1.005] dark:bg-gray-800 dark:border-gray-700">
         <div className="space-y-6 md:space-y-7">
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-4xl text-center">
+          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-4xl text-center dark:text-white">
             Create Your Account
-            <p className="text-base font-medium text-gray-500 mt-2">
+            <p className="text-base font-medium text-gray-500 mt-2 dark:text-gray-400">
               Join us to get started on your journey!
             </p>
           </h1>
@@ -215,12 +215,12 @@ const Signup = () => {
           <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
             {/* Error and Message Display */}
             {error && (
-              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300">
+              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300 dark:bg-red-950 dark:border-red-700 dark:text-red-300">
                 <p className="font-semibold text-sm">{error}</p>
               </div>
             )}
             {message && (
-              <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300">
+              <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300 dark:bg-green-950 dark:border-green-700 dark:text-green-300">
                 <p className="font-semibold text-sm">{message}</p>
               </div>
             )}
@@ -229,7 +229,7 @@ const Signup = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -245,7 +245,7 @@ const Signup = () => {
                 type="text"
                 name="fullName"
                 id="fullName"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Full Name"
                 required
               />
@@ -255,7 +255,7 @@ const Signup = () => {
             <div className="relative">
               <label
                 htmlFor="profileImage"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
               >
                 Profile Image (Optional)
               </label>
@@ -264,29 +264,29 @@ const Signup = () => {
                 name="profileImage"
                 id="profileImage"
                 accept="image/*"
-                className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
               />
             </div>
 
             {/* Upload Progress Bar */}
             {imageUploading && uploadProgress > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden dark:bg-gray-700">
                 <div
                   className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
-                <p className="text-xs text-gray-600 mt-1 text-center">
+                <p className="text-xs text-gray-600 mt-1 text-center dark:text-gray-400">
                   {uploadProgress}% Uploaded
                 </p>
               </div>
             )}
 
             {/* Email Input with OTP functionality */}
-            <div className="flex flex-col sm:flex-row bg-gray-50 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
+            <div className="flex flex-col sm:flex-row bg-gray-50 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:focus-within:ring-blue-600 dark:focus-within:border-blue-600">
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg
-                    className="w-5 h-5 text-gray-400"
+                    className="w-5 h-5 text-gray-400 dark:text-gray-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -301,7 +301,7 @@ const Signup = () => {
                   value={email}
                   disabled={otpVerified || isSendingOtp || isVerifyingOtp}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-transparent text-gray-900 sm:text-sm block w-full pl-10 pr-3 py-3 placeholder-gray-400 focus:outline-none"
+                  className="bg-transparent text-gray-900 sm:text-sm block w-full pl-10 pr-3 py-3 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-400"
                   placeholder="Email Address"
                   required
                 />
@@ -314,8 +314,8 @@ const Signup = () => {
                 className={`flex-shrink-0 px-4 py-3 sm:py-0 sm:h-auto sm:w-auto text-sm font-medium rounded-r-lg sm:rounded-l-none sm:rounded-r-lg transition-all duration-300
                   ${
                     otpVerified
-                      ? "bg-green-600 text-white cursor-not-allowed opacity-80"
-                      : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300"
+                      ? "bg-green-600 text-white cursor-not-allowed opacity-80 dark:bg-green-800 dark:opacity-90"
+                      : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   } flex items-center justify-center gap-2`}
               >
                 {otpVerified ? (
@@ -368,14 +368,14 @@ const Signup = () => {
 
             {/* OTP Input and Verify Button */}
             {otpVisible && !otpVerified && (
-              <div className="flex flex-col sm:flex-row bg-gray-50 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
+              <div className="flex flex-col sm:flex-row bg-gray-50 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:focus-within:ring-blue-600 dark:focus-within:border-blue-600">
                 <input
                   type="text"
                   name="otp"
                   placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  className="flex-grow bg-transparent text-gray-900 sm:text-sm block w-full p-3 placeholder-gray-400 focus:outline-none"
+                  className="flex-grow bg-transparent text-gray-900 sm:text-sm block w-full p-3 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-400"
                   required
                 />
                 <button
@@ -385,8 +385,8 @@ const Signup = () => {
                   className={`flex-shrink-0 px-4 py-3 sm:py-0 sm:h-auto sm:w-auto text-sm font-medium rounded-r-lg sm:rounded-l-none sm:rounded-r-lg transition-all duration-300
                     ${
                       isVerifyingOtp
-                        ? "bg-gray-400 text-white cursor-not-allowed opacity-80"
-                        : "bg-green-600 text-white hover:bg-green-700 focus:ring-4 focus:ring-green-300"
+                        ? "bg-gray-400 text-white cursor-not-allowed opacity-80 dark:bg-gray-600 dark:opacity-90"
+                        : "bg-green-600 text-white hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     } flex items-center justify-center gap-2`}
                 >
                   {isVerifyingOtp ? (
@@ -424,7 +424,7 @@ const Signup = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -440,7 +440,7 @@ const Signup = () => {
                 type="password"
                 name="password"
                 id="password"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Password"
                 required
               />
@@ -450,7 +450,7 @@ const Signup = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -466,7 +466,7 @@ const Signup = () => {
                 type="password"
                 name="confirmPassword"
                 id="confirmPassword"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Confirm Password"
                 required
               />
@@ -476,7 +476,7 @@ const Signup = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -494,7 +494,7 @@ const Signup = () => {
                 type="tel" // Changed to tel for semantic correctness
                 name="phone"
                 id="phone"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Phone Number (e.g., 1234567890)"
                 required
               />
@@ -504,7 +504,7 @@ const Signup = () => {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5 text-gray-400 dark:text-gray-500"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -521,7 +521,7 @@ const Signup = () => {
               <select
                 name="role"
                 id="role"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-3 shadow-sm transition-all duration-200 appearance-none" // appearance-none to remove default arrow
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-3 shadow-sm transition-all duration-200 appearance-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // appearance-none to remove default arrow
                 required
               >
                 <option value="" disabled selected className="text-gray-400">
@@ -531,7 +531,7 @@ const Signup = () => {
                 <option value="parking_owner">Parking Owner</option>
               </select>
               {/* Custom arrow for select */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
                 <svg
                   className="fill-current h-4 w-4"
                   xmlns="http://www.w3.org/2000/svg"
@@ -549,26 +549,26 @@ const Signup = () => {
                   id="terms"
                   aria-describedby="terms"
                   type="checkbox"
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
                   required
                 />
               </div>
               <div className="ml-3 text-sm">
                 <label
                   htmlFor="terms"
-                  className="text-gray-600 hover:text-gray-800 cursor-pointer"
+                  className="text-gray-600 hover:text-gray-800 cursor-pointer dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   I agree to the{" "}
                   <a
                     href="#"
-                    className="text-blue-600 hover:underline font-medium transition-colors duration-200"
+                    className="text-blue-600 hover:underline font-medium transition-colors duration-200 dark:text-blue-400 dark:hover:underline"
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
                   <a
                     href="#"
-                    className="text-blue-600 hover:underline font-medium transition-colors duration-200"
+                    className="text-blue-600 hover:underline font-medium transition-colors duration-200 dark:text-blue-400 dark:hover:underline"
                   >
                     Privacy Policy
                   </a>
@@ -579,7 +579,7 @@ const Signup = () => {
             {/* Create Account Button */}
             <button
               type="submit"
-              className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-lg px-6 py-3.5 text-center transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-lg px-6 py-3.5 text-center transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               disabled={
                 loading || imageUploading || isSendingOtp || isVerifyingOtp
               }
@@ -637,11 +637,11 @@ const Signup = () => {
           </form>
 
           {/* Sign In Link */}
-          <p className="text-sm text-center text-gray-600 mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-center text-gray-600 mt-4 pt-4 border-t border-gray-200 dark:text-gray-400 dark:border-gray-700">
             Already have an account?{" "}
             <a
               href="get-started"
-              className="text-blue-600 hover:underline font-semibold transition-colors duration-200"
+              className="text-blue-600 hover:underline font-semibold transition-colors duration-200 dark:text-blue-400 dark:hover:underline"
             >
               Sign in
             </a>

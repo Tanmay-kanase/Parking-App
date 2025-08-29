@@ -17,7 +17,6 @@ import {
 // Use Tailwind CSS to define styles
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [darkMode, setDarkMode] = useState(true);
   const navigate = useNavigate();
 
   // Use a custom modal for alerts
@@ -29,8 +28,6 @@ const Home = () => {
     setIsAlertVisible(true);
   };
 
-  console.log(darkMode);
-
   // Handles search for a specific location
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -41,16 +38,16 @@ const Home = () => {
   // This useEffect hook is the core of the dark mode fix.
   // It adds or removes the 'dark' class from the HTML element,
   // which enables all Tailwind CSS 'dark:' variants.
-  useEffect(() => {
-    console.log("USe Efffect called");
-    
-    const htmlElement = document.documentElement;
-    if (darkMode) {
-      htmlElement.classList.add("dark");
-    } else {
-      htmlElement.classList.remove("dark");
-    }
-  }, [darkMode]);
+  // useEffect(() => {
+  //   console.log("USe Efffect called");
+
+  //   const htmlElement = document.documentElement;
+  //   if (darkMode) {
+  //     htmlElement.classList.add("dark");
+  //   } else {
+  //     htmlElement.classList.remove("dark");
+  //   }
+  // }, [darkMode]);
 
   // Handles finding nearby parking spots using geolocation
   const handleNearby = () => {
@@ -84,7 +81,7 @@ const Home = () => {
   };
 
   return (
-    <div className={`${darkMode ? "dark" : ""} min-h-screen font-sans`}>
+    <div className={`min-h-screen font-sans`}>
       {/* Alert Modal */}
       {isAlertVisible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -131,15 +128,6 @@ const Home = () => {
             >
               Contact
             </a>
-
-            {/* Dark Mode Toggle Button */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? <Sun size={24} /> : <Moon size={24} />}
-            </button>
           </div>
         </div>
       </nav>

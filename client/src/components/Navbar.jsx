@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Menu,
   X,
@@ -17,20 +17,14 @@ import {
 // Removed useSelector and useAuth from original, adding back useAuth as it's needed
 import { useAuth } from "../context/AuthContext";
 
-const Navbar = () => {
+// eslint-disable-next-line react/prop-types
+const Navbar = ({ darkMode, setDarkMode }) => {
   const [isOpen, setIsOpen] = useState(false); // Mobile menu open/close
   const [dropdownOpen, setDropdownOpen] = useState(false); // Profile dropdown open/close
   const { logout, user } = useAuth(); // Assuming useAuth provides user object and logout function
-  const [darkMode, setDarkMode] = useState(false); // Default to light mode, toggle for dark mode
-
+  const toggleDarkMode = () => setDarkMode(!darkMode);
   // Log user object for debugging (can be removed in production)
   // console.log(user);
-
-  // Helper function to toggle dark mode
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark"); // Toggle 'dark' class on <html> for Tailwind
-  };
 
   // Links for Parking Owner
   const parkingOwnerLinks = [
