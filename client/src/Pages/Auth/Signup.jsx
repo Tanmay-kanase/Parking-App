@@ -104,7 +104,6 @@ const Signup = () => {
 
     const formData = new FormData(e.target);
     const fullName = formData.get("fullName");
-    const submittedEmail = formData.get("email"); // Use a distinct variable
     const password = formData.get("password");
     const confirmPassword = formData.get("confirmPassword");
     const imageFile = formData.get("profileImage");
@@ -180,7 +179,7 @@ const Signup = () => {
         `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
         {
           name: fullName,
-          email: submittedEmail, // Use submittedEmail
+          email: email, // Use submittedEmail
           phone,
           password,
           photo: profileUrl,

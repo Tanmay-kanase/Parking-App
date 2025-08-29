@@ -94,7 +94,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
             {/* Changed div to a and added href */}
             <Car size={36} className="text-blue-600 dark:text-blue-400" />
             <span className="text-2xl font-extrabold text-gray-900 dark:text-white">
-              ParkWise
+              ParkEase
             </span>{" "}
             {/* Changed name for modern feel */}
           </a>

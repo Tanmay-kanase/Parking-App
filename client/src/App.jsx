@@ -154,7 +154,6 @@ function App() {
       </Routes>
       <HowItWorks />
       <Footer />
-      <Contact_Footer />
     </>
   );
 }

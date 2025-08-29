@@ -37,12 +37,12 @@ const MyBookings = () => {
   console.log("Booking : ", bookings);
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
+        <h2 className="text-3xl font-bold text-center text-gray-100 mb-6">
           Bookings History
         </h2>
-        <p className="text-center text-gray-600 mb-8">
+        <p className="text-center text-gray-400 mb-8">
           View details of your past parking bookings.
         </p>
 
@@ -51,7 +51,7 @@ const MyBookings = () => {
           {bookings.map((booking) => (
             <div
               key={booking.bookingId}
-              className="bg-white p-6 rounded-xl shadow-lg flex flex-col gap-4 border-l-4"
+              className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col gap-4 border-l-4"
               style={{
                 borderColor:
                   booking.status === "active"
@@ -62,25 +62,25 @@ const MyBookings = () => {
               }}
             >
               <h3 className="text-xl font-bold flex items-center gap-2">
-                <FaCar className="text-blue-500" /> {booking.licensePlate}
+                <FaCar className="text-blue-400" /> {booking.licensePlate}
               </h3>
 
-              <p className="text-gray-600 flex items-center gap-2">
-                <FaParking className="text-gray-700" /> Slot:{" "}
+              <p className="text-gray-400 flex items-center gap-2">
+                <FaParking className="text-gray-300" /> Slot:{" "}
                 {booking.slotNumber}
               </p>
 
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Location:{" "}
                 <span className="font-medium">{booking.location}</span>
               </p>
 
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Vehicle Type:{" "}
                 <span className="font-medium">{booking.vehicleType}</span>
               </p>
 
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Start Time:{" "}
                 <span className="font-medium">
                   {new Date(booking.startTime).toLocaleString("en-US", {
@@ -89,7 +89,7 @@ const MyBookings = () => {
                 </span>
               </p>
 
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 End Time:{" "}
                 <span className="font-medium">
                   {new Date(booking.startTime).toLocaleString("en-US", {
@@ -98,14 +98,14 @@ const MyBookings = () => {
                 </span>
               </p>
 
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Payment Method:{" "}
                 <span className="font-medium">{booking.paymentMethod}</span>
               </p>
 
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Payment Status:{" "}
-                <span className="font-medium text-green-600">
+                <span className="font-medium text-green-400">
                   {booking.paymentStatus}
                 </span>
               </p>
@@ -113,10 +113,10 @@ const MyBookings = () => {
               <p
                 className={`text-lg font-semibold flex items-center gap-2 ${
                   new Date() > new Date(booking.endTime)
-                    ? "text-blue-600"
+                    ? "text-blue-400"
                     : new Date() < new Date(booking.startTime)
-                    ? "text-yellow-600"
-                    : "text-green-600"
+                    ? "text-yellow-400"
+                    : "text-green-400"
                 }`}
               >
                 {new Date() > new Date(booking.endTime) ? (
@@ -135,12 +135,12 @@ const MyBookings = () => {
               </p>
 
               <div className="flex justify-between items-center">
-                <p className="text-gray-800 font-semibold flex items-center gap-2">
-                  <FaDollarSign className="text-green-600" /> Paid: $
+                <p className="text-gray-200 font-semibold flex items-center gap-2">
+                  <FaDollarSign className="text-green-400" /> Paid: $
                   {booking.amountPaid}
                 </p>
-                <p className="text-gray-800 font-semibold flex items-center gap-2">
-                  <FaDollarSign className="text-gray-700" /> Total: $
+                <p className="text-gray-200 font-semibold flex items-center gap-2">
+                  <FaDollarSign className="text-gray-300" /> Total: $
                   {booking.totalCost || booking.amountPaid}
                 </p>
               </div>

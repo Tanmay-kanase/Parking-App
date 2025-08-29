@@ -61,6 +61,7 @@ public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpSe
     String password = request.get("password");
     String photo = request.get("photo");
     String role = request.get("role");
+    String phone = request.get("phone");
 
     if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
         return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
@@ -75,6 +76,7 @@ public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpSe
     user.setName(name);
     user.setEmail(email);
     user.setPhoto(photo);
+    user.setPhone(phone);
     user.setRole(role);
     user.setPassword(password);
     try{
@@ -136,8 +138,8 @@ public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required =
         }
 
         try {
-            emailService.sendOtpEmail(email);
-            return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+            String otp = emailService.sendOtpEmail(email);
+            return ResponseEntity.ok(Map.of("message", "OTP sent successfully " , "otp", otp));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to send OTP"));

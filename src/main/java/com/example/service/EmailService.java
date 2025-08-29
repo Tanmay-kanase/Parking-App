@@ -61,7 +61,7 @@ public class EmailService {
 
     }
 
-    public void sendOtpEmail(String toEmail) {
+    public String sendOtpEmail(String toEmail) {
         String otp = generateOTP();
         otpStorage.put(toEmail, otp);
 
@@ -71,6 +71,7 @@ public class EmailService {
         message.setText("Your OTP is: " + otp + "\nValid for 5 minutes.");
 
         mailSender.send(message);
+        return otp;
     }
 
     public String generateOTP() {

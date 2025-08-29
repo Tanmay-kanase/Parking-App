@@ -67,46 +67,37 @@ const Signin = () => {
       let tempPassword = ""; // Variable to hold password if needed
 
       if (isNewUser) {
-        // For a more robust solution, you'd replace this with a modal or dedicated UI
-        // that prompts the user for a password, rather than a browser prompt.
-        // For now, we'll inform the user and stop the process.
-        showError(
-          "New user detected. Please use the signup form to set a password first, then sign in with Google."
-        );
-        return;
-        // Example of how you *might* handle it with a prompt, but it's not recommended:
-        // tempPassword = prompt("As a new user logging in with Google, please set a password (this happens only once).");
-        // if (!tempPassword) {
-        //   showError("Password is required to complete registration with Google.");
-        //   return;
-        // }
+        password = prompt("Set your password (only once):");
+        if (!password) {
+          alert("Password is required to continue.");
+          return;
+        }
       }
 
       const userData = {
         name,
-        email: googleEmail,
+        email,
         userId: googleUserId,
         photo: picture,
-        password: tempPassword, // Will be empty string if not a new user or if prompt was cancelled
+        password, // send only if new
       };
+
+      console.log("checking user Data before hit request ", userData);
 
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
         userData
       );
-
+      console.log(res);
+      console.log("success");
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       await setUser(res.data.user);
-      showMessage("Google login successful! Redirecting...");
+      console.log("User is fetched proceed to home");
       navigate("/");
-    } catch (err) {
-      console.error("Google login error:", err);
-      showError(
-        err.response?.data?.message ||
-          err.message ||
-          "Google login failed. Please try again."
-      );
+    } catch (error) {
+      showError(error.message);
+      console.error("Google login error:", error);
     }
   };
 
