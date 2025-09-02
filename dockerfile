@@ -1,23 +1,28 @@
-# ===== Stage 1: Build Frontend =====
-FROM node:20 AS frontend-build
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm install
-COPY client/ .
-RUN npm run build
+# Start with a Maven image to build the application
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-# ===== Stage 2: Build Backend =====
-FROM maven:3.9.6-eclipse-temurin-21 AS backend-build
+# Set the working directory
 WORKDIR /app
+
+# Copy the project files
 COPY pom.xml .
 COPY src ./src
-# Copy frontend build into backend static folder
-COPY --from=frontend-build /app/client/dist ./src/main/resources/static
+
+# Package the application (skip tests for faster builds)
 RUN mvn clean package -DskipTests
 
-# ===== Stage 3: Production =====
+# --- Production image ---
 FROM eclipse-temurin:21-jdk-alpine
+
+# Set working directory in the final image
 WORKDIR /app
-COPY --from=backend-build /app/target/*.jar app.jar
+
+# Copy the JAR from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose the port the app runs on
 EXPOSE 8080
+
+# Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
+

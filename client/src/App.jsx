@@ -25,9 +25,25 @@ import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Signup from "./Pages/Auth/Signup";
 import Signin from "./Pages/Auth/Signin";
+import axios from "axios";
 
 function App() {
   const { user, loading } = useAuth();
+  const [loadingbackend, setLoadingBackend] = useState(true);
+
+  useEffect(() => {
+    const wakeUpBackend = async () => {
+      try {
+        axios.get("http://localhost:8080/health"); // replace with Render URL
+        console.log("✅ Backend warmed up");
+        setLoadingBackend(false);
+      } catch (err) {
+        console.error("❌ Backend warm-up failed", err);
+      }
+    };
+
+    wakeUpBackend();
+  }, []);
 
   const [darkMode, setDarkMode] = useState(() => {
     // Load from localStorage or system preference
@@ -48,7 +64,7 @@ function App() {
     }
   }, [darkMode]);
 
-  if (loading) {
+  if (loading || loadingbackend) {
     return (
       <>
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -68,11 +84,25 @@ function App() {
         <Route path="/parking-slots" element={<ParkingSlots />} />
         <Route path="/park-history" element={<ParkingHistory />} />
         <Route path="/show-parkings" element={<ShowParkings />} />
-        <Route path="/show-parkings-nearby" element={<Shownearbyparkings />} />
-        <Route path="/verify" element={<Verify />} />
         <Route path="signup" element={<Signup />} />
 
         {/* Protected Routes - Any Authenticated User */}
+        <Route
+          path="/verify"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "parking_owner"]}>
+              <Verify />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/show-parkings-nearby"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
+              <Shownearbyparkings />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/profile"
           element={
@@ -154,6 +184,7 @@ function App() {
       </Routes>
       <HowItWorks />
       <Footer />
+      <Contact_Footer />
     </>
   );
 }

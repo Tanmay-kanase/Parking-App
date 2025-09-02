@@ -64,10 +64,8 @@ const Signin = () => {
 
       const isNewUser = !checkRes?.data?.email;
 
-      let tempPassword = ""; // Variable to hold password if needed
-
       if (isNewUser) {
-        password = prompt("Set your password (only once):");
+        const password = prompt("Set your password (only once):");
         if (!password) {
           alert("Password is required to continue.");
           return;
