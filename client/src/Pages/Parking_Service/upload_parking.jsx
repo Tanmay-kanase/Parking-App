@@ -179,231 +179,351 @@ const UploadParkingSpots = () => {
   };
 
   return (
-    <div className="min-h-screen bg-yellow-50 text-gray-900 p-10">
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-2xl p-8">
+    // Main container with responsive padding and dark mode theming
+    <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-4 sm:p-8">
         <button
           onClick={() => setShowModal(true)}
-          className="bg-yellow-500 text-white font-bold p-3 rounded-lg hover:bg-yellow-600"
+          className="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-colors"
         >
           Add Parking Slots
         </button>
 
+        {/* Modal for adding/editing slots */}
         {showModal && (
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow"
-          >
-            {/* Upload Mode Selection */}
-            <div className="col-span-2 flex gap-6 items-center">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  value="single"
-                  checked={uploadMode === "single"}
-                  onChange={() => setUploadMode("single")}
-                />
-                Single Slot
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  value="multiple"
-                  checked={uploadMode === "multiple"}
-                  onChange={() => setUploadMode("multiple")}
-                />
-                Multiple Slots
-              </label>
-            </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                {isEditMode ? "Edit Parking Slot" : "Add New Parking Slots"}
+              </h2>
 
-            {/* Conditional Inputs */}
-            {uploadMode === "single" ? (
-              <input
-                type="text"
-                name="slotNumber"
-                placeholder="Slot Number (e.g. B1)"
-                onChange={handleChange}
-                className="border p-3 rounded-lg text-lg col-span-2 md:col-span-1"
-                required
-              />
-            ) : (
-              <>
-                <input
-                  type="text"
-                  name="slotPrefix"
-                  placeholder="Slot Prefix (e.g. B)"
-                  onChange={handleChange}
-                  className="border p-3 rounded-lg text-lg"
-                  required
-                />
-                <input
-                  type="number"
-                  name="startNumber"
-                  placeholder="Start Number"
-                  onChange={handleChange}
-                  className="border p-3 rounded-lg text-lg"
-                  required
-                />
-                <input
-                  type="number"
-                  name="endNumber"
-                  placeholder="End Number"
-                  onChange={handleChange}
-                  className="border p-3 rounded-lg text-lg"
-                  required
-                />
-              </>
-            )}
-
-            {/* Price */}
-            <input
-              type="number"
-              name="pricePerHour"
-              placeholder="Price Per Hour ($)"
-              value={formData.pricePerHour}
-              onChange={handleChange}
-              className="border p-3 rounded-lg text-lg"
-              required
-            />
-
-            {/* Vehicle Type */}
-            <div className="col-span-2">
-              <p className="text-lg font-semibold text-gray-700 mb-2">
-                Select Vehicle Type:
-              </p>
-              <div className="flex gap-4 flex-wrap">
-                {[
-                  { type: "bike", icon: <FaMotorcycle className="text-2xl" /> },
-                  { type: "compact", icon: <FaCar className="text-2xl" /> },
-                  { type: "sedan", icon: <FaCar className="text-2xl" /> },
-                  { type: "SUV", icon: <FaTruck className="text-2xl" /> },
-                  { type: "truck", icon: <FaBus className="text-2xl" /> },
-                ].map(({ type, icon }) => (
-                  <label
-                    key={type}
-                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
-                      formData.vehicleType === type
-                        ? "bg-gray-300"
-                        : "bg-gray-100"
-                    }`}
-                  >
+              {/* Form content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="col-span-full flex gap-6 items-center">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
-                      name="vehicleType"
-                      value={type}
-                      checked={formData.vehicleType === type}
-                      onChange={() => handleVehicleType(type)}
+                      value="single"
+                      checked={uploadMode === "single"}
+                      onChange={() => setUploadMode("single")}
+                      className="text-yellow-500 focus:ring-yellow-400"
+                    />
+                    Single Slot
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="multiple"
+                      checked={uploadMode === "multiple"}
+                      onChange={() => setUploadMode("multiple")}
+                      className="text-yellow-500 focus:ring-yellow-400"
+                    />
+                    Multiple Slots
+                  </label>
+                </div>
+
+                {uploadMode === "single" ? (
+                  <div className="col-span-full">
+                    <label
+                      htmlFor="slotNumber"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Slot Number
+                    </label>
+                    <input
+                      id="slotNumber"
+                      type="text"
+                      name="slotNumber"
+                      placeholder="e.g., A101"
+                      onChange={handleChange}
+                      className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                      required
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label
+                        htmlFor="slotPrefix"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Slot Prefix
+                      </label>
+                      <input
+                        id="slotPrefix"
+                        type="text"
+                        name="slotPrefix"
+                        placeholder="e.g., A"
+                        onChange={handleChange}
+                        className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="startNumber"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Start Number
+                      </label>
+                      <input
+                        id="startNumber"
+                        type="number"
+                        name="startNumber"
+                        placeholder="e.g., 101"
+                        onChange={handleChange}
+                        className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                        required
+                      />
+                    </div>
+                    <div className="col-span-full md:col-span-1">
+                      <label
+                        htmlFor="endNumber"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        End Number
+                      </label>
+                      <input
+                        id="endNumber"
+                        type="number"
+                        name="endNumber"
+                        placeholder="e.g., 120"
+                        onChange={handleChange}
+                        className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="col-span-full md:col-span-1">
+                  <label
+                    htmlFor="pricePerHour"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Price Per Hour ($)
+                  </label>
+                  <input
+                    id="pricePerHour"
+                    type="number"
+                    name="pricePerHour"
+                    placeholder="e.g., 5.50"
+                    value={formData.pricePerHour}
+                    onChange={handleChange}
+                    className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+
+                <div className="col-span-full">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Vehicle Type
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {[
+                      { type: "bike", icon: <FaMotorcycle /> },
+                      { type: "compact", icon: <FaCar /> },
+                      { type: "sedan", icon: <FaCar /> },
+                      { type: "SUV", icon: <FaTruck /> },
+                      { type: "truck", icon: <FaBus /> },
+                    ].map(({ type, icon }) => (
+                      <label
+                        key={type}
+                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          formData.vehicleType === type
+                            ? "bg-yellow-200 dark:bg-yellow-700 ring-2 ring-yellow-500"
+                            : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="vehicleType"
+                          value={type}
+                          checked={formData.vehicleType === type}
+                          onChange={() => handleVehicleType(type)}
+                          className="hidden"
+                        />
+                        <span className="text-xl">{icon}</span>
+                        <span className="capitalize text-sm font-medium">
+                          {type}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="col-span-full">
+                  <label
+                    htmlFor="available"
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Availability:
+                    </span>
+                    <input
+                      onChange={handleChange}
+                      checked={formData.available}
+                      type="checkbox"
+                      id="available"
                       className="hidden"
                     />
-                    {icon}
-                    <span className="capitalize text-lg">{type}</span>
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        formData.available
+                          ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                          : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+                      }`}
+                    >
+                      {formData.available ? "Available" : "Not Available"}
+                    </span>
                   </label>
-                ))}
+                </div>
+
+                {/* Responsive buttons: stack on mobile, side-by-side on larger screens */}
+                <div className="col-span-full flex flex-col sm:flex-row gap-4 justify-start pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto bg-yellow-500 text-white font-bold px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+                  >
+                    {isEditMode ? "Update Slot" : "Add Slot"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="w-full sm:w-auto bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white font-bold px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* Availability */}
-            <div className="col-span-2 flex items-center">
-              <label className="flex items-center gap-3">
-                <input
-                  onChange={handleChange}
-                  checked={formData.available}
-                  type="checkbox"
-                  id="available"
-                  className="hidden"
-                />
-                <span
-                  className={`px-4 py-2 rounded-lg text-lg font-semibold ${
-                    formData.available
-                      ? "bg-green-500 text-white"
-                      : "bg-red-500 text-white"
-                  }`}
-                >
-                  {formData.available ? "Available" : "Not Available"}
-                </span>
-              </label>
-            </div>
-
-            {/* Buttons */}
-            <div className="col-span-2 flex flex-wrap gap-4 justify-start mt-4">
-              <button
-                type="submit"
-                className="bg-yellow-500 text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-yellow-600"
-              >
-                {isEditMode ? "Update Parking Slot" : "Add Parking Slot"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowModal(false);
-                  setIsEditMode(false);
-                  setEditingSlotId(null);
-                }}
-                className="bg-red-500 text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-red-600"
-              >
-                Cancel
-              </button>
-
-              {isEditMode && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditMode(false);
-                    setEditingSlotId(null);
-                  }}
-                  className="bg-gray-300 text-black font-bold text-lg px-6 py-3 rounded-lg hover:bg-gray-400"
-                >
-                  Cancel Edit
-                </button>
-              )}
-            </div>
-          </form>
+            </form>
+          </div>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full mt-6 border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-yellow-100">
-                <th className="border p-2">Slot Number</th>
-                <th className="border p-2">Location</th>
-                <th className="border p-2">Price</th>
-                <th className="border p-2">Vehicle Type</th>
-                <th className="border p-2">Availability</th>
-                <th className="border p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {spots.map((spot) => (
-                <tr key={spot.id} className="text-center">
-                  <td className="border p-2">{spot.slotNumber}</td>
-                  <td className="border p-2">{spot.location}</td>
-                  <td className="border p-2">${spot.pricePerHour}</td>
-                  <td className="border p-2 capitalize">{spot.vehicleType}</td>
-                  <td
-                    className={`border p-2 font-bold ${
-                      spot.available ? "text-green-600" : "text-red-600"
+        {/* Container for responsive data display */}
+        <div className="mt-8">
+          {/* --- Mobile Card View --- */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+            {spots.map((spot) => (
+              <div
+                key={spot.slotId}
+                className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow space-y-2"
+              >
+                <div className="flex justify-between items-center">
+                  <p className="font-bold text-lg">{spot.slotNumber}</p>
+                  <p
+                    className={`font-bold text-sm px-2 py-1 rounded-full ${
+                      spot.available
+                        ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                        : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
                     }`}
                   >
-                    {spot.available ? "Available" : "Not Available"}
-                  </td>
-                  <td className="border p-2 flex justify-between gap-2">
-                    <button
-                      onClick={() => handleEdit(spot)}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(spot.slotId)}
-                      className="text-red-600 hover:underline items-center"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                    {spot.available ? "Available" : "Taken"}
+                  </p>
+                </div>
+                <div>
+                  <strong>Location:</strong> {spot.location}
+                </div>
+                <div>
+                  <strong>Price:</strong> ${spot.pricePerHour}/hr
+                </div>
+                <div className="capitalize">
+                  <strong>Type:</strong> {spot.vehicleType}
+                </div>
+                <div className="flex justify-end gap-4 pt-2 border-t border-gray-200 dark:border-gray-600">
+                  <button
+                    onClick={() => handleEdit(spot)}
+                    className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(spot.slotId)}
+                    className="font-semibold text-red-600 dark:text-red-400 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* --- Desktop Table View --- */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-yellow-100 dark:bg-gray-700 text-left">
+                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
+                    Slot Number
+                  </th>
+                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
+                    Location
+                  </th>
+                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
+                    Price/hr
+                  </th>
+                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
+                    Vehicle Type
+                  </th>
+                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
+                    Availability
+                  </th>
+                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {spots.map((spot) => (
+                  <tr
+                    key={spot.slotId}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="p-3 border-b border-gray-200 dark:border-gray-600">
+                      {spot.slotNumber}
+                    </td>
+                    <td className="p-3 border-b border-gray-200 dark:border-gray-600">
+                      {spot.location}
+                    </td>
+                    <td className="p-3 border-b border-gray-200 dark:border-gray-600">
+                      ${spot.pricePerHour}
+                    </td>
+                    <td className="p-3 border-b border-gray-200 dark:border-gray-600 capitalize">
+                      {spot.vehicleType}
+                    </td>
+                    <td className="p-3 border-b border-gray-200 dark:border-gray-600">
+                      <span
+                        className={`font-bold px-2 py-1 rounded-full text-xs ${
+                          spot.available
+                            ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                            : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+                        }`}
+                      >
+                        {spot.available ? "Available" : "Not Available"}
+                      </span>
+                    </td>
+                    <td className="p-3 border-b border-gray-200 dark:border-gray-600 flex gap-4">
+                      <button
+                        onClick={() => handleEdit(spot)}
+                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(spot.slotId)}
+                        className="font-semibold text-red-600 dark:text-red-400 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

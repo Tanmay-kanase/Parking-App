@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/users/**")
+                                "/api/users/**", "/api/health")
                         .permitAll() // 👈 public endpoints
                         .anyRequest().authenticated() // 👈 all other APIs require token
                 )
