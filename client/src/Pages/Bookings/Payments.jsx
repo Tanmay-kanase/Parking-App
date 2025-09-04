@@ -2,34 +2,13 @@ import {
   FaMoneyBill,
   FaCreditCard,
   FaPaypal,
-  FaClock,
   FaCheckCircle,
   FaTimesCircle,
+  FaClock,
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import axios from "../../config/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-
-// const payments = [
-//   {
-//     paymentId: "PAY001",
-//     userId: "USER123",
-//     reservationId: "RES789",
-//     amount: 25.99,
-//     paymentMethod: "credit_card",
-//     status: "completed",
-//     paymentTime: "2025-03-22 12:45 PM",
-//   },
-//   {
-//     paymentId: "PAY002",
-//     userId: "USER456",
-//     reservationId: "RES456",
-//     amount: 40.5,
-//     paymentMethod: "paypal",
-//     status: "failed",
-//     paymentTime: "2025-03-20 10:30 AM",
-//   },
-// ];
 
 const Payments = () => {
   const { user, loading } = useAuth();
@@ -52,80 +31,113 @@ const Payments = () => {
 
     fetchPayments();
   }, [user]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-yellow-100 text-center text-xl p-20">
+      <div className="min-h-screen bg-yellow-100 text-center text-xl p-20 dark:bg-gray-900 dark:text-gray-100">
         Loading your payment history...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-yellow-100 text-gray-900 p-8">
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
+    <div className="min-h-screen bg-yellow-100 text-gray-900 p-4 sm:p-8 dark:bg-gray-900 dark:text-gray-100">
+      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-4 sm:p-6 dark:bg-gray-800">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-2 sm:mb-4 dark:text-gray-100">
           Payments History
         </h2>
-        <p className="text-center text-gray-600 mb-6">
+        <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 dark:text-gray-400">
           View details of your past payments and transactions.
         </p>
 
-        <div className="overflow-x-auto">
-          <table className="w-full bg-white border border-gray-300 rounded-lg">
-            <tr className="bg-yellow-500 text-white text-left">
-              <td className="p-3">User</td>
-              <td className="p-3">Reservation</td>
-              <td className="p-3">Amount</td>
-              <td className="p-3">Method</td>
-              <td className="p-3">Status</td>
-              <td className="p-3">Payment Time</td>
-            </tr>
+        <div className="space-y-4">
+          {payments.length > 0 ? (
+            payments.map((payment) => (
+              <div
+                key={payment.paymentId}
+                className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center dark:bg-gray-700 dark:border-gray-600"
+              >
+                <div className="flex flex-col mb-2 sm:mb-0">
+                  <div className="flex items-center gap-2 text-sm sm:text-base">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      User:
+                    </span>
+                    <span className="text-gray-900 dark:text-gray-100">
+                      {payment.userId}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm sm:text-base">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      Reservation:
+                    </span>
+                    <span className="text-gray-900 dark:text-gray-100">
+                      {payment.reservationId}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm sm:text-base">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      Amount:
+                    </span>
+                    <span className="flex items-center gap-1 text-green-600 font-bold dark:text-green-400">
+                      <FaMoneyBill /> ${payment.amount}
+                    </span>
+                  </div>
+                </div>
 
-            {payments.map((payment) => (
-              <tr key={payment.paymentId} className="border-b border-gray-300">
-                <td className="p-3">{payment.userId}</td>
-                <td className="p-3">{payment.reservationId}</td>
-                <td className="p-3 whitespace-nowrap  items-center gap-2">
-                  <>
-                    <FaMoneyBill className="text-green-600" />
-                  </>
-                  <> ${payment.amount} </>
-                </td>
-                <td className="p-3 whitespace-nowrap items-center gap-2">
-                  {payment.paymentMethod === "credit_card" ? (
-                    <>
-                      <FaCreditCard className="text-blue-600" /> Credit Card
-                    </>
-                  ) : (
-                    <>
-                      <FaPaypal className="text-blue-500" /> PayPal
-                    </>
-                  )}
-                </td>
-                <td className="p-3 whitespace-nowrap flex items-center gap-2">
-                  {payment.status === "completed" ? (
-                    <>
-                      <FaCheckCircle className="text-green-600" /> Completed
-                    </>
-                  ) : (
-                    <>
-                      <FaTimesCircle className="text-red-600" /> Failed
-                    </>
-                  )}
-                </td>
-                <td className="p-3 whitespace-nowrap  items-center gap-2">
-                  <FaClock className="text-gray-600" /> {payment.paymentTime}
-                </td>
-              </tr>
-            ))}
-          </table>
+                <div className="flex flex-col items-start sm:items-end space-y-2">
+                  <div className="flex items-center gap-2 text-sm sm:text-base">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      Method:
+                    </span>
+                    {payment.paymentMethod === "credit_card" ? (
+                      <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                        <FaCreditCard /> Credit Card
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-blue-500 dark:text-blue-300">
+                        <FaPaypal /> PayPal
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm sm:text-base">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      Status:
+                    </span>
+                    {payment.status === "completed" ? (
+                      <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                        <FaCheckCircle /> Completed
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                        <FaTimesCircle /> Failed
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm sm:text-base">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      Time:
+                    </span>
+                    <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                      <FaClock /> {payment.paymentTime}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 dark:text-gray-400 p-6">
+              No payments found.
+            </div>
+          )}
         </div>
 
-        <div className="mt-6 text-center">
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md">
-            View More Payments
-          </button>
-        </div>
+        {payments.length > 0 && (
+          <div className="mt-4 sm:mt-6 text-center">
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 sm:px-6 rounded-lg shadow-md transition-colors duration-300">
+              View More Payments
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

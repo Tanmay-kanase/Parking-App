@@ -310,293 +310,306 @@ const DoBooking = () => {
       </div>
     );
   return (
-    <div className="p-10 bg-gray-900 min-h-screen text-gray-100">
-      <h2 className="text-2xl font-bold text-yellow-400 mb-6">
-        Booking for Location {name}
-      </h2>
+    // Main container with responsive padding and dark mode background/text colors
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 md:p-8 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-6">
+          Booking for Location: {name}
+        </h2>
 
-      {/* Cards instead of Table for responsive layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-        {spots.map((group) => {
-          const { vehicleType, slots } = group;
-          const availableCount = slots.filter((s) => s.available).length;
-          const totalCount = slots.length;
-          const avgPrice = (
-            slots.reduce((sum, s) => sum + s.pricePerHour, 0) / totalCount
-          ).toFixed(2);
+        {/* Responsive grid for parking spot cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {spots.map((group) => {
+            const { vehicleType, slots } = group;
+            const availableCount = slots.filter((s) => s.available).length;
+            const totalCount = slots.length;
+            const avgPrice = (
+              slots.reduce((sum, s) => sum + s.pricePerHour, 0) / totalCount
+            ).toFixed(2);
 
-          return (
-            <div
-              key={vehicleType}
-              className="flex flex-col p-6 rounded-xl shadow-lg border-2 bg-gray-800 border-blue-600 transition-transform transform hover:scale-105"
-            >
-              <div className="flex-grow">
-                <h3 className="text-xl font-bold mb-2 capitalize">
-                  Vehicle Type: {vehicleType}
-                </h3>
-                <p className="text-gray-400">
-                  <span className="font-semibold">Total Slots:</span>{" "}
-                  {totalCount}
-                </p>
-                <p className="text-gray-400">
-                  <span className="font-semibold">Available Slots:</span>{" "}
-                  {availableCount}
-                </p>
-                <p className="text-gray-400">
-                  <span className="font-semibold">Avg. Price:</span> ${avgPrice}{" "}
-                  / hr
-                </p>
-              </div>
+            return (
+              <div
+                key={vehicleType}
+                className="flex flex-col p-5 rounded-lg shadow-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-blue-700 transition-transform transform hover:scale-105 hover:shadow-xl"
+              >
+                <div className="flex-grow">
+                  <h3 className="text-xl font-bold mb-2 capitalize text-gray-900 dark:text-white">
+                    {vehicleType}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <span className="font-semibold">Total Slots:</span>{" "}
+                    {totalCount}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <span className="font-semibold">Available:</span>{" "}
+                    <span className="font-bold text-green-600 dark:text-green-400">
+                      {availableCount}
+                    </span>
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <span className="font-semibold">Avg. Price:</span> $
+                    {avgPrice} / hr
+                  </p>
+                </div>
 
-              <div className="mt-4 text-center">
-                {availableCount > 0 ? (
-                  <button
-                    className="w-full bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
-                    onClick={() => {
-                      // Pick first available slot from this group
-                      const firstAvailable = slots.find((s) => s.available);
-                      if (firstAvailable) {
-                        setSelectedSpot(firstAvailable);
-                      }
-                    }}
-                  >
-                    Book Now
-                  </button>
-                ) : (
-                  <span className="text-red-500 font-bold">
-                    No Slots Available
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Booking Form */}
-      {selectedSpot && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handlePaymentClick();
-          }}
-          className="mt-8 p-6 bg-gray-800 rounded-xl shadow-lg"
-        >
-          <h3 className="text-xl font-semibold mb-4 text-gray-100">
-            Booking Slot {selectedSpot.slotNumber}
-          </h3>
-
-          {/* Start Time Input */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Start Time:</label>
-            <input
-              type="datetime-local"
-              name="startTime"
-              value={formData.startTime}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
-              required
-            />
-          </div>
-
-          {/* End Time Input */}
-          <div className="mb-4">
-            <label className="block text-gray-300">End Time:</label>
-            <input
-              type="datetime-local"
-              name="endTime"
-              value={formData.endTime}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
-              required
-            />
-          </div>
-
-          {/* Time (in hours) */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Time (Hours):</label>
-            <input
-              type="number"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
-              required
-            />
-          </div>
-
-          {/* Total Amount */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Total Amount:</label>
-            <p className="font-semibold text-gray-100">
-              ${selectedSpot.pricePerHour * (formData.time || 1)}
-            </p>
-          </div>
-
-          {/* Vehicle Number Selection */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Vehicle Number:</label>
-
-            {/* Case 1: No vehicles */}
-            {vehicles.length === 0 ? (
-              <input
-                type="text"
-                name="vehicleNumber"
-                value={formData.vehicleNumber}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
-                placeholder="Enter your vehicle number"
-                required
-              />
-            ) : vehicles.length === 1 ? (
-              // Case 2: Only one vehicle - prefill the input
-              <input
-                type="text"
-                name="vehicleNumber"
-                value={formData.vehicleNumber}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
-                required
-              />
-            ) : (
-              // Case 3: Multiple vehicles - show dropdown and allow manual entry
-              <>
-                <select
-                  name="vehicleNumber"
-                  value={selectedVehicle}
-                  onChange={(e) => {
-                    const selected = e.target.value;
-                    setSelectedVehicle(selected);
-                    setFormData({ ...formData, vehicleNumber: selected });
-                  }}
-                  className="w-full p-2 border border-gray-600 rounded-lg mb-2 bg-gray-700 text-gray-100"
-                >
-                  <option value="">Select a vehicle</option>
-                  {vehicles.map((vehicle) => (
-                    <option
-                      key={vehicle.licensePlate}
-                      value={vehicle.licensePlate}
+                <div className="mt-4 text-center">
+                  {availableCount > 0 ? (
+                    <button
+                      className="w-full bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-colors"
+                      onClick={() => {
+                        const firstAvailable = slots.find((s) => s.available);
+                        if (firstAvailable) {
+                          setSelectedSpot(firstAvailable);
+                        }
+                      }}
                     >
-                      {vehicle.licensePlate}
-                    </option>
-                  ))}
-                  <option value="manual">Enter manually</option>
-                </select>
+                      Book Now
+                    </button>
+                  ) : (
+                    <span className="font-bold text-red-500">
+                      No Slots Available
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-                {selectedVehicle === "manual" && (
-                  <>
+        {/* Booking Form Modal/Section */}
+        {selectedSpot && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-40 p-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handlePaymentClick();
+              }}
+              className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg relative"
+            >
+              <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                Booking Slot {selectedSpot.slotNumber}
+              </h3>
+
+              {/* Responsive layout for form fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Start Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    End Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="endTime"
+                    value={formData.endTime}
+                    onChange={handleChange}
+                    className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Time (Hours)
+                  </label>
+                  <input
+                    type="number"
+                    name="time"
+                    min="1"
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Vehicle Number
+                  </label>
+                  {vehicles.length === 0 ? (
                     <input
                       type="text"
                       name="vehicleNumber"
                       value={formData.vehicleNumber}
-                      onChange={(e) => {
-                        const formatted = formatVehicleNumber(e.target.value);
-
-                        setFormData((prev) => ({
-                          ...prev,
-                          vehicleNumber: formatted,
-                        }));
-
-                        if (!validateVehicleNumber(formatted)) {
-                          setError("Invalid format! Use: MH-43-AR-0707");
-                        } else {
-                          setError("");
-                        }
-                      }}
-                      className={`w-full p-2 border rounded-lg bg-gray-700 text-gray-100 ${
-                        error ? "border-red-500" : "border-gray-600"
-                      }`}
+                      onChange={handleChange}
+                      className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
                       placeholder="Enter your vehicle number"
                       required
                     />
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1">{error}</p>
+                  ) : vehicles.length === 1 ? (
+                    <input
+                      type="text"
+                      name="vehicleNumber"
+                      value={formData.vehicleNumber}
+                      onChange={handleChange}
+                      className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
+                      required
+                    />
+                  ) : (
+                    <>
+                      <select
+                        name="vehicleNumber"
+                        value={selectedVehicle}
+                        onChange={(e) => {
+                          const selected = e.target.value;
+                          setSelectedVehicle(selected);
+                          setFormData({ ...formData, vehicleNumber: selected });
+                        }}
+                        className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
+                      >
+                        <option value="">Select a vehicle</option>
+                        {vehicles.map((vehicle) => (
+                          <option
+                            key={vehicle.licensePlate}
+                            value={vehicle.licensePlate}
+                          >
+                            {vehicle.licensePlate}
+                          </option>
+                        ))}
+                        <option value="manual">Enter manually</option>
+                      </select>
+
+                      {selectedVehicle === "manual" && (
+                        <>
+                          <input
+                            type="text"
+                            name="vehicleNumber"
+                            value={formData.vehicleNumber}
+                            onChange={(e) => {
+                              const formatted = formatVehicleNumber(
+                                e.target.value
+                              );
+                              setFormData((prev) => ({
+                                ...prev,
+                                vehicleNumber: formatted,
+                              }));
+                              if (!validateVehicleNumber(formatted)) {
+                                setError("Invalid format! Use: MH-43-AR-0707");
+                              } else {
+                                setError("");
+                              }
+                            }}
+                            className={`mt-2 w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                              error
+                                ? "border-red-500"
+                                : "border-gray-300 dark:border-gray-600"
+                            }`}
+                            placeholder="Enter your vehicle number"
+                            required
+                          />
+                          {error && (
+                            <p className="text-red-500 text-sm mt-1">{error}</p>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Payment Method
+                  </label>
+                  <select
+                    name="paymentMethod"
+                    value={formData.paymentMethod}
+                    onChange={handleChange}
+                    className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
+                  >
+                    <option value="credit-card">Credit Card</option>
+                    <option value="debit-card">Debit Card</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="upi">UPI</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Total Amount
+                  </label>
+                  <p className="font-semibold text-lg text-gray-900 dark:text-gray-100 mt-2">
+                    $
+                    {(selectedSpot.pricePerHour * (formData.time || 1)).toFixed(
+                      2
                     )}
-                  </>
-                )}
-              </>
-            )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Responsive buttons: stack on mobile, side-by-side on larger screens */}
+              <div className="mt-6 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-2 sm:space-y-0">
+                <button
+                  type="button"
+                  className="w-full sm:w-auto bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                  onClick={() => setSelectedSpot(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
+                >
+                  Proceed to Payment
+                </button>
+              </div>
+            </form>
           </div>
+        )}
 
-          {/* Payment Method */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Payment Method:</label>
-            <select
-              name="paymentMethod"
-              value={formData.paymentMethod}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-100"
-            >
-              <option value="credit-card">Credit Card</option>
-              <option value="debit-card">Debit Card</option>
-              <option value="paypal">PayPal</option>
-              <option value="upi">UPI</option>
-            </select>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600"
-          >
-            Proceed to Payment
-          </button>
-
-          {/* Cancel Button */}
-          <button
-            type="button"
-            className="ml-4 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700"
-            onClick={() => setSelectedSpot(null)}
-          >
-            Cancel
-          </button>
-        </form>
-      )}
-      {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-gray-800 p-6 rounded-xl w-[90%] max-w-md shadow-lg">
-            <h2 className="text-xl font-bold mb-4 text-center text-gray-100">
-              Scan QR & Pay
-            </h2>
-            <img
-              src={
-                "public/5aad3715-5a2d-47da-992c-18ac3f6799dd_GooglePay_QR.png"
-              }
-              alt="QR Code"
-              className="mx-auto mb-4 w-[300px] h-[300px] object-contain"
-            />
-
-            <div className="mb-4">
-              <label className="block font-semibold text-gray-300">
-                Transaction ID <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
-                className="border rounded w-full px-3 py-2 mt-1 bg-gray-700 text-gray-100 border-gray-600"
-                placeholder="Enter 8-digit Transaction ID"
+        {/* Payment QR Code Popup */}
+        {showPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-sm sm:max-w-md shadow-lg text-center">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+                Scan QR & Pay
+              </h2>
+              <img
+                src="public/5aad3715-5a2d-47da-992c-18ac3f6799dd_GooglePay_QR.png"
+                alt="QR Code for Payment"
+                className="mx-auto mb-4 w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg"
               />
-              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-            </div>
 
-            <div className="flex justify-between">
-              <button
-                onClick={handleDonePayment}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              >
-                Done Payment
-              </button>
-              <button
-                onClick={() => setShowPopup(false)}
-                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-              >
-                Cancel
-              </button>
+              <div className="mb-4 text-left">
+                <label className="block font-semibold text-gray-700 dark:text-gray-300">
+                  Transaction ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  className="mt-1 border rounded w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter 8-digit Transaction ID"
+                />
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              </div>
+
+              {/* Responsive buttons for the modal */}
+              <div className="flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="w-full sm:w-auto bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDonePayment}
+                  className="w-full sm:w-auto bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Done Payment
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

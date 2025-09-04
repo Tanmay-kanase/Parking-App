@@ -264,7 +264,7 @@ const Signin = () => {
           </div>
 
           <p className="text-sm text-center text-gray-600 mt-4 pt-4 border-t border-gray-200 dark:text-gray-400 dark:border-gray-700">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a
               href="signup"
               className="text-blue-600 hover:underline font-semibold transition-colors duration-200 dark:text-blue-400 dark:hover:underline"
