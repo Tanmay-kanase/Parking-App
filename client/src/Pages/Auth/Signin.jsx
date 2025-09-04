@@ -57,6 +57,7 @@ const Signin = () => {
       const { credential } = response;
       const userInfo = jwtDecode(credential);
       const { name, email: googleEmail, sub: googleUserId, picture } = userInfo;
+      console.log(userInfo);
 
       // Check if user already exists
       const checkRes = await axios.get(
@@ -75,10 +76,10 @@ const Signin = () => {
 
       const userData = {
         name,
-        email,
+        email: googleEmail, // use the correct variable
         userId: googleUserId,
         photo: picture,
-        password, // send only if new
+        password, // only for new users
       };
 
       console.log("checking user Data before hit request ", userData);
