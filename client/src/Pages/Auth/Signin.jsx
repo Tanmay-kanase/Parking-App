@@ -52,6 +52,7 @@ const Signin = () => {
   const handleSuccess = async (response) => {
     setError(""); // Reset previous error
     setMessage("");
+    let password;
     try {
       const { credential } = response;
       const userInfo = jwtDecode(credential);
@@ -65,7 +66,7 @@ const Signin = () => {
       const isNewUser = !checkRes?.data?.email;
 
       if (isNewUser) {
-        const password = prompt("Set your password (only once):");
+        password = prompt("Set your password (only once):");
         if (!password) {
           alert("Password is required to continue.");
           return;

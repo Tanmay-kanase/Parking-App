@@ -29,21 +29,6 @@ import axios from "axios";
 
 function App() {
   const { user, loading } = useAuth();
-  const [loadingbackend, setLoadingBackend] = useState(true);
-
-  useEffect(() => {
-    const wakeUpBackend = async () => {
-      try {
-        axios.get("http://localhost:8080/health"); // replace with Render URL
-        console.log("✅ Backend warmed up");
-        setLoadingBackend(false);
-      } catch (err) {
-        console.error("❌ Backend warm-up failed", err);
-      }
-    };
-
-    wakeUpBackend();
-  }, []);
 
   const [darkMode, setDarkMode] = useState(() => {
     // Load from localStorage or system preference
@@ -64,7 +49,7 @@ function App() {
     }
   }, [darkMode]);
 
-  if (loading || loadingbackend) {
+  if (loading) {
     return (
       <>
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />

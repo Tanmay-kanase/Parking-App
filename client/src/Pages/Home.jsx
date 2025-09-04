@@ -13,20 +13,52 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import axios from "axios";
 
 // Use Tailwind CSS to define styles
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(true);
+  const [isBackendReady, setIsBackendReady] = useState(false);
   // Use a custom modal for alerts
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const { status } = await axios.get("http://localhost:8088/api/health");
+        if (status === 200) setIsBackendReady(true);
+        else setIsBackendReady(false);
+      } catch (err) {
+        console.error("Backend not ready:", err);
+        setIsBackendReady(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkBackend();
+  }, []);
 
   const showAlert = (message) => {
     setAlertMessage(message);
     setIsAlertVisible(true);
   };
+
+  // 🔹 Loading screen while waiting for backend
+  if (!isBackendReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-yellow-500 border-solid mx-auto"></div>
+          <p className="mt-6 text-lg font-semibold text-gray-700 dark:text-gray-300">
+            Connecting to backend...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Handles search for a specific location
   const handleSearch = () => {
