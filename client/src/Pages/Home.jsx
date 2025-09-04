@@ -27,7 +27,9 @@ const Home = () => {
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const { status } = await axios.get("http://localhost:8088/api/health");
+        const { status } = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/health`
+        );
         if (status === 200) setIsBackendReady(true);
         else setIsBackendReady(false);
       } catch (err) {
