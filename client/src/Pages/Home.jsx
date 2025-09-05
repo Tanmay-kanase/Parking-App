@@ -14,6 +14,9 @@ import {
   Sun,
 } from "lucide-react";
 import axios from "axios";
+import Contact_Footer from "../components/Contact_Footer";
+import Footer from "../components/Footer";
+import HowItWorks from "../components/Howitworks";
 
 // Use Tailwind CSS to define styles
 const Home = () => {
@@ -332,6 +335,9 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+      <HowItWorks />
+      <Footer />
+    
     </div>
   );
 };

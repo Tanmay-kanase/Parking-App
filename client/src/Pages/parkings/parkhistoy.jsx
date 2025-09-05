@@ -51,48 +51,95 @@ const ParkingHistory = () => {
 
     fetchParkingHistory();
   }, [user]);
+
   return (
-    <div className="min-h-screen bg-yellow-100 text-gray-900 p-8">
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
+    // Main container with responsive padding and dark mode background/text colors
+    <div className="min-h-screen bg-yellow-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-8">
+      <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6">
         {/* Header */}
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
           Parking History
         </h2>
-        <p className="text-center text-gray-600 mb-6">
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-6 sm:mb-8">
           Your previous parking details and payments.
         </p>
 
-        {/* Table */}
+        {/* Responsive Table Wrapper */}
         <div className="overflow-x-auto">
-          <table className="w-full bg-white border border-gray-300 rounded-lg">
-            <thead>
-              <tr className="bg-yellow-500 text-white text-left">
-                <th className="p-3">Vehicle</th>
-
-                <th className="p-3">Slot</th>
-                <th className="p-3">Entry Time</th>
-                <th className="p-3">Exit Time</th>
-                <th className="p-3">Payment</th>
+          {/*
+          On screens smaller than `md` (768px), the table will behave like a block element.
+          - The `thead` is hidden.
+          - Each `tr` becomes a card with its own border and padding.
+          - Each `td` stacks vertically and uses a `data-label` for context.
+          On `md` screens and larger, it reverts to a standard table layout.
+        */}
+          <table className="w-full bg-white dark:bg-gray-800 border-collapse">
+            <thead className="hidden md:table-header-group">
+              <tr className="bg-yellow-500 dark:bg-yellow-600 text-white text-left">
+                <th className="p-3 font-semibold">Vehicle</th>
+                <th className="p-3 font-semibold">Slot</th>
+                <th className="p-3 font-semibold">Entry Time</th>
+                <th className="p-3 font-semibold">Exit Time</th>
+                <th className="p-3 font-semibold">Payment</th>
               </tr>
             </thead>
             <tbody>
               {parkingHistory.map((history) => (
                 <tr
                   key={history.history_id}
-                  className="border-b border-gray-300"
+                  className="block md:table-row border-b border-gray-300 dark:border-gray-700 md:border-b mb-4 md:mb-0 rounded-lg md:rounded-none shadow-md md:shadow-none"
                 >
-                  <td className="p-3  items-center gap-2">
-                    <FaCar className="text-blue-600" /> {history.vehicleId}
+                  <td
+                    data-label="Vehicle"
+                    className="p-3 flex items-center justify-between md:table-cell md:text-left border-b md:border-none"
+                  >
+                    <span className="font-semibold md:hidden mr-2">
+                      Vehicle
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <FaCar className="text-blue-600 dark:text-blue-400" />{" "}
+                      {history.vehicleId}
+                    </span>
                   </td>
-
-                  <td className="p-3">{history.slotId}</td>
-                  <td className="p-3  items-center gap-2">
-                    <FaClock className="text-gray-600" /> {history.entryTime}
+                  <td
+                    data-label="Slot"
+                    className="p-3 flex items-center justify-between md:table-cell md:text-left border-b md:border-none"
+                  >
+                    <span className="font-semibold md:hidden mr-2">Slot</span>
+                    <span>{history.slotId}</span>
                   </td>
-                  <td className="p-3">{history.exitTime}</td>
-                  <td className="p-3  items-center gap-2">
-                    <FaMoneyBill className="text-yellow-600" />{" "}
-                    {history.amountPaid}
+                  <td
+                    data-label="Entry Time"
+                    className="p-3 flex items-center justify-between md:table-cell md:text-left border-b md:border-none"
+                  >
+                    <span className="font-semibold md:hidden mr-2">
+                      Entry Time
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <FaClock className="text-gray-600 dark:text-gray-400" />{" "}
+                      {history.entryTime}
+                    </span>
+                  </td>
+                  <td
+                    data-label="Exit Time"
+                    className="p-3 flex items-center justify-between md:table-cell md:text-left border-b md:border-none"
+                  >
+                    <span className="font-semibold md:hidden mr-2">
+                      Exit Time
+                    </span>
+                    <span>{history.exitTime}</span>
+                  </td>
+                  <td
+                    data-label="Payment"
+                    className="p-3 flex items-center justify-between md:table-cell md:text-left"
+                  >
+                    <span className="font-semibold md:hidden mr-2">
+                      Payment
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <FaMoneyBill className="text-yellow-600 dark:text-yellow-500" />{" "}
+                      {history.amountPaid}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -101,8 +148,8 @@ const ParkingHistory = () => {
         </div>
 
         {/* Button */}
-        <div className="mt-6 text-center">
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md">
+        <div className="mt-8 text-center">
+          <button className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-colors duration-300">
             View More History
           </button>
         </div>

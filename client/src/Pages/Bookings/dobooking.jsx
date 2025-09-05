@@ -3,23 +3,6 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "../../config/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 
-const formatVehicleNumber = (input) => {
-  let cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  let formatted = "";
-
-  if (cleaned.length > 0) formatted += cleaned.substring(0, 2);
-  if (cleaned.length > 2) formatted += "-" + cleaned.substring(2, 4);
-  if (cleaned.length > 4) formatted += "-" + cleaned.substring(4, 6);
-  if (cleaned.length > 6) formatted += "-" + cleaned.substring(6, 10);
-
-  return formatted;
-};
-
-const validateVehicleNumber = (number) => {
-  const regex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
-  return regex.test(number);
-};
-
 const DoBooking = () => {
   const { user, loading } = useAuth();
   const [message, setMessage] = useState("Processing your booking...");
@@ -36,7 +19,7 @@ const DoBooking = () => {
     paymentMethod: "credit-card",
   });
   const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [selectedVehicle, setSelectedVehicle] = useState("");
   // Fetch vehicles from the backend using userId from localStorage
   // Handle vehicle selection change
 
@@ -83,6 +66,26 @@ const DoBooking = () => {
   const [transactionId, setTransactionId] = useState("");
   const [error, setError] = useState("");
 
+  const validateVehicleNumber = (number) => {
+    const regex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
+    if (!regex.test(number)) {
+      setError("Invalid format! Use: MH-43-AR-0707");
+    } else {
+      setError("");
+    }
+  };
+
+  const formatVehicleNumber = (input) => {
+    let cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    let formatted = "";
+
+    if (cleaned.length > 0) formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) formatted += "-" + cleaned.substring(2, 4);
+    if (cleaned.length > 4) formatted += "-" + cleaned.substring(4, 6);
+    if (cleaned.length > 6) formatted += "-" + cleaned.substring(6, 10);
+
+    return formatted;
+  };
   const handlePaymentClick = () => {
     setShowPopup(true);
     setError("");
@@ -459,23 +462,32 @@ const DoBooking = () => {
                     <>
                       <select
                         name="vehicleNumber"
-                        value={selectedVehicle}
+                        value={selectedVehicle || ""}
                         onChange={(e) => {
                           const selected = e.target.value;
                           setSelectedVehicle(selected);
-                          setFormData({ ...formData, vehicleNumber: selected });
+
+                          if (selected !== "manual") {
+                            setFormData({
+                              ...formData,
+                              vehicleNumber: selected,
+                            });
+                          } else {
+                            setFormData({ ...formData, vehicleNumber: "" }); // clear box for manual entry
+                          }
                         }}
                         className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
                       >
                         <option value="">Select a vehicle</option>
                         {vehicles.map((vehicle) => (
                           <option
-                            key={vehicle.licensePlate}
+                            key={vehicle._id || vehicle.licensePlate}
                             value={vehicle.licensePlate}
                           >
                             {vehicle.licensePlate}
                           </option>
                         ))}
+
                         <option value="manual">Enter manually</option>
                       </select>
 
@@ -483,32 +495,24 @@ const DoBooking = () => {
                         <>
                           <input
                             type="text"
-                            name="vehicleNumber"
+                            placeholder="MH-43-AR-0707"
+                            className={`border p-2 rounded-lg ${
+                              error ? "border-red-500" : "border-gray-300"
+                            }`}
                             value={formData.vehicleNumber}
                             onChange={(e) => {
                               const formatted = formatVehicleNumber(
                                 e.target.value
                               );
-                              setFormData((prev) => ({
-                                ...prev,
+                              setFormData({
+                                ...formData,
                                 vehicleNumber: formatted,
-                              }));
-                              if (!validateVehicleNumber(formatted)) {
-                                setError("Invalid format! Use: MH-43-AR-0707");
-                              } else {
-                                setError("");
-                              }
+                              });
+                              validateVehicleNumber(formatted);
                             }}
-                            className={`mt-2 w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
-                              error
-                                ? "border-red-500"
-                                : "border-gray-300 dark:border-gray-600"
-                            }`}
-                            placeholder="Enter your vehicle number"
-                            required
                           />
                           {error && (
-                            <p className="text-red-500 text-sm mt-1">{error}</p>
+                            <p className="text-red-500 text-sm">{error}</p>
                           )}
                         </>
                       )}

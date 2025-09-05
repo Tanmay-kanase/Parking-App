@@ -177,13 +177,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                     >
                       <User size={18} className="mr-2" /> My Account
                     </a>
-                    <a
-                      href="settings"
-                      className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Settings size={18} className="mr-2" /> Settings
-                    </a>
+
                     <button
                       onClick={() => {
                         logout();
@@ -265,14 +259,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                 <User size={24} />
                 <span>My Account</span>
               </a>
-              <a
-                href="settings"
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-300"
-                onClick={() => setIsOpen(false)}
-              >
-                <Settings size={24} />
-                <span>Settings</span>
-              </a>
+
               <button
                 onClick={() => {
                   logout();
