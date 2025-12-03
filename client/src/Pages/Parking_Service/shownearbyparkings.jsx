@@ -15,9 +15,9 @@ import {
 
 export default function Shownearbyparkings() {
   const navigate = useNavigate();
-
+  const [flashId, setFlashId] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [selections, setSelections] = useState({});
   function getDistanceFromLatLng(lat1, lng1, lat2, lng2) {
     const R = 6371; // Radius of the earth in km
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -34,7 +34,21 @@ export default function Shownearbyparkings() {
   }
 
   const handleBooking = (parkingId, name) => {
-    navigate(`/do-booking?locID=${parkingId}&name=${name}`);
+    const selection = selections[parkingId];
+    if (!selection || !selection.vehicleType) {
+      setFlashId(parkingId);
+
+      // Remove the flash class after the animation completes (e.g., 1000ms for two flashes)
+      setTimeout(() => {
+        setFlashId(null);
+      }, 1400); // Wait for 2 x 0.5s animation duration
+      // alert("Please select a Vehicle Type and a Date/Time before proceeding.");
+      return;
+    }
+    const selectedVehicleType = selection.vehicleType;
+    navigate(
+      `/do-booking?locID=${parkingId}&name=${name}&vType=${selectedVehicleType}`
+    );
   };
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -72,6 +86,16 @@ export default function Shownearbyparkings() {
 
   console.log(parkings);
 
+  const handleVehicleChange = (locationId, vehicleType) => {
+    setSelections((prev) => ({
+      ...prev,
+      [locationId]: {
+        ...prev[locationId],
+        vehicleType,
+      },
+    }));
+  };
+
   if (loading)
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-sm transition-opacity duration-300">
@@ -97,29 +121,111 @@ export default function Shownearbyparkings() {
         <h2 className="text-3xl font-bold text-yellow-400 mb-6">
           Available Parkings in {searchLocation}
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {parkings.length > 0 ? (
-            parkings.map((parking) => (
-              <div
-                key={parking.slotId}
-                className="bg-gray-800 shadow-lg rounded-xl p-6 flex flex-col justify-between"
-              >
-                <h3 className="text-xl font-semibold text-gray-50">
-                  {parking.name}
-                </h3>
+            parkings.map((parking) => {
+              // Determine if the current card is the one flashing
+              const isFlashing = flashId === parking.locationId;
 
-                <p className="text-gray-400 text-lg font-semibold">
-                  📍 {parking.distance} km away
-                </p>
+              // Determine if another card is flashing (and this one should be dimmed)
+              const shouldBeDimmed = flashId !== null && !isFlashing;
+              return (
+                <div
+                  key={parking.slotId}
+                  className={`bg-gray-800 shadow-lg rounded-xl p-6 flex flex-col justify-between ${
+                    shouldBeDimmed ? "opacity-50 blur-[1px]" : ""
+                  }`}
+                >
+                  <h3 className="text-xl font-semibold text-gray-50">
+                    {parking.name}
+                  </h3>
 
-                <p className="text-gray-400 text-lg font-semibold">
-                  Total Slots: {parking.totalSlots}
-                </p>
+                  <p className="text-gray-400 text-lg font-semibold">
+                    📍 {parking.distance} km away
+                  </p>
 
-                <p className="text-gray-400 text-lg font-semibold">
+                  <p className="text-gray-400 text-lg font-semibold">
+                    Total Slots: {parking.totalSlots}
+                  </p>
+
+                  {/* Vehicle Type Selection (NEW) */}
+                  <div className="mb-4">
+                    <label
+                      htmlFor={`vehicle-${parking.locationId}`}
+                      className="block text-gray-300 font-semibold mb-1"
+                    >
+                      Available Parking :
+                    </label>
+                    <div
+                      className={`grid grid-cols-2 gap-2 text-sm font-semibold `}
+                    >
+                      {[
+                        {
+                          type: "bike",
+                          icon: FaMotorcycle,
+                          color: "text-blue-400",
+                          slots: parking.bikeSlots,
+                        },
+                        {
+                          type: "sedan",
+                          icon: FaCar,
+                          color: "text-green-500",
+                          slots: parking.sedanSlots,
+                        },
+                        {
+                          type: "truck",
+                          icon: FaTruck,
+                          color: "text-red-500",
+                          slots: parking.truckSlots,
+                        },
+                        {
+                          type: "bus",
+                          icon: FaBus,
+                          color: "text-yellow-500",
+                          slots: parking.busSlots,
+                        },
+                      ].map((v) => {
+                        const isSelected =
+                          selections[parking.locationId]?.vehicleType ===
+                          v.type;
+                        const Icon = v.icon;
+                        return (
+                          <button
+                            key={v.type}
+                            onClick={() =>
+                              handleVehicleChange(parking.locationId, v.type)
+                            }
+                            className={`flex items-center justify-center gap-2 p-2 rounded-lg transition duration-200 
+                            ${
+                              isSelected
+                                ? "bg-yellow-500 text-gray-900 shadow-lg"
+                                : "bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600"
+                            } p-1 transition-all duration-300 ${
+                              flashId === parking.locationId
+                                ? "animate-flash-glow border-2 border-yellow-500 rounded-lg scale-[1.05] shadow-2xl"
+                                : ""
+                            }`}
+                          >
+                            <Icon
+                              className={`${
+                                isSelected ? "text-gray-900" : v.color
+                              } text-lg`}
+                            />
+                            <span>{v.type}</span>
+                            <span className="text-blue-500 font-bold">
+                              {v.slots}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* <p className="text-gray-400 text-lg font-semibold">
                   Avail Slots :
                 </p>
-                {/* 🚗 Vehicle Slots Grid (2x2) */}
+                 🚗 Vehicle Slots Grid (2x2)
                 <div className="grid grid-cols-2 gap-3 text-sm font-semibold text-gray-300">
                   <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
                     <FaMotorcycle className="text-blue-400 text-lg" />
@@ -143,67 +249,68 @@ export default function Shownearbyparkings() {
                     <FaBus className="text-yellow-500 text-lg" />
                     <span>Bus: {parking.busSlots}</span>
                   </div>
+                </div> */}
+
+                  <p className="text-gray-400 text-lg font-semibold mb-2">
+                    Features
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* ⚡ EV Charging */}
+                    <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
+                      <FaChargingStation className="text-blue-400 text-lg" />
+                      <span>Charging:</span>
+                      {parking.evCharging ? (
+                        <FaCheckCircle className="text-green-500 text-lg" />
+                      ) : (
+                        <FaTimesCircle className="text-red-500 text-lg" />
+                      )}
+                    </div>
+
+                    {/* 📹 CCTV Camera */}
+                    <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
+                      <FaVideo className="text-yellow-500 text-lg" />
+                      <span>CCTV:</span>
+                      {parking.cctvCamera ? (
+                        <FaCheckCircle className="text-green-500 text-lg" />
+                      ) : (
+                        <FaTimesCircle className="text-red-500 text-lg" />
+                      )}
+                    </div>
+
+                    {/* 🚿 Washing */}
+                    <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
+                      <FaShower className="text-blue-300 text-lg" />
+                      <span>Washing:</span>
+                      {parking.washing ? (
+                        <FaCheckCircle className="text-green-500 text-lg" />
+                      ) : (
+                        <FaTimesCircle className="text-red-500 text-lg" />
+                      )}
+                    </div>
+                  </div>
+
+                  {parking.user && (
+                    <>
+                      <p className="text-gray-400">
+                        <strong>Owner:</strong> {parking.user.name}
+                      </p>
+                      <p className="text-gray-400">
+                        <strong>Phone:</strong> {parking.user.phone}
+                      </p>
+                    </>
+                  )}
+                  <button
+                    className="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
+                    // disabled={!parking.available}
+                    onClick={() =>
+                      handleBooking(parking.locationId, parking.name)
+                    }
+                  >
+                    Park Here ...
+                  </button>
                 </div>
-
-                <p className="text-gray-400 text-lg font-semibold mb-2">
-                  Features
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* ⚡ EV Charging */}
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaChargingStation className="text-blue-400 text-lg" />
-                    <span>Charging:</span>
-                    {parking.evCharging ? (
-                      <FaCheckCircle className="text-green-500 text-lg" />
-                    ) : (
-                      <FaTimesCircle className="text-red-500 text-lg" />
-                    )}
-                  </div>
-
-                  {/* 📹 CCTV Camera */}
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaVideo className="text-yellow-500 text-lg" />
-                    <span>CCTV:</span>
-                    {parking.cctvCamera ? (
-                      <FaCheckCircle className="text-green-500 text-lg" />
-                    ) : (
-                      <FaTimesCircle className="text-red-500 text-lg" />
-                    )}
-                  </div>
-
-                  {/* 🚿 Washing */}
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaShower className="text-blue-300 text-lg" />
-                    <span>Washing:</span>
-                    {parking.washing ? (
-                      <FaCheckCircle className="text-green-500 text-lg" />
-                    ) : (
-                      <FaTimesCircle className="text-red-500 text-lg" />
-                    )}
-                  </div>
-                </div>
-
-                {parking.user && (
-                  <>
-                    <p className="text-gray-400">
-                      <strong>Owner:</strong> {parking.user.name}
-                    </p>
-                    <p className="text-gray-400">
-                      <strong>Phone:</strong> {parking.user.phone}
-                    </p>
-                  </>
-                )}
-                <button
-                  className="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-                  // disabled={!parking.available}
-                  onClick={() =>
-                    handleBooking(parking.locationId, parking.name)
-                  }
-                >
-                  Park Here ...
-                </button>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="text-gray-400 col-span-full">
               No parking slots available at this location.

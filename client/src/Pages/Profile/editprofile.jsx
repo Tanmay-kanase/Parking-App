@@ -8,7 +8,7 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   const queryParams = new URLSearchParams(location.search);
-  const userId = queryParams.get("userId"); // ✅ get userId from URL
+  const userId = queryParams.get("userId");
 
   const [user, setUser] = useState({
     name: "",

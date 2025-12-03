@@ -2,30 +2,6 @@ import { useEffect, useState } from "react";
 import { FaCar, FaMoneyBill, FaClock, FaParking } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import axios from "../../config/axiosInstance";
-// const parkingHistory = [
-//   {
-//     history_id: "HIST001",
-//     userId: "USER123",
-//     vehicleId: "VEH456",
-//     parking_lotid: "LOT789",
-//     slotId: "SLOT101",
-//     paymentId: "PAY202",
-//     entryTime: "2025-03-22 10:00 AM",
-//     exitTime: "2025-03-22 12:30 PM",
-//     amountPaid: "$15",
-//   },
-//   {
-//     history_id: "HIST002",
-//     userId: "USER789",
-//     vehicleId: "VEH321",
-//     parking_lotid: "LOT555",
-//     slotId: "SLOT505",
-//     paymentId: "PAY808",
-//     entryTime: "2025-03-20 09:00 AM",
-//     exitTime: "2025-03-20 11:00 AM",
-//     amountPaid: "$12",
-//   },
-// ];
 
 const ParkingHistory = () => {
   const { user, loading } = useAuth(); // get current user

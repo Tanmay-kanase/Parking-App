@@ -1,22 +1,21 @@
 package com.example.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.model.ParkingSlot;
-import com.example.service.EmailService;
 import com.example.service.ParkingSlotService;
 import com.example.repository.ParkingSlotRepository;
 import java.util.List;
 import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/parking-slots")
 public class ParkingSlotController {
-
-    @Autowired
-    private EmailService emailService;
 
     @Autowired
     private ParkingSlotService parkingSlotService;
@@ -32,8 +31,7 @@ public class ParkingSlotController {
     @GetMapping("/{slotId}")
     public ResponseEntity<ParkingSlot> getSlotById(@PathVariable String slotId) {
         Optional<ParkingSlot> slot = parkingSlotService.getSlotById(slotId);
-        return slot.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return slot.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
@@ -61,7 +59,8 @@ public class ParkingSlotController {
     }
 
     @PutMapping("/{slotId}")
-    public ResponseEntity<ParkingSlot> updateSlot(@PathVariable String slotId, @RequestBody ParkingSlot updatedSlot) {
+    public ResponseEntity<ParkingSlot> updateSlot(@PathVariable String slotId,
+            @RequestBody ParkingSlot updatedSlot) {
         try {
             System.out.println("\n\n\nBooking started\n\n\n");
             ParkingSlot slot = parkingSlotService.updateSlot(slotId, updatedSlot);
@@ -78,9 +77,37 @@ public class ParkingSlotController {
     }
 
     @PostMapping("/batch")
-public ResponseEntity<?> addParkingSlots(@RequestBody List<ParkingSlot> slots) {
-    List<ParkingSlot> savedSlots = parkingSlotRepository.saveAll(slots);
-    return ResponseEntity.ok(savedSlots);
-}
+    public ResponseEntity<?> addParkingSlots(@RequestBody List<ParkingSlot> slots) {
+        List<ParkingSlot> savedSlots = parkingSlotRepository.saveAll(slots);
+        return ResponseEntity.ok(savedSlots);
+    }
+
+    @GetMapping("/available-by-time")
+    public ResponseEntity<List<ParkingSlot>> getAvailableSlotsByTime(@RequestParam String parkingId,
+            @RequestParam String vehicleType, @RequestParam String startTime,
+            @RequestParam String endTime) {
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            Date start = sdf.parse(startTime);
+            Date end = sdf.parse(endTime);
+            System.out.println("Available Tiem" + parkingId + " " + vehicleType + " " + startTime
+                    + " " + endTime);
+            List<ParkingSlot> availableSlots =
+                    parkingSlotService.getAvailableSlotsByTime(parkingId, vehicleType, start, end);
+            System.out.println("AvailableSlots : " + availableSlots);
+            return ResponseEntity.ok(availableSlots);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/availableByVehicle")
+    public List<ParkingSlot> getAvailableSlots(@RequestParam String parkingId,
+            @RequestParam String vehicleType,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime) {
+        return parkingSlotService.getAvailableSlots(parkingId, vehicleType, startTime, endTime);
+    }
 
 }
