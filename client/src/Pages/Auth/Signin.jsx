@@ -4,6 +4,8 @@ import axios from "axios";
 import { useAuth } from "../../context/AuthContext"; // Changed from useAuth to useAuth based on your SignUpForm
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Signin = () => {
   const { login, setUser } = useAuth(); // fetchUser is not directly used here
   const [email, setEmail] = useState("");
@@ -14,17 +16,8 @@ const Signin = () => {
 
   const navigate = useNavigate();
 
-  // Function to display error message temporarily
-  const showError = (msg) => {
-    setError(msg);
-    setTimeout(() => setError(""), 5000); // Hide error after 5 seconds
-  };
-
-  // Function to display success/info message temporarily
-  const showMessage = (msg) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(""), 5000); // Hide message after 5 seconds
-  };
+  const showError = (msg) => toast.error(msg);
+  const showMessage = (msg) => toast.success(msg);
 
   // Handle traditional email/password login
   const handleLogin = async (e) => {
@@ -276,6 +269,7 @@ const Signin = () => {
           </p>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
     </div>
   );
 };

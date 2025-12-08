@@ -1,16 +1,29 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Regular */
 @font-face {
   font-family: "Cascadia Code";
-  src: url("public/fonts/CascadiaCode.woff2") format("woff2"),
-    url("public/fonts/CascadiaCode.woff") format("woff");
+  src: url("/fonts/CascadiaCode.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
 
+/* Mono (optional) */
 @font-face {
-  font-family: "Cascadia Code";
-  src: url("public/fonts/CascadiaCode-Bold.woff2") format("woff2");
-  font-weight: 700;
+  font-family: "Cascadia Mono";
+  src: url("/fonts/CascadiaMono.ttf") format("truetype");
+  font-weight: 400;
   font-style: normal;
+}
+
+/* Powerline (optional) */
+@font-face {
+  font-family: "Cascadia Code PL";
+  src: url("/fonts/CascadiaCodePL.ttf") format("truetype");
+}
+
+/* Apply the font globally */
+* {
+  font-family: "Cascadia Code", monospace;
 }

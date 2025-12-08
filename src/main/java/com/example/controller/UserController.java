@@ -39,7 +39,8 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User updatedUser) {
+    public ResponseEntity<User> updateUser(@PathVariable String userId,
+            @RequestBody User updatedUser) {
         User user = userService.updateUser(userId, updatedUser);
         return ResponseEntity.ok(user);
     }
@@ -55,79 +56,87 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-public ResponseEntity<?> signup(@RequestBody Map<String, String> request, HttpServletResponse response) {
-    String name = request.get("name");
-    String email = request.get("email");
-    String password = request.get("password");
-    String photo = request.get("photo");
-    String role = request.get("role");
-    String phone = request.get("phone");
+    public ResponseEntity<?> signup(@RequestBody Map<String, String> request,
+            HttpServletResponse response) {
+        String name = request.get("name");
+        String email = request.get("email");
+        String password = request.get("password");
+        String photo = request.get("photo");
+        String role = request.get("role");
+        String phone = request.get("phone");
 
-    if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
-        return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
-    }
+        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email and password are required"));
+        }
 
-    if (userRepository.findByEmail(email).isPresent()) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "User already exists"));
-    }
+        if (userRepository.findByEmail(email).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "User already exists"));
+        }
 
-    User user = new User();
-    user.setUserId(UUID.randomUUID().toString());
-    user.setName(name);
-    user.setEmail(email);
-    user.setPhoto(photo);
-    user.setPhone(phone);
-    user.setRole(role);
-    user.setPassword(password);
-    try{
-      Map<String, Object> result = userService.registerUser(user);
-        return ResponseEntity.ok(result);
-        
-    } catch (RuntimeException e){
-      System.out.println(e.getMessage());
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
+        User user = new User();
+        user.setUserId(UUID.randomUUID().toString());
+        user.setName(name);
+        user.setEmail(email);
+        user.setPhoto(photo);
+        user.setPhone(phone);
+        user.setRole(role);
+        user.setPassword(password);
+        try {
+            Map<String, Object> result = userService.registerUser(user);
+            return ResponseEntity.ok(result);
+
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", e.getMessage()));
+        }
     }
-}
 
 
 
     @PostMapping("/login")
-public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData, HttpServletResponse response) {
-    try {
-        Map<String, Object> result = userService.loginUser(loginData.get("email"), loginData.get("password"));
-        return ResponseEntity.ok(result);
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
-    }
-}
-
-// UserController.java
-
-@GetMapping("/me")
-public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required = false) String token) {
-    if (token == null || token.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "No token provided"));
-    }
-
-    try {
-        String userId = jwtUtil.extractUserId(token);
-        User user = userRepository.findById(userId).orElse(null);
-
-        if (user == null) {
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData,
+            HttpServletResponse response) {
+        try {
+            Map<String, Object> result =
+                    userService.loginUser(loginData.get("email"), loginData.get("password"));
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "User not found"));
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // UserController.java
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(
+            @CookieValue(value = "token", required = false) String token) {
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "No token provided"));
         }
 
-        // Remove sensitive info before sending
-        user.setPassword(null);  // to avoid sending password
+        try {
+            String userId = jwtUtil.extractUserId(token);
+            User user = userRepository.findById(userId).orElse(null);
 
-        return ResponseEntity.ok(user);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Invalid token"));
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "User not found"));
+            }
+
+            // Remove sensitive info before sending
+            user.setPassword(null); // to avoid sending password
+
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid token"));
+        }
     }
-}
 
 
     @PostMapping("/send-otp")
@@ -139,7 +148,7 @@ public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required =
 
         try {
             String otp = emailService.sendOtpEmail(email);
-            return ResponseEntity.ok(Map.of("message", "OTP sent successfully " , "otp", otp));
+            return ResponseEntity.ok(Map.of("message", "OTP sent successfully ", "otp", otp));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to send OTP"));
@@ -187,40 +196,42 @@ public ResponseEntity<?> getCurrentUser(@CookieValue(value = "token", required =
     }
 
     @PostMapping("/google-login")
-public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request) {
-    String email = request.get("email");
-    String name = request.get("name");
-    String photo = request.get("photo");
-    String password = request.get("password");
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String name = request.get("name");
+        String photo = request.get("photo");
+        String password = request.get("password");
 
-    if (email == null || email.isEmpty()) {
-        return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
-    }
-
-    Optional<User> userOpt = userRepository.findByEmail(email);
-
-    try {
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
-            Map<String, Object> result = Map.of("token", token, "user", user);
-            return ResponseEntity.ok(result);
-        } else {
-            User user = new User();
-            user.setUserId(UUID.randomUUID().toString());
-            user.setName(name);
-            user.setEmail(email);
-            user.setPhoto(photo);
-            user.setRole("user");
-            user.setPassword(passwordEncoder.encode(password));
-            Map<String, Object> result = userService.registerUser(user);
-            return ResponseEntity.ok(result); // returns token and user
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email and password are required"));
         }
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
-    }
-}
 
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        try {
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                String token =
+                        jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+                Map<String, Object> result = Map.of("token", token, "user", user);
+                return ResponseEntity.ok(result);
+            } else {
+                User user = new User();
+                user.setUserId(UUID.randomUUID().toString());
+                user.setName(name);
+                user.setEmail(email);
+                user.setPhoto(photo);
+                user.setRole("user");
+                user.setPassword(passwordEncoder.encode(password));
+                Map<String, Object> result = userService.registerUser(user);
+                return ResponseEntity.ok(result); // returns token and user
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
 
 
 
@@ -244,9 +255,9 @@ public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request) {
         cookie.setSecure(true); // same as login
         cookie.setPath("/");
         cookie.setMaxAge(0); // delete the cookie
-    
+
         response.addCookie(cookie);
-    
+
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 

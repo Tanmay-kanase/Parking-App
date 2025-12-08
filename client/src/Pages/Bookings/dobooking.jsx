@@ -13,7 +13,7 @@ const DoBooking = () => {
   const locationId = params.get("locID");
   const name = params.get("name");
 
-  const [message, setMessage] = useState("Processing your booking...");
+  const [message, setMessage] = useState("Getting Parkings ...");
   const [loadingbooking, setLoadingBooking] = useState(false);
   const [spots, setSpots] = useState([]); // Grouped slots by vehicle type
   const [selectedSpot, setSelectedSpot] = useState(null); // The slot selected in the UI grid
@@ -404,9 +404,9 @@ const DoBooking = () => {
         {/* 5. Time and Vehicle Selection Area (NEW) */}
         <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
           <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Select Date & Time 
+            Select Date & Time
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2  md:grid-cols-4 gap-4">
             {/* Start Time */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -474,7 +474,10 @@ const DoBooking = () => {
 
         {/* 6. Slot Grid Display (Updated to show all slots and allow selection) */}
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Select an Available Slot
+          Select an Available Slot{" "}
+          <span className="text-sm italic">
+            * Only slots note booked by anyone shows
+          </span>
         </h3>
         <div className="grid grid-cols-1 gap-6">
           {spots.length > 0 ? (
@@ -713,7 +716,7 @@ const DoBooking = () => {
                 Scan QR & Pay
               </h2>
               <img
-                src="public/5aad3715-5a2d-47da-992c-18ac3f6799dd_GooglePay_QR.png"
+                src="/5aad3715-5a2d-47da-992c-18ac3f6799dd_GooglePay_QR.png"
                 alt="QR Code for Payment"
                 className="mx-auto mb-4 w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg"
               />

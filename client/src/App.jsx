@@ -27,6 +27,7 @@ import Signup from "./Pages/Auth/Signup";
 import Signin from "./Pages/Auth/Signin";
 import axios from "axios";
 import SystemArchitecture from "./Pages/Architecture/SystemArchitecture";
+import Demo from "./Pages/Auth/Demo";
 
 function App() {
   const { user, loading } = useAuth();
@@ -72,7 +73,7 @@ function App() {
         <Route path="/show-parkings" element={<ShowParkings />} />
         <Route path="signup" element={<Signup />} />
         <Route path="/arch" element={<SystemArchitecture />} />
-
+        <Route path="/demo" element={<Demo />} />
         {/* Protected Routes - Any Authenticated User */}
         <Route
           path="/verify"

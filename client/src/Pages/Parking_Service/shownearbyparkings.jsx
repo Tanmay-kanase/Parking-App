@@ -12,9 +12,12 @@ import {
   FaVideo,
   FaChargingStation,
 } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Shownearbyparkings() {
   const navigate = useNavigate();
+  const showError = (msg) => toast.error(msg);
   const [flashId, setFlashId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selections, setSelections] = useState({});
@@ -130,6 +133,7 @@ export default function Shownearbyparkings() {
 
               // Determine if another card is flashing (and this one should be dimmed)
               const shouldBeDimmed = flashId !== null && !isFlashing;
+              if (isFlashing) showError("Select one of the vehicle type");
               return (
                 <div
                   key={parking.slotId}
@@ -318,6 +322,15 @@ export default function Shownearbyparkings() {
           )}
         </div>
       </div>
+      <ToastContainer
+        position="bottom-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 }

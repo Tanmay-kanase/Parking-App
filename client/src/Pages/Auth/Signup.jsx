@@ -4,10 +4,13 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext"; // Assuming this path is correct
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Signup = () => {
   // State variables
   const [otpVisible, setOtpVisible] = useState(false);
+  const [generatedOtp, setGeneratedOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [otp, setOtp] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false); // Renamed for clarity
@@ -24,17 +27,8 @@ const Signup = () => {
   const navigate = useNavigate();
 
   // Function to display error message temporarily
-  const showError = (msg) => {
-    setError(msg);
-    setTimeout(() => setError(""), 5000); // Hide error after 5 seconds
-  };
-
-  // Function to display success/info message temporarily
-  const showMessage = (msg) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(""), 5000); // Hide message after 5 seconds
-  };
-
+  const showError = (msg) => toast.error(msg);
+  const showMessage = (msg) => toast.success(msg);
   // Handle sending OTP
   const handleSendOtp = async () => {
     if (!email) {
@@ -53,7 +47,8 @@ const Signup = () => {
       );
       if (res.data.message) {
         setOtpVisible(true);
-        showMessage("OTP sent to your email!");
+        setGeneratedOtp(res.data.otp);
+        showMessage(`OTP Sent ! ${res.data.otp}`);
       }
     } catch (err) {
       showError(
@@ -64,35 +59,26 @@ const Signup = () => {
     }
   };
 
-  // Handle verifying OTP
   const handleVerifyOtp = async () => {
     if (!otp) {
       showError("Please enter the OTP.");
       return;
     }
+
     setIsVerifyingOtp(true);
-    setError("");
-    setMessage("");
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/verify-otp`,
-        {
-          email: email,
-          otp,
-        }
-      );
-      if (res.data.verified) {
+
+    setTimeout(() => {
+      if (otp === generatedOtp.toString()) {
         setOtpVerified(true);
-        setOtpVisible(false); // Hide OTP input after verification
-        showMessage("✅ Email verified successfully!");
+        setOtpVisible(false);
+
+        showMessage("Email verified successfully!");
       } else {
-        showError("❌ Invalid OTP. Please try again.");
+        showError("Invalid OTP. Please try again.");
       }
-    } catch (err) {
-      showError(err.response?.data?.message || "OTP verification failed.");
-    } finally {
+
       setIsVerifyingOtp(false);
-    }
+    }, 500); // small delay for UI feel
   };
 
   // Handle form submission (user signup)
@@ -212,18 +198,6 @@ const Signup = () => {
           </h1>
 
           <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
-            {/* Error and Message Display */}
-            {error && (
-              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300 dark:bg-red-950 dark:border-red-700 dark:text-red-300">
-                <p className="font-semibold text-sm">{error}</p>
-              </div>
-            )}
-            {message && (
-              <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-md animate-fade-in-down transition-all duration-300 dark:bg-green-950 dark:border-green-700 dark:text-green-300">
-                <p className="font-semibold text-sm">{message}</p>
-              </div>
-            )}
-
             {/* Full Name Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -647,6 +621,15 @@ const Signup = () => {
           </p>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 };

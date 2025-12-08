@@ -30,13 +30,16 @@ public class BookingController {
         try {
             Booking savedBooking = bookingService.createBooking(booking);
 
-            // ✅ Compose the email HTML
-         //   String subject = "Your Parking Slot Booking is Confirmed!";
-          //  String emailContent = emailTemplateService.generateBookingTemplate(savedBooking); // You’ll create this
-                                                                                              // method
+            // Compose the email HTML
+            String subject = "Your Parking Slot Booking is Confirmed!";
+            String emailContent = emailTemplateService.generateBookingTemplate(savedBooking); // You’ll
+                                                                                              // create
+                                                                                              // this
 
-            // ✅ Send email
-          //  emailService.sendBookingConfirmation(booking.getEmail(), subject, emailContent, savedBooking);
+
+            // Send email
+            emailService.sendBookingConfirmation(booking.getEmail(), subject, emailContent,
+                    savedBooking);
 
             System.out.println("Booking confirmation email sent to " + booking.getEmail());
 
