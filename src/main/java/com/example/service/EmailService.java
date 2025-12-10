@@ -30,7 +30,7 @@ public class EmailService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String emailServiceBaseUrl = "http://localhost:3000";
+    public String emailServiceBaseUrl = "http://52.66.43.122:3000";
 
     private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
 
