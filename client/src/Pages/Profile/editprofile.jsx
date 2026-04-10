@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaLock, FaMapMarkerAlt } from "react-icons/fa";
 import axios from "../../config/axiosInstance";
-
+import { useAuth } from "../../context/AuthContext";
 const EditProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
   const queryParams = new URLSearchParams(location.search);
   const userId = queryParams.get("userId");
 
@@ -68,12 +67,14 @@ const EditProfile = () => {
 
   const updateUser = async () => {
     try {
-      await axios.put(
+      const response = await axios.put(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`,
-        user
+        user,
       );
+      localStorage.setItem("user", JSON.stringify(response.data));
       alert("Profile updated successfully!");
       navigate("/profile");
+      window.location.reload();
     } catch (error) {
       console.error("Error updating user:", error);
       alert("Failed to update profile!");
@@ -87,7 +88,7 @@ const EditProfile = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`,
         );
         setUser(response.data);
       } catch (error) {
@@ -103,7 +104,7 @@ const EditProfile = () => {
     const fetchVehicles = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${userId}`,
         );
         setVehicles(res.data);
       } catch (error) {
@@ -123,7 +124,7 @@ const EditProfile = () => {
         const res = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_URL
-          }/api/parking-locations/user/${userId}`
+          }/api/parking-locations/user/${userId}`,
         );
         setParkings(res.data);
       } catch (error) {
@@ -134,7 +135,6 @@ const EditProfile = () => {
     fetchParkings();
   }, [user.role, userId]);
 
-  
   return (
     // Main container with dark mode background and text colors
     <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -298,7 +298,7 @@ const EditProfile = () => {
                       key={p.locationId}
                       onClick={() =>
                         navigate(
-                          `/upload-parking-slots?locationId=${p.locationId}&name=${p.name}`
+                          `/upload-parking-slots?locationId=${p.locationId}&name=${p.name}`,
                         )
                       }
                       className="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6 border border-gray-200 dark:border-gray-600 hover:shadow-xl dark:hover:bg-gray-600 transition cursor-pointer"

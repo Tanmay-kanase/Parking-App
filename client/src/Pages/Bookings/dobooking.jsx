@@ -53,6 +53,81 @@ const DoBooking = () => {
     // Dependency array is empty so it runs only once on mount
     // It depends on filterData being set in the initial state.
   }, []);
+
+  const handlePayment = async () => {
+    try {
+      // Step 1: Create order
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/payments/create-order`,
+        {
+          amount: 500,
+        },
+      );
+
+      const order = response.data;
+      console.log("ORDER:", order);
+      // Step 2: Razorpay options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEYID,
+        amount: order.amount,
+        currency: "INR",
+        name: "Parking App",
+        description: "Parking Slot Booking",
+        order_id: order.id,
+
+        handler: async function (response) {
+          // 👇 THIS IS WHAT YOU NEED
+          const bookingPayload = {
+            userId: user.userId,
+            email: user.email,
+            slotId: selectedSpot.slotId,
+            slotNumber: selectedSpot.slotNumber,
+            location: selectedSpot.location,
+            vehicleNumber: formData.vehicleNumber,
+            vehicleType: selectedSpot.vehicleType,
+            paymentMethod: formData.paymentMethod,
+            transactionId: response.razorpay_payment_id,
+            amount: order.amount,
+            startTime: formData.startTime,
+            endTime: formData.endTime,
+
+            // 🔥 REQUIRED FOR VERIFICATION
+            orderId: response.razorpay_order_id,
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+          };
+
+          await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/api/bookings/complete`,
+            bookingPayload,
+          );
+
+          navigate("/booking");
+        },
+
+        prefill: {
+          name: "Tanmay",
+          email: "test@gmail.com",
+          contact: "9999999999",
+        },
+
+        theme: {
+          color: "#FACC15",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      rzp.open();
+
+      rzp.on("payment.failed", function (response) {
+        console.error("FAILED:", response);
+        alert(response.error.description);
+      });
+    } catch (error) {
+      console.error("Payment failed", error);
+    }
+  };
   const getInitialDateTimeLocal = () => {
     const now = new Date();
 
@@ -93,12 +168,13 @@ const DoBooking = () => {
   }
 
   // --- Vehicle Logic (Kept mostly unchanged) ---
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (!user || !user.userId) return;
     if (user.userId) {
       axios
         .get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${user.userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${user.userId}`,
         )
         .then((response) => {
           const data = response.data;
@@ -144,7 +220,7 @@ const DoBooking = () => {
     // Check if essential data is set before payment
     if (!selectedSpot || !formData.startTime || !formData.vehicleNumber) {
       alert(
-        "Please select a slot, specify a vehicle number, and set the booking time."
+        "Please select a slot, specify a vehicle number, and set the booking time.",
       );
       return;
     }
@@ -163,7 +239,7 @@ const DoBooking = () => {
     // Safety check for null times
     if (!formData.startTime || !formData.endTime) {
       setError(
-        "Booking times are missing. Please set Start Time and Duration."
+        "Booking times are missing. Please set Start Time and Duration.",
       );
       return;
     }
@@ -179,7 +255,7 @@ const DoBooking = () => {
         }`,
         {
           available: false, // Update availability status
-        }
+        },
       );
 
       // 2. Post to Parking History
@@ -197,7 +273,7 @@ const DoBooking = () => {
           amountPaid: (
             selectedSpot.pricePerHour * parseFloat(formData.time)
           ).toFixed(2),
-        }
+        },
       );
 
       // 3. Post to Payments
@@ -230,7 +306,7 @@ const DoBooking = () => {
 
       await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/bookings`,
-        BookingData
+        BookingData,
       );
 
       navigate("/booking");
@@ -266,7 +342,7 @@ const DoBooking = () => {
 
       // 3. Calculate the end time in UTC
       const utcEnd = new Date(
-        utcStart.getTime() + durationHours * 60 * 60 * 1000
+        utcStart.getTime() + durationHours * 60 * 60 * 1000,
       );
 
       // 4. Create the final ISO strings for the API
@@ -343,7 +419,7 @@ const DoBooking = () => {
         // Calculate end time
         const endUTC = new Date(start.getTime() + duration * 60 * 60 * 1000);
         const localEndTime = new Date(
-          endUTC.getTime() - endUTC.getTimezoneOffset() * 60000
+          endUTC.getTime() - endUTC.getTimezoneOffset() * 60000,
         );
         const calculatedEndTime = localEndTime.toISOString().slice(0, 16);
 
@@ -496,7 +572,7 @@ const DoBooking = () => {
                   <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
                     {slots.map(
                       (
-                        slot // Show ALL slots
+                        slot, // Show ALL slots
                       ) => (
                         <div
                           key={slot.slotId}
@@ -514,7 +590,7 @@ const DoBooking = () => {
                               setSelectedSpot(slot);
                             } else if (!formData.startTime) {
                               alert(
-                                "Please select a Start Time and Duration first."
+                                "Please select a Start Time and Duration first.",
                               );
                             }
                           }}
@@ -526,7 +602,7 @@ const DoBooking = () => {
                             {`$${slot.pricePerHour}/hr`}
                           </span>
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
@@ -545,7 +621,7 @@ const DoBooking = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handlePaymentClick();
+                handlePayment();
               }}
               className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg relative"
             >
@@ -643,7 +719,7 @@ const DoBooking = () => {
                             value={formData.vehicleNumber}
                             onChange={(e) => {
                               const formatted = formatVehicleNumber(
-                                e.target.value
+                                e.target.value,
                               );
                               setFormData({
                                 ...formData,
@@ -698,10 +774,10 @@ const DoBooking = () => {
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  onClick={handlePayment}
                   className="w-full sm:w-auto bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
                 >
-                  Proceed to Payment
+                  Proceed to Payments
                 </button>
               </div>
             </form>

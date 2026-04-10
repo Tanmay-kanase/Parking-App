@@ -2,6 +2,7 @@ package com.example.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
@@ -12,6 +13,8 @@ public class Payment {
     private String paymentId;
     private String userId;
     private double amount;
+    @Indexed(unique = true)
+    private String transactionId;
     private String paymentMethod; // "credit_card", "paypal"
     private String status; // "completed", "failed"
     private Date paymentTime;

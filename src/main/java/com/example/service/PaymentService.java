@@ -6,6 +6,7 @@ import com.example.model.Payment;
 import com.example.repository.PaymentRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -17,11 +18,14 @@ public class PaymentService {
         return paymentRepository.findByUserId(userId);
     }
 
+    
+
     public List<Payment> getPaymentsByStatus(String status) {
         return paymentRepository.findByStatus(status);
     }
+
     public Payment savePayment(Payment payment) {
-    return paymentRepository.save(payment);
-}
+        return paymentRepository.save(payment);
+    }
 
 }

@@ -28,6 +28,7 @@ import Signin from "./Pages/Auth/Signin";
 import axios from "axios";
 import SystemArchitecture from "./Pages/Architecture/SystemArchitecture";
 import Demo from "./Pages/Auth/Demo";
+import PaymentsPage from "./Pages/Paments/Payments";
 
 function App() {
   const { user, loading } = useAuth();
@@ -107,7 +108,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         {/* Protected Routes - User Only */}
         <Route
           path="/booking"
@@ -133,14 +133,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/payments"
-          element={
-            <ProtectedRoute allowedRoles={["user"]}>
-              <Payments />
-            </ProtectedRoute>
-          }
-        />
 
         {/* Protected Routes - Parking Owner and Admin */}
         <Route
@@ -148,6 +140,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
               <UploadParkingLocations />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
+              <PaymentsPage />
             </ProtectedRoute>
           }
         />
@@ -159,7 +160,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         {/* Protected Routes - Admin Only */}
         <Route
           path="/admin"

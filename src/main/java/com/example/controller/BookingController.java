@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.dto.CompleteBookingRequest;
 import com.example.model.Booking;
 import com.example.service.BookingService;
 import com.example.service.EmailService;
@@ -36,7 +38,6 @@ public class BookingController {
                                                                                               // create
                                                                                               // this
 
-
             // Send email
             emailService.sendBookingConfirmation(booking.getEmail(), subject, emailContent,
                     savedBooking);
@@ -68,5 +69,17 @@ public class BookingController {
     @DeleteMapping("/{bookingId}")
     public void deleteBooking(@PathVariable String bookingId) {
         bookingService.deleteBooking(bookingId);
+    }
+
+    @PostMapping("/complete")
+    public ResponseEntity<?> completeBooking(@RequestBody CompleteBookingRequest request) {
+        try {
+
+            Booking booking = bookingService.completeBooking(request);
+            return ResponseEntity.ok(booking);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Booking failed: " + e.getMessage());
+        }
     }
 }

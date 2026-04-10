@@ -19,9 +19,7 @@ const Signup = () => {
   const [error, setError] = useState(""); // For general error messages
   const [message, setMessage] = useState(""); // For success/info messages (replaces alerts)
 
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false); // For user registration loading
-  const [imageUploading, setImageUploading] = useState(false); // For image upload loading
 
   const { setUser } = useAuth(); // fetchUser is not used in the provided snippet
   const navigate = useNavigate();
@@ -43,7 +41,7 @@ const Signup = () => {
         `${import.meta.env.VITE_BACKEND_URL}/api/users/send-otp`,
         {
           email: email,
-        }
+        },
       );
       if (res.data.message) {
         setOtpVisible(true);
@@ -52,7 +50,7 @@ const Signup = () => {
       }
     } catch (err) {
       showError(
-        err.response?.data?.message || "Failed to send OTP. Please try again."
+        err.response?.data?.message || "Failed to send OTP. Please try again.",
       );
     } finally {
       setIsSendingOtp(false);
@@ -92,7 +90,6 @@ const Signup = () => {
     const fullName = formData.get("fullName");
     const password = formData.get("password");
     const confirmPassword = formData.get("confirmPassword");
-    const imageFile = formData.get("profileImage");
     const phone = formData.get("phone");
     const role = formData.get("role");
 
@@ -120,46 +117,6 @@ const Signup = () => {
       return;
     }
 
-    let profileUrl = "";
-
-    try {
-      if (imageFile && imageFile.name) {
-        // Check if a file is actually selected
-        setImageUploading(true);
-        const imageRef = ref(
-          storage,
-          `profiles/${Date.now()}-${imageFile.name}`
-        );
-        const uploadTask = uploadBytesResumable(imageRef, imageFile);
-
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadProgress(Math.round(progress));
-            },
-            (err) => {
-              setImageUploading(false);
-              reject(err);
-            },
-            async () => {
-              profileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              setImageUploading(false);
-              resolve();
-            }
-          );
-        });
-      }
-    } catch (uploadError) {
-      console.error("Image upload failed:", uploadError);
-      showError("Failed to upload profile image. Please try again.");
-      setImageUploading(false);
-      setLoading(false);
-      return;
-    }
-
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
@@ -168,9 +125,9 @@ const Signup = () => {
           email: email, // Use submittedEmail
           phone,
           password,
-          photo: profileUrl,
+          photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
           role,
-        }
+        },
       );
 
       localStorage.setItem("token", response.data.token);
@@ -223,36 +180,6 @@ const Signup = () => {
                 required
               />
             </div>
-
-            {/* Profile Image Input */}
-            <div className="relative">
-              <label
-                htmlFor="profileImage"
-                className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
-              >
-                Profile Image (Optional)
-              </label>
-              <input
-                type="file"
-                name="profileImage"
-                id="profileImage"
-                accept="image/*"
-                className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
-              />
-            </div>
-
-            {/* Upload Progress Bar */}
-            {imageUploading && uploadProgress > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden dark:bg-gray-700">
-                <div
-                  className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-                <p className="text-xs text-gray-600 mt-1 text-center dark:text-gray-400">
-                  {uploadProgress}% Uploaded
-                </p>
-              </div>
-            )}
 
             {/* Email Input with OTP functionality */}
             <div className="flex flex-col sm:flex-row bg-gray-50 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:focus-within:ring-blue-600 dark:focus-within:border-blue-600">
@@ -467,6 +394,8 @@ const Signup = () => {
                 type="tel" // Changed to tel for semantic correctness
                 name="phone"
                 id="phone"
+                min={10}
+                max={10}
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm transition-all duration-200 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="Phone Number (e.g., 1234567890)"
                 required
@@ -553,34 +482,9 @@ const Signup = () => {
             <button
               type="submit"
               className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-lg px-6 py-3.5 text-center transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-              disabled={
-                loading || imageUploading || isSendingOtp || isVerifyingOtp
-              }
+              disabled={loading || isSendingOtp || isVerifyingOtp}
             >
-              {imageUploading ? (
-                <>
-                  <svg
-                    className="w-5 h-5 animate-spin text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    />
-                  </svg>
-                  Uploading Image... ({uploadProgress}%)
-                </>
-              ) : loading ? (
+              {loading ? (
                 <>
                   <svg
                     className="w-5 h-5 animate-spin text-white"
