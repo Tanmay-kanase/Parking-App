@@ -27,40 +27,40 @@ const DoBooking = () => {
 
   // --- Initial Form Data Calculation ---
   // This runs once on mount to populate formData based on initial filterData
+  // --- Initial Form Data Calculation ---
   useEffect(() => {
-    // 1. Get the initial values
-    const startString = filterData.startTime;
+    const startString = filterData.startTime; // e.g. "2026-04-23T13:00"
     const duration = parseFloat(filterData.duration);
 
-    // 2. Calculate End Time
     if (startString && duration > 0) {
-      // Treat the local input string as UTC for accurate time calculation
-      const start = new Date(`${startString}:00.000Z`);
-      const endUTC = new Date(start.getTime() + duration * 60 * 60 * 1000);
+      // 1. Let JS read the local string normally (do NOT add 'Z' here)
+      const start = new Date(startString);
 
-      // Format for display (YYYY-MM-DDTHH:MM local string)
-      const calculatedEndTime = endUTC.toISOString().slice(0, 16);
+      // 2. Calculate end time in milliseconds
+      const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-      // 3. Set the form data (important for the grid to become clickable)
+      // 3. Store the strict UTC strings in formData to send to the backend
       setFormData((prev) => ({
         ...prev,
-        startTime: startString, // The local time string
-        endTime: calculatedEndTime,
-        time: filterData.duration, // Hours
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+        time: filterData.duration,
       }));
     }
-
-    // Dependency array is empty so it runs only once on mount
-    // It depends on filterData being set in the initial state.
-  }, []);
+  }, []); // Keep dependency array empty
 
   const handlePayment = async () => {
     try {
-      // Step 1: Create order
+      // Calculate the amount right before making the API call
+      const totalAmount =
+        selectedSpot.pricePerHour * parseFloat(formData.time || 1);
+
+      // Depending on your backend, Razorpay usually expects the amount in the smallest currency unit (e.g., paise).
+      // If your backend doesn't multiply by 100, you might need to do it here: totalAmount * 100.
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/payments/create-order`,
         {
-          amount: 500,
+          amount: totalAmount,
         },
       );
 
@@ -90,13 +90,24 @@ const DoBooking = () => {
             amount: order.amount,
             startTime: formData.startTime,
             endTime: formData.endTime,
-
-            // 🔥 REQUIRED FOR VERIFICATION
+            locationId: params.get("locID"),
             orderId: response.razorpay_order_id,
             paymentId: response.razorpay_payment_id,
             signature: response.razorpay_signature,
           };
-
+          console.log("====== FRONTEND DEBUG: PAYLOAD TO BACKEND ======");
+          console.log(
+            "1. Raw startTime type:",
+            typeof bookingPayload.startTime,
+          );
+          console.log("2. Raw startTime value:", bookingPayload.startTime);
+          console.log("3. Raw endTime value:", bookingPayload.endTime);
+          console.log(
+            "4. Full Payload stringified:",
+            JSON.stringify(bookingPayload, null, 2),
+          );
+          console.log("=================================================");
+          console.log("Booking Payload:", bookingPayload);
           await axios.post(
             `${import.meta.env.VITE_BACKEND_URL}/api/bookings/complete`,
             bookingPayload,
@@ -124,8 +135,12 @@ const DoBooking = () => {
         console.error("FAILED:", response);
         alert(response.error.description);
       });
+      console.log("=== RAZORPAY HANDLER RESPONSE ===");
+      console.log(JSON.stringify(response, null, 2));
+      navigate("/booking");
     } catch (error) {
       console.error("Payment failed", error);
+      alert("Payment Failed");
     }
   };
   const getInitialDateTimeLocal = () => {
@@ -228,97 +243,6 @@ const DoBooking = () => {
     setError("");
   };
 
-  const handleDonePayment = async () => {
-    const transactionIdPattern = /^\d{8}$/;
-
-    if (!transactionIdPattern.test(transactionId)) {
-      setError("Transaction ID must be an 8-digit number.");
-      return;
-    }
-
-    // Safety check for null times
-    if (!formData.startTime || !formData.endTime) {
-      setError(
-        "Booking times are missing. Please set Start Time and Duration.",
-      );
-      return;
-    }
-
-    try {
-      setLoadingBooking(true);
-      setMessage("Reserving your slot...");
-
-      // 1. Update slot availability (assuming this API handles the time-based reservation check on the server)
-      await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${
-          selectedSpot.slotId
-        }`,
-        {
-          available: false, // Update availability status
-        },
-      );
-
-      // 2. Post to Parking History
-      setMessage("Saving parking history...");
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-history`,
-        {
-          userId: user.userId,
-          vehicleId: formData.vehicleNumber,
-          parking_lot_id: locationId,
-          slotId: selectedSpot.slotNumber,
-          paymentId: transactionId,
-          entryTime: formData.startTime,
-          exitTime: formData.endTime,
-          amountPaid: (
-            selectedSpot.pricePerHour * parseFloat(formData.time)
-          ).toFixed(2),
-        },
-      );
-
-      // 3. Post to Payments
-      setMessage("Processing payment...");
-      await axios.post("/api/payments", {
-        userId: user.userId,
-        paymentMethod: formData.paymentMethod,
-        status: "completed",
-        paymentTime: new Date().toISOString(),
-        amount: selectedSpot.pricePerHour * parseFloat(formData.time),
-      });
-
-      // 4. Create final Booking record
-      setMessage("Finalizing booking...");
-      const BookingData = {
-        userId: user.userId,
-        email: user.email,
-        slotId: selectedSpot.slotId,
-        slotNumber: selectedSpot.slotNumber,
-        location: selectedSpot.location,
-        amountPaid: selectedSpot.pricePerHour * parseFloat(formData.time),
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        licensePlate: formData.vehicleNumber,
-        vehicleType: selectedSpot.vehicleType,
-        paymentMethod: formData.paymentMethod,
-        paymentStatus: "Completed",
-        transactionId: transactionId,
-      };
-
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/bookings`,
-        BookingData,
-      );
-
-      navigate("/booking");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error during booking process:", error);
-      setMessage("Error occurred while booking. Please try again.");
-    }
-
-    setLoadingBooking(false);
-  };
-
   // --- Slot Fetching and Filtering Logic (Updated) ---
   useEffect(() => {
     const fetchAndFilterParkingSlots = async () => {
@@ -333,33 +257,27 @@ const DoBooking = () => {
       setLoadingBooking(true);
 
       // --- CHANGE START ---
-      // 1. Get the local time string from state (e.g., "2025-12-03T14:00")
-      const localStartString = filterData.startTime;
+      // 1. Read the local input time
+      const start = new Date(filterData.startTime);
+      const duration = parseFloat(filterData.duration);
+      const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-      // 2. Treat the local string as a UTC time by appending Z (e.g., "2025-12-03T14:00:00.000Z")
-      const utcStart = new Date(`${localStartString}:00.000Z`);
-      const durationHours = parseFloat(filterData.duration);
-
-      // 3. Calculate the end time in UTC
-      const utcEnd = new Date(
-        utcStart.getTime() + durationHours * 60 * 60 * 1000,
-      );
-
-      // 4. Create the final ISO strings for the API
-      const startTimeISO = utcStart.toISOString(); // e.g., 2025-12-03T14:00:00.000Z
-      const endTimeISO = utcEnd.toISOString(); // e.g., 2025-12-03T16:00:00.000Z
+      // 2. Convert to pure UTC strings and encode them for the URL
+      const startUTC = encodeURIComponent(start.toISOString());
+      const endUTC = encodeURIComponent(end.toISOString());
       // --- CHANGE END ---
+
       // Construct the URL with all query parameters
-      const apiUrl = `${
-        import.meta.env.VITE_BACKEND_URL
-      }/api/parking-slots/availableByVehicle?parkingId=${locationId}&vehicleType=${
-        filterData.vehicleType
-      }&startTime=${startTimeISO}&endTime=${endTimeISO}`;
+      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/availableByVehicle?parkingId=${locationId}&vehicleType=${filterData.vehicleType}&startTime=${startUTC}&endTime=${endUTC}`;
 
       try {
         // 2. **Updated API Call**
         const response = await axios.get(apiUrl);
-
+        console.log("====== FRONTEND DEBUG: FETCHING SLOTS ======");
+        console.log("1. Local Start String:", filterData.startTime);
+        console.log("2. Encoded UTC Start:", startUTC);
+        console.log("3. Full API URL:", apiUrl);
+        console.log("============================================");
         // **3. Simplified grouping now that the backend filters by time/availability**
         const grouped = response.data.reduce((acc, slot) => {
           const type = slot.vehicleType;
@@ -400,10 +318,7 @@ const DoBooking = () => {
     const { name, value } = e.target;
 
     setFilterData((prevFilter) => {
-      const updatedFilter = {
-        ...prevFilter,
-        [name]: value,
-      };
+      const updatedFilter = { ...prevFilter, [name]: value };
 
       const start = updatedFilter.startTime
         ? new Date(updatedFilter.startTime)
@@ -416,30 +331,24 @@ const DoBooking = () => {
         !isNaN(duration) &&
         duration > 0
       ) {
-        // Calculate end time
-        const endUTC = new Date(start.getTime() + duration * 60 * 60 * 1000);
-        const localEndTime = new Date(
-          endUTC.getTime() - endUTC.getTimezoneOffset() * 60000,
-        );
-        const calculatedEndTime = localEndTime.toISOString().slice(0, 16);
+        const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-        // Update the final booking form data
-        setFormData({
-          ...formData,
-          startTime: updatedFilter.startTime,
-          endTime: calculatedEndTime,
-          time: updatedFilter.duration, // Hours
-        });
+        // FIX: Use prevForm so you don't overwrite/delete other form inputs!
+        setFormData((prevForm) => ({
+          ...prevForm,
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          time: updatedFilter.duration,
+        }));
       } else {
-        // Clear times if input is invalid
-        setFormData({
-          ...formData,
-          startTime: updatedFilter.startTime,
+        // FIX: Pass empty strings to prevent backend parsing crashes
+        setFormData((prevForm) => ({
+          ...prevForm,
+          startTime: "",
           endTime: "",
           time: updatedFilter.duration,
-        });
+        }));
       }
-
       return updatedFilter;
     });
   };
@@ -818,10 +727,7 @@ const DoBooking = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={handleDonePayment}
-                  className="w-full sm:w-auto bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-                >
+                <button className="w-full sm:w-auto bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
                   Done Payment
                 </button>
               </div>

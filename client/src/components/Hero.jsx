@@ -1,79 +1,95 @@
-import { Search, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { Link } from "react-router-dom";
+import { FaArrowRight } from "react-icons/fa";
 
 const Hero = () => {
-  const [searchVisible, setSearchVisible] = useState(false);
-  const [location, setLocation] = useState("");
+  const imageUri =
+    "https://media.istockphoto.com/id/2192670569/vector/parking-lots-or-car-parking-space-or-parking-zone-in-the-city-from-aerial-view.jpg?s=612x612&w=0&k=20&c=-hpByat3FtLcer1jem2RAVeRYd5v325Fgfq5WSIlqrM=";
+
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-[#eeeedb] text-white overflow-hidden">
-      {/* Background Grid of Parking Images */}
-      {/* <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-5 gap-4 rotate-[-29deg]">
-        {[
-          "https://images.pexels.com/photos/2402235/pexels-photo-2402235.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          "https://images.pexels.com/photos/2417466/pexels-photo-2417466.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          "https://images.pexels.com/photos/938580/pexels-photo-938580.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          "https://images.pexels.com/photos/965877/pexels-photo-965877.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-        ].map((image, index) => (
-          <motion.div
-            key={index}
-            className="w-48 h-48 bg-cover bg-center rounded-lg shadow-lg border-2 border-yellow-400"
-            style={{ backgroundImage: `url(${image})` }}
-            whileHover={{ scale: 1.1, rotate: [0, 55, -5, 0] }}
-            animate={{ y: [0, -10, 0] }} // Floating effect
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
-      </div> */}
+    <section className="relative overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-300 min-h-[90vh] flex items-center">
+      {/* Subtle Background Glow Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/20 dark:bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-yellow-400/20 dark:bg-yellow-600/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Content */}
-      <div className="relative z-10 text-center max-w-3xl px-6">
-        <p className="text-4xl md:text-6xl font-extrabold leading-tight text-black">
-          Revolutionizing <span className="text-yellow-400">Parking</span>, One
-          Spot at a Time!
-        </p>
-        <p className="text-lg md:text-xl text-black mt-4">
-          Smart parking solutions that save time, reduce stress, and optimize
-          space.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-          <div className="p-5 overflow-hidden w-[60px] h-[60px] hover:w-[270px] bg-yellow-400 shadow-[2px_2px_20px_rgba(0,0,0,0.08)] rounded-full flex group items-center hover:duration-300 duration-300 hover:bg-yellow-500">
-            <div className="flex items-center justify-center ">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                id="Isolation_Mode"
-                data-name="Isolation Mode"
-                viewBox="0 0 24 24"
-                width="22"
-                height="22"
-              >
-                <path d="M18.9,16.776A10.539,10.539,0,1,0,16.776,18.9l5.1,5.1L24,21.88ZM10.5,18A7.5,7.5,0,1,1,18,10.5,7.507,7.507,0,0,1,10.5,18Z"></path>
-              </svg>
-            </div>
-            <input
-              type="text"
-              className="outline-none text-[20px]  w-full text-white font-normal px-4"
-            />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 w-full">
+        <div className="text-center max-w-3xl mx-auto">
+          {/* Top Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-sm font-semibold tracking-wide mb-6 border border-blue-200 dark:border-blue-800 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            Application v2.0 is Live
           </div>
 
-          <button className="w-[110px] h-10 flex items-center justify-start gap-2 bg-yellow-400 rounded-full text-white font-semibold border-none relative cursor-pointer shadow-md pl-2 transition-all duration-500 hover:bg-yellow-500 active:scale-95">
-            <svg
-              className="h-6 transition-transform duration-[1500ms] group-hover:rotate-[250deg]"
-              viewBox="0 0 512 512"
-              xmlns="http://www.w3.org/2000/svg"
+          {/* Main Headline */}
+          <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-6 leading-tight">
+            Find, Book, and Park. <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-yellow-500 dark:from-blue-400 dark:to-yellow-400">
+              Reserve your parking in advance
+            </span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">
+            Say goodbye to circling the block. Reserve your parking slot in
+            advance, manage your vehicles, and pay seamlessly with our smart
+            parking network.
+          </p>
+
+          {/* Call to Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <Link
+              to="/signup"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
             >
-              <path
-                fill="currentColor"
-                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
-              ></path>
-            </svg>
-            Get nearby location
-          </button>
+              Get Started
+              <FaArrowRight className="text-sm" />
+            </Link>
+
+            <Link
+              to="/booking"
+              className="w-full sm:w-auto flex justify-center items-center px-8 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              View Available Slots
+            </Link>
+          </div>
+        </div>
+
+        {/* UI Mockup Container */}
+        <div className="mt-16 relative max-w-5xl mx-auto group">
+          {/* Outer glow effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+
+          {/* Fixed Layout: Flex Column ensures header and image stack properly */}
+          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col">
+            {/* Fake Browser Window Header (Now sits securely at the top) */}
+            <div className="w-full h-8 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-2 shrink-0 z-10">
+              <div className="w-3 h-3 rounded-full bg-red-400"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            </div>
+
+            {/* Content area for your actual app image */}
+            <div className="w-full aspect-video relative overflow-hidden bg-gray-900">
+              <img
+                src={imageUri}
+                alt="Parking Dashboard Mockup"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
+              />
+              {/* Subtle UI Overlays to make it look like an "App" */}
+              <div className="absolute top-4 right-4 p-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-lg shadow-xl border border-white/20 z-10">
+                <div className="text-[10px] uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400">
+                  Occupancy
+                </div>
+                <div className="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                  84% Full
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {/* Car Animation - Moving and Parking */}
     </section>
   );
 };

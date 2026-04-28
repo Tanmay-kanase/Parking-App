@@ -8,6 +8,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaParking,
+  FaDownload,
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
@@ -24,7 +25,7 @@ const MyBookings = () => {
 
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/bookings/user/${user.userId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/bookings/user/${user.userId}`,
         );
         setBookings(response.data);
       } catch (error) {
@@ -35,6 +36,10 @@ const MyBookings = () => {
     fetchBookings();
   }, [user]);
   console.log("Booking : ", bookings);
+
+  function downloadRec() {
+    alert("Downloading reiept");
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6">
@@ -57,14 +62,27 @@ const MyBookings = () => {
                   booking.status === "active"
                     ? "#10b981"
                     : booking.status === "completed"
-                    ? "#3b82f6"
-                    : "#ef4444",
+                      ? "#3b82f6"
+                      : "#ef4444",
               }}
             >
-              <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                <FaCar className="text-blue-600 dark:text-blue-400" />{" "}
-                {booking.licensePlate}
-              </h3>
+              <div className="flex items-center justify-between gap-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+                {/* License Plate Section */}
+                <div className="flex items-center gap-2">
+                  <FaCar className="text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span className="truncate">{booking.licensePlate}</span>
+                </div>
+
+                {/* Download Button Section */}
+                <button
+                  onClick={downloadRec}
+                  aria-label="Download Receipt"
+                  title="Download Receipt"
+                  className="flex items-center justify-center p-2 text-sm text-gray-600 transition-colors border-2 border-gray-200 rounded-full dark:text-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0"
+                >
+                  <FaDownload />
+                </button>
+              </div>
 
               <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
                 <FaParking className="text-gray-600 dark:text-gray-300" /> Slot:{" "}
@@ -89,7 +107,8 @@ const MyBookings = () => {
                 Start Time:{" "}
                 <span className="font-medium text-gray-700 dark:text-gray-300">
                   {new Date(booking.startTime).toLocaleString("en-US", {
-                    timeZone: "UTC",
+                    dateStyle: "medium", // e.g., Apr 23, 2026
+                    timeStyle: "short", // e.g., 1:44 PM
                   })}
                 </span>
               </p>
@@ -97,8 +116,10 @@ const MyBookings = () => {
               <p className="text-gray-500 dark:text-gray-400">
                 End Time:{" "}
                 <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {new Date(booking.startTime).toLocaleString("en-US", {
-                    timeZone: "UTC",
+                  {/* Notice this is now booking.endTime, and no UTC override */}
+                  {new Date(booking.endTime).toLocaleString("en-US", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
                   })}
                 </span>
               </p>
@@ -122,8 +143,8 @@ const MyBookings = () => {
                   new Date() > new Date(booking.endTime)
                     ? "text-blue-600 dark:text-blue-400"
                     : new Date() < new Date(booking.startTime)
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : "text-green-600 dark:text-green-400"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-green-600 dark:text-green-400"
                 }`}
               >
                 {new Date() > new Date(booking.endTime) ? (
@@ -137,18 +158,14 @@ const MyBookings = () => {
                 {new Date() > new Date(booking.endTime)
                   ? "Parking Completed"
                   : new Date() < new Date(booking.startTime)
-                  ? "Upcoming"
-                  : "Ongoing"}
+                    ? "Upcoming"
+                    : "Ongoing"}
               </p>
 
               <div className="flex justify-between items-center">
                 <p className="text-gray-700 dark:text-gray-200 font-semibold flex items-center gap-2">
                   <FaDollarSign className="text-green-600 dark:text-green-400" />{" "}
-                  Paid: $ {booking.amountPaid}
-                </p>
-                <p className="text-gray-700 dark:text-gray-200 font-semibold flex items-center gap-2">
-                  <FaDollarSign className="text-gray-600 dark:text-gray-300" />{" "}
-                  Total: $ {booking.totalCost || booking.amountPaid}
+                  Paid: {booking.amountPaid / 100}
                 </p>
               </div>
             </div>

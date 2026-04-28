@@ -2,7 +2,7 @@
 /target/
 /out/
 /build/
-
+/src/main/resources/static/
 # Ignore IDE-specific files
 /.idea/
 /*.iml
@@ -12,9 +12,10 @@
 /*.njsproj
 /*.sln
 /*.sw?
-
+/dist/
 # Ignore Logs and temp files
 /logs/
+/static/
 /*.log
 /*.tmp
 hs_err_pid*

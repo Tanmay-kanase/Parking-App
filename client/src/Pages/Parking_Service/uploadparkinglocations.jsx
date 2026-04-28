@@ -5,6 +5,8 @@ import {
   FaHome,
   FaHashtag,
   FaWarehouse,
+  FaEdit, // Added
+  FaTrash,
 } from "react-icons/fa";
 import { MapPin, Building, Upload } from "lucide-react";
 import axios from "../../config/axiosInstance";
@@ -12,6 +14,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 export default function UploadParkingLocations() {
   const [parkings, setParkings] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const { user, loading } = useAuth();
   const [loadingVerification, setLoadingVerification] = useState(false);
@@ -40,9 +44,9 @@ export default function UploadParkingLocations() {
         (error) => {
           console.error("Geolocation error:", error);
           alert(
-            "Failed to get your location. Please enable location services."
+            "Failed to get your location. Please enable location services.",
           );
-        }
+        },
       );
     } else {
       alert("Geolocation is not supported by this browser.");
@@ -73,7 +77,7 @@ export default function UploadParkingLocations() {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/user/${
             user.userId
-          }`
+          }`,
         );
         setParkings(response.data); // Set the parking data
       } catch (error) {
@@ -93,26 +97,90 @@ export default function UploadParkingLocations() {
     e.preventDefault();
     try {
       setUploading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations`,
-        formData
-      );
-      console.log("Parking location uploaded successfully:", response.data);
-      navigate(
-        `/upload-parking-slots?locationId=${response.data.locationId}&name=${response.data.name}`
-      );
+
+      if (isEditing) {
+        // Edit Existing (PUT Request)
+        const response = await axios.put(
+          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/${editId}`,
+          formData,
+        );
+        // Update the item in the local state array
+        setParkings(
+          parkings.map((p) => (p.locationId === editId ? response.data : p)),
+        );
+        setShowModal(false);
+        setIsEditing(false);
+        setEditId(null);
+      } else {
+        // Create New (POST Request)
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations`,
+          formData,
+        );
+        setParkings([...parkings, response.data]);
+        navigate(
+          `/upload-parking-slots?locationId=${response.data.locationId}&name=${response.data.name}`,
+        );
+      }
     } catch (error) {
-      setUploading(false);
       console.error(
-        "Error uploading parking location:",
-        error.response?.data || error.message
+        "Error saving parking location:",
+        error.response?.data || error.message,
       );
     } finally {
       setUploading(false);
     }
   };
-  console.log(formData);
 
+  console.log(formData);
+  const handleAddNew = () => {
+    setIsEditing(false);
+    setEditId(null);
+    setFormData({
+      userId: user?.userId || "",
+      name: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      totalSlots: "",
+      evCharging: false,
+      cctvCamera: false,
+      washing: false,
+      bikeSlots: "",
+      sedanSlots: "",
+      truckSlots: "",
+      busSlots: "",
+    });
+    setLocationVerified(false);
+    setShowModal(true);
+  };
+  const handleEdit = (e, parking) => {
+    e.stopPropagation(); // Prevents triggering the card's navigation onClick
+    setIsEditing(true);
+    setEditId(parking.locationId); // Ensure this matches your backend ID field
+    setFormData(parking); // Populate the form with existing data
+    setLocationVerified(true); // Assuming existing locations have valid coords
+    setShowModal(true);
+  };
+  const handleDelete = async (e, id) => {
+    e.stopPropagation(); // Prevents triggering the card's navigation onClick
+    if (
+      !window.confirm("Are you sure you want to delete this parking location?")
+    )
+      return;
+
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/${id}`,
+      );
+      // Remove the deleted item from UI
+      setParkings(parkings.filter((p) => p.locationId !== id));
+    } catch (error) {
+      console.error("Error deleting parking location:", error);
+      alert("Failed to delete parking location.");
+    }
+  };
   return (
     // Main container with responsive padding and dark mode theming
     <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
@@ -122,7 +190,7 @@ export default function UploadParkingLocations() {
             My Parkings
           </h2>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={handleAddNew}
             className="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-colors"
           >
             Add Parking
@@ -268,30 +336,6 @@ export default function UploadParkingLocations() {
                     />
                   </div>
                 </div>
-                <div className="w-full">
-                  <label
-                    htmlFor="totalSlots"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Total Slots
-                  </label>
-                  <div className="mt-1 flex items-center border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-transparent">
-                    <FaWarehouse
-                      className="text-gray-400 dark:text-gray-500 mr-3"
-                      size={20}
-                    />
-                    <input
-                      id="totalSlots"
-                      type="number"
-                      name="totalSlots"
-                      placeholder="150"
-                      value={formData.totalSlots}
-                      onChange={handleChange}
-                      className="w-full bg-transparent focus:outline-none"
-                      required
-                    />
-                  </div>
-                </div>
               </div>
 
               <button
@@ -368,35 +412,6 @@ export default function UploadParkingLocations() {
                 </div>
               </div>
 
-              {/* Slot Distribution */}
-              <div>
-                <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                  Slot Distribution
-                </h4>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {["bike", "sedan", "truck", "bus"].map((type) => (
-                    <div key={type}>
-                      <label
-                        htmlFor={`${type}Slots`}
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize"
-                      >
-                        {type} Slots
-                      </label>
-                      <input
-                        id={`${type}Slots`}
-                        type="number"
-                        name={`${type}Slots`}
-                        placeholder="0"
-                        value={formData[`${type}Slots`]}
-                        onChange={handleChange}
-                        className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:outline-none"
-                        required
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4">
                 <button
@@ -426,14 +441,34 @@ export default function UploadParkingLocations() {
                 key={parking.locationId}
                 onClick={() =>
                   navigate(
-                    `/upload-parking-slots?locationId=${parking.locationId}&name=${parking.name}`
+                    `/upload-parking-slots?locationId=${parking.locationId}&name=${parking.name}`,
                   )
                 }
-                className="bg-white dark:bg-gray-700 shadow-md rounded-xl p-6 border border-gray-200 dark:border-gray-600 hover:shadow-xl hover:ring-2 hover:ring-yellow-500 cursor-pointer transition"
+                className="bg-white dark:bg-gray-700 shadow-md rounded-xl p-6 border border-gray-200 dark:border-gray-600 hover:shadow-xl hover:ring-2 hover:ring-yellow-500 cursor-pointer transition relative"
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <FaMapMarkerAlt className="text-red-500 text-xl" />
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                {/* Edit and Delete Buttons */}
+                <div className="absolute top-4 right-4 flex gap-3">
+                  <button
+                    onClick={(e) => handleEdit(e, parking)}
+                    className="p-2 text-blue-500 bg-blue-50 dark:bg-gray-600 rounded-full hover:bg-blue-100 dark:hover:bg-gray-500 transition-colors"
+                    title="Edit"
+                  >
+                    <FaEdit size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(e, parking.locationId)}
+                    className="p-2 text-red-500 bg-red-50 dark:bg-gray-600 rounded-full hover:bg-red-100 dark:hover:bg-gray-500 transition-colors"
+                    title="Delete"
+                  >
+                    <FaTrash size={16} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 mb-2 pr-16">
+                  {" "}
+                  {/* added pr-16 to avoid text overlapping buttons */}
+                  <FaMapMarkerAlt className="text-red-500 text-xl flex-shrink-0" />
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">
                     {parking.name}
                   </h3>
                 </div>

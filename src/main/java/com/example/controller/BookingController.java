@@ -66,6 +66,11 @@ public class BookingController {
         return bookingService.updateBooking(booking);
     }
 
+    @GetMapping("/location/{locationId}")
+    public List<Booking> getBookingsByLocationId(@PathVariable String locationId) {
+        return bookingService.getBookingsByLocationId(locationId);
+    }
+
     @DeleteMapping("/{bookingId}")
     public void deleteBooking(@PathVariable String bookingId) {
         bookingService.deleteBooking(bookingId);
@@ -73,6 +78,10 @@ public class BookingController {
 
     @PostMapping("/complete")
     public ResponseEntity<?> completeBooking(@RequestBody CompleteBookingRequest request) {
+        System.out.println("====== BACKEND DEBUG: REQUEST RECEIVED ======");
+        System.out.println("1. Received StartTime: [" + request.startTime + "]");
+        System.out.println("2. Received EndTime:   [" + request.endTime + "]");
+        System.out.println("=============================================");
         try {
 
             Booking booking = bookingService.completeBooking(request);

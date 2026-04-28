@@ -2,8 +2,10 @@ package com.example.service;
 
 import com.example.dto.ParkingLocationResponse;
 import com.example.dto.UserDTO;
+import com.example.model.Booking;
 import com.example.model.ParkingLocation;
 import com.example.model.ParkingSlot;
+import com.example.repository.BookingRepository;
 import com.example.repository.ParkingLocationRepository;
 import com.example.repository.ParkingSlotRepository;
 import com.example.repository.UserRepository;
@@ -14,9 +16,13 @@ import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ParkingLocationService {
@@ -30,6 +36,9 @@ public class ParkingLocationService {
 
     @Autowired
     private ParkingLocationRepository parkingLocationRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     ParkingLocationService(UserRepository userRepository, ParkingSlotRepository parkingSlotRepository) {
         this.userRepository = userRepository;
@@ -69,11 +78,58 @@ public class ParkingLocationService {
         List<ParkingLocationResponse> responses = new ArrayList<>();
 
         for (ParkingLocation location : nearbyLocations) {
+            Instant now = Instant.now();
+
+            // 1. Get all slots of this parking
+            List<ParkingSlot> allSlots = parkingSlotRepository.findByParkingId(location.getLocationId());
+
+            // 2. Get active bookings
+            List<Booking> activeBookings = bookingRepository.findActiveBookings(location.getLocationId(), now);
+
+            // 3. Get booked slotIds
+            Set<String> bookedSlotIds = activeBookings.stream()
+                    .map(Booking::getSlotId)
+                    .collect(Collectors.toSet());
+
+            // 4. Initialize counters
+            int bike = 0, sedan = 0, truck = 0, bus = 0;
+
+            // 5. Count available slots
+            for (ParkingSlot slot : allSlots) {
+
+                // If slot is NOT booked currently
+                if (!bookedSlotIds.contains(slot.getSlotId())) {
+
+                    switch (slot.getVehicleType().toLowerCase()) {
+                        case "bike":
+                            bike++;
+                            break;
+                        case "sedan":
+                        case "car":
+                            sedan++;
+                            break;
+                        case "truck":
+                            truck++;
+                            break;
+                        case "bus":
+                            bus++;
+                            break;
+                    }
+                }
+            }
+
             System.out.println(
                     "    Location (lat,lng): " + location.getLocation().getY() + ", " + location.getLocation().getX());
             ParkingLocationResponse response = new ParkingLocationResponse();
             BeanUtils.copyProperties(location, response);
+            // 6. Set in response
+            response.setBikeSlots(bike);
+            response.setSedanSlots(sedan);
+            response.setTruckSlots(truck);
+            response.setBusSlots(bus);
 
+            // Optional: overall availability
+            response.setAvailable((bike + sedan + truck + bus) > 0);
             response.setLat(location.getLocation().getY()); // latitude
             response.setLng(location.getLocation().getX()); // longitude
 
@@ -97,7 +153,6 @@ public class ParkingLocationService {
             existingLocation.setCity(updatedLocation.getCity());
             existingLocation.setState(updatedLocation.getState());
             existingLocation.setZipCode(updatedLocation.getZipCode());
-            existingLocation.setTotalSlots(updatedLocation.getTotalSlots());
             existingLocation.setSlotIds(updatedLocation.getSlotIds());
             return parkingLocationRepository.save(existingLocation);
         }).orElse(null);

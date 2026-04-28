@@ -19,7 +19,7 @@ const PaymentsPage = () => {
   const handleDownload = (reportName) => {
     alert(`Triggering PDF generation for: ${reportName}`);
   };
-
+  const locationId = "69d7d255bae40612cb6796be";
   // --- RENDER HELPERS ---
   const renderTabs = () => (
     <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
@@ -77,16 +77,16 @@ const PaymentsPage = () => {
         {renderTabs()}
 
         {/* TAB CONTENT: LIVE SLOTS */}
-        {activeTab === "slots" && <LiveSlotsTab userId={user.userId} />}
+        {activeTab === "slots" && <LiveSlotsTab locationId={locationId} />}
 
         {/* TAB CONTENT: BOOKINGS */}
-        {activeTab === "bookings" && <BookingsTab userId={user.userId} />}
+        {activeTab === "bookings" && <BookingsTab locationId={locationId} />}
 
         {/* TAB CONTENT: FINANCE & REPORTS */}
-        {activeTab === "finance" && <FinanceTab userId={user.userId} />}
+        {activeTab === "finance" && <FinanceTab locationId={locationId} />}
 
         {/* TAB CONTENT: HISTORY LOG */}
-        {activeTab === "history" && <HistoryTab userId={user.userId} />}
+        {activeTab === "history" && <HistoryTab locationId={locationId} />}
       </div>
     </div>
   );

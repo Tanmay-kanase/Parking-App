@@ -1,27 +1,62 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PaginationFooter from "../../components/PaginationFooter";
 import { FileText } from "lucide-react";
 import usePagination from "../../hooks/usePagination";
-
+import axios from "../../config/axiosInstance";
 function BookingsTab() {
   // --- YOUR MOCK DATA GOES HERE (bookings, payments, history, etc.) ---
-  
-  const generateBookings = (count) => {
-    return Array.from({ length: count }, (_, i) => ({
-      bookingId: `BKG-${100 + i}`,
-      slotNumber: `A-${String((i % 5) + 1).padStart(2, "0")}`,
-      location: i % 2 === 0 ? "Level 1 - North" : "Level 1 - South",
-      amountPaid: +(Math.random() * 20 + 5).toFixed(2),
-      paymentStatus: i % 3 === 0 ? "Pending" : "Paid",
-      startTime: new Date(Date.now() - i * 3600000).toISOString(),
-      endTime: new Date(Date.now() + (i + 1) * 3600000).toISOString(),
-      licensePlate: `CAR-${1000 + i}`,
-      vehicleType: i % 2 === 0 ? "Car" : "Bike",
-    }));
-  };
 
-  const bookings = generateBookings(15);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const response = await axios.get(
+          "/api/bookings/location/69d7d255bae40612cb6796be",
+        );
+
+        // Axios already gives data in response.data
+        const data = response.data;
+
+        const formattedData = data.map((item) => ({
+          bookingId: item.bookingId.slice(0, 5),
+          slotNumber: item.slotNumber,
+          location: item.location,
+          amountPaid: item.amountPaid / 100, // paise → rupees
+          paymentStatus: item.paymentStatus,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          licensePlate: item.licensePlate,
+          vehicleType: item.vehicleType,
+        }));
+
+        console.log(formattedData);
+        setBookings(formattedData);
+      } catch (err) {
+        console.error(err);
+
+        // Better error handling
+        if (err.response) {
+          setError(err.response.data.message || "Server error");
+        } else if (err.request) {
+          setError("No response from server");
+        } else {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, []);
+
   const bookingsPagination = usePagination(bookings);
+
+  if (loading) return <p>Loading bookings...</p>;
+  if (error) return <p>Error: {error}</p>;
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -42,6 +77,7 @@ function BookingsTab() {
               <th className="p-4">Vehicle</th>
               <th className="p-4">Time Window</th>
               <th className="p-4">Amount</th>
+              <th className="p-4">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -81,6 +117,16 @@ function BookingsTab() {
                 </td>
                 <td className="p-4 font-bold text-green-600 dark:text-green-400">
                   ${b.amountPaid.toFixed(2)}
+                </td>
+                <td className="p-4">
+                  <p
+                    style={{
+                      color:
+                        b.paymentStatus === "Completed" ? "green" : "orange",
+                    }}
+                  >
+                    {b.paymentStatus}
+                  </p>
                 </td>
               </tr>
             ))}

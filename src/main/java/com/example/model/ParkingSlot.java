@@ -16,6 +16,4 @@ public class ParkingSlot {
     private String location;
     private double pricePerHour;
     private String vehicleType;
-    @Field("isAvailable")
-    private boolean isAvailable;
 }

@@ -6,6 +6,7 @@ public class CompleteBookingRequest {
     public String slotId;
     public String slotNumber;
     public String location;
+    public String locationId;
     public String vehicleNumber;
     public String vehicleType;
     public String paymentMethod;

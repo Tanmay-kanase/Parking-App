@@ -17,6 +17,8 @@ import axios from "axios";
 import Contact_Footer from "../components/Contact_Footer";
 import Footer from "../components/Footer";
 import HowItWorks from "../components/Howitworks";
+import { useAuth } from "../context/AuthContext";
+import Hero from "../components/Hero";
 
 // Use Tailwind CSS to define styles
 const Home = () => {
@@ -24,6 +26,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   // Use a custom modal for alerts
+  const { logout, user } = useAuth();
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -103,93 +106,64 @@ const Home = () => {
           </div>
         </div>
       )}
+      {!user ? (
+        <Hero />
+      ) : (
+        <section className="relative pt-32 pb-20 flex flex-col items-center justify-center text-center bg-white dark:bg-gray-800 border-b-2 border-gray-100 dark:border-gray-700 transition-colors duration-300">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl px-4"
+          >
+            <h2 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900 dark:text-white">
+              Find Your <span className="text-yellow-500">Perfect Spot</span>,
+              Instantly.
+            </h2>
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
+              Our smart parking solutions help you find, reserve, and pay for
+              parking spots with ease, saving you time and stress.
+            </p>
 
-      {/* Header/Navbar */}
-      <nav className="fixed top-0 left-0 w-full z-20 bg-white dark:bg-gray-900 shadow-sm dark:shadow-lg transition-colors duration-300">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <ParkingCircle className="text-yellow-500" size={32} />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Smart<span className="text-yellow-500">Park</span>
-            </h1>
-          </div>
-          <div className="flex items-center space-x-6">
-            <a
-              href="#"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-300"
-            >
-              Home
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-300"
-            >
-              About
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-300"
-            >
-              Contact
-            </a>
-          </div>
-        </div>
-      </nav>
+            {/* Combined Search Bar and Buttons */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
+              {/* Search Input Container */}
+              <div className="relative flex-grow w-full max-w-xl">
+                <input
+                  type="text"
+                  placeholder="Search for a city, address, or landmark..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition duration-300"
+                />
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                  size={20}
+                />
+              </div>
 
+              {/* Action Buttons */}
+              <div className="flex gap-4 w-full sm:w-auto mt-4 sm:mt-0">
+                <button
+                  onClick={handleSearch}
+                  className="w-full sm:w-auto px-6 py-3 bg-gray-900 hover:bg-gray-800 dark:bg-yellow-600 dark:hover:bg-yellow-500 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
+                >
+                  Search
+                </button>
+                <button
+                  onClick={handleNearby}
+                  className="w-full sm:w-auto px-6 py-3 flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
+                >
+                  <MapPin size={20} />
+                  Nearby
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+      )}
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 flex flex-col items-center justify-center text-center bg-white dark:bg-gray-800 border-b-2 border-gray-100 dark:border-gray-700 transition-colors duration-300">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl px-4"
-        >
-          <h2 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900 dark:text-white">
-            Find Your <span className="text-yellow-500">Perfect Spot</span>,
-            Instantly.
-          </h2>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
-            Our smart parking solutions help you find, reserve, and pay for
-            parking spots with ease, saving you time and stress.
-          </p>
-
-          {/* Combined Search Bar and Buttons */}
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
-            {/* Search Input Container */}
-            <div className="relative flex-grow w-full max-w-xl">
-              <input
-                type="text"
-                placeholder="Search for a city, address, or landmark..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition duration-300"
-              />
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                size={20}
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 w-full sm:w-auto mt-4 sm:mt-0">
-              <button
-                onClick={handleSearch}
-                className="w-full sm:w-auto px-6 py-3 bg-gray-900 hover:bg-gray-800 dark:bg-yellow-600 dark:hover:bg-yellow-500 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
-              >
-                Search
-              </button>
-              <button
-                onClick={handleNearby}
-                className="w-full sm:w-auto px-6 py-3 flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
-              >
-                <MapPin size={20} />
-                Nearby
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </section>
 
       {/* Features Section */}
       <section className="bg-gray-50 dark:bg-gray-900 py-16 px-6 transition-colors duration-300">

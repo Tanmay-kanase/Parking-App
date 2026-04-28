@@ -11,6 +11,8 @@ import com.example.repository.ParkingSlotRepository;
 import java.util.List;
 import java.util.Optional;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @RestController
@@ -84,17 +86,16 @@ public class ParkingSlotController {
 
     @GetMapping("/available-by-time")
     public ResponseEntity<List<ParkingSlot>> getAvailableSlotsByTime(@RequestParam String parkingId,
-            @RequestParam String vehicleType, @RequestParam String startTime,
-            @RequestParam String endTime) {
+            @RequestParam String vehicleType, @RequestParam Instant startTime,
+            @RequestParam Instant endTime) {
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-            Date start = sdf.parse(startTime);
-            Date end = sdf.parse(endTime);
+
             System.out.println("Available Tiem" + parkingId + " " + vehicleType + " " + startTime
                     + " " + endTime);
-            List<ParkingSlot> availableSlots =
-                    parkingSlotService.getAvailableSlotsByTime(parkingId, vehicleType, start, end);
+            List<ParkingSlot> availableSlots = parkingSlotService.getAvailableSlotsByTime(parkingId, vehicleType,
+                    startTime,
+                    startTime);
             System.out.println("AvailableSlots : " + availableSlots);
             return ResponseEntity.ok(availableSlots);
         } catch (Exception e) {
@@ -103,10 +104,12 @@ public class ParkingSlotController {
     }
 
     @GetMapping("/availableByVehicle")
-    public List<ParkingSlot> getAvailableSlots(@RequestParam String parkingId,
+    public List<ParkingSlot> getAvailableSlots(
+            @RequestParam String parkingId,
             @RequestParam String vehicleType,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime) {
+            @RequestParam Instant startTime, // Removed the annotation
+            @RequestParam Instant endTime) { // Removed the annotation
+
         return parkingSlotService.getAvailableSlots(parkingId, vehicleType, startTime, endTime);
     }
 

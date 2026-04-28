@@ -21,19 +21,14 @@ public class ParkingLocation {
     private String city;
     private String state;
     private String zipCode;
-    private int totalSlots; // Total number of slots available
     private List<String> slotIds; // References to parking slots
     private boolean evCharging;
     private boolean cctvCamera;
     private boolean washing;
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-    private GeoJsonPoint location; // 🌍 This replaces lat & lng
-    
-    private int bikeSlots;
-    private int sedanSlots;
-    private int truckSlots;
-    private int busSlots;
+    private GeoJsonPoint location; 
+
 
     @Transient
     private Double lat;

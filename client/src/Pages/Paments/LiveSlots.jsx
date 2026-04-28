@@ -1,23 +1,51 @@
 import { CarFront, CheckCircle2, Filter } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import usePagination from "../../hooks/usePagination";
 import PaginationFooter from "../../components/PaginationFooter";
+import axios from "../../config/axiosInstance";
 
 const LiveSlotsTab = (userId) => {
-  const generateParkingSlots = (count) => {
-    const levels = ["Level 1 - North", "Level 1 - South", "Level 2 - VIP"];
+  const [parkingSlots, setParkingSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    return Array.from({ length: count }, (_, i) => ({
-      slotId: `S${i + 1}`,
-      slotNumber: `${String.fromCharCode(65 + (i % 3))}-${String((i % 10) + 1).padStart(2, "0")}`,
-      location: levels[i % levels.length],
-      pricePerHour: i % 3 === 0 ? 10 : i % 2 === 0 ? 5 : 3,
-      vehicleType: i % 2 === 0 ? "Car" : "Bike",
-      isAvailable: Math.random() > 0.3,
-    }));
-  };
+  useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        const response = await axios.get(
+          "/api/parking-slots/parking/69d7d255bae40612cb6796be",
+        );
 
-  const parkingSlots = generateParkingSlots(20);
+        const data = response.data;
+
+        // 🔥 Transform backend → frontend format
+        const formattedSlots = data.map((item) => ({
+          slotId: item.slotId,
+          slotNumber: item.slotNumber,
+          location: item.location,
+          pricePerHour: item.pricePerHour,
+          vehicleType: item.vehicleType,
+          isAvailable: item.available, // rename for UI
+        }));
+
+        setParkingSlots(formattedSlots);
+      } catch (err) {
+        console.error(err);
+
+        if (err.response) {
+          setError(err.response.data.message || "Server error");
+        } else if (err.request) {
+          setError("No response from server");
+        } else {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSlots();
+  }, []);
   // 1. Move the filter state inside the child component
   const [slotFilterType, setSlotFilterType] = useState("All");
   const [slotFilterStatus, setSlotFilterStatus] = useState("All");
@@ -35,7 +63,8 @@ const LiveSlotsTab = (userId) => {
 
   // 3. Move the pagination hook inside the child component
   const parkingSlotsPagination = usePagination(filteredParkingSlots, 5);
-
+  if (loading) return <p>Loading slots...</p>;
+  if (error) return <p>Error: {error}</p>;
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -83,7 +112,9 @@ const LiveSlotsTab = (userId) => {
               className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
             >
               <option value="All">All Vehicle Types</option>
-              <option value="Car">Cars</option>
+              <option value="Car">Compact</option>
+              <option value="Sedan">Sedan</option>
+              <option value="compact">Compact</option>
               <option value="Bike">Bikes</option>
             </select>
 

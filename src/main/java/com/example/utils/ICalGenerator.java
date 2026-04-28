@@ -5,6 +5,12 @@ import com.example.model.Booking;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class ICalGenerator {
@@ -26,8 +32,11 @@ public class ICalGenerator {
     }
 
     // 📅 Format: 20250421T180000Z (iCal UTC format)
-    private static String formatDateTime(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        return sdf.format(date);
+    private static String formatDateTime(Instant dateTime) {
+        ZonedDateTime utcTime = dateTime.atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
+        return utcTime.format(formatter);
     }
 }

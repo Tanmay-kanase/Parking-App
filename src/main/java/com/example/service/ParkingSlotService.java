@@ -10,10 +10,11 @@ import com.example.repository.ParkingSlotRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
-
 
 @Service
 public class ParkingSlotService {
@@ -42,7 +43,6 @@ public class ParkingSlotService {
 
     public ParkingSlot createSlot(ParkingSlot slot) {
         System.out.println(slot);
-        slot.setAvailable(slot.isAvailable());
         return parkingSlotRepository.save(slot);
     }
 
@@ -62,7 +62,6 @@ public class ParkingSlotService {
                 slot.setVehicleType(updatedSlot.getVehicleType());
 
             // Always update availability if sent
-            slot.setAvailable(updatedSlot.isAvailable());
 
             return parkingSlotRepository.save(slot);
         }).orElseThrow(() -> new RuntimeException("Parking Slot not found"));
@@ -73,7 +72,7 @@ public class ParkingSlotService {
     }
 
     public List<ParkingSlot> getAvailableSlotsByTime(String parkingId, String vehicleType,
-            Date start, Date end) {
+            Instant start, Instant end) {
 
         // Get all slots for that parking + vehicle type
         List<ParkingSlot> slots = parkingSlotRepository.findByParkingId(parkingId).stream()
@@ -82,18 +81,16 @@ public class ParkingSlotService {
         System.out.println("Slots" + slots);
         // Filter out slots that are already booked
         return slots.stream().filter(slot -> {
-            List<Booking> conflicts =
-                    bookingRepository.findBySlotIdAndStartTimeLessThanAndEndTimeGreaterThan(
-                            slot.getSlotId(), start, end);
+            List<Booking> conflicts = bookingRepository.findBySlotIdAndStartTimeLessThanAndEndTimeGreaterThan(
+                    slot.getSlotId(), start, end);
 
             System.out.println("Conflicts" + conflicts);
             return conflicts.isEmpty(); // keep slot only if NOT conflicting
         }).collect(Collectors.toList());
     }
 
-
-    public List<ParkingSlot> getAvailableSlots(String parkingId, String vehicleType, Date startTime,
-            Date endTime) {
+    public List<ParkingSlot> getAvailableSlots(String parkingId, String vehicleType, Instant startTime,
+            Instant endTime) {
 
         List<ParkingSlot> slots;
         if ("ALL".equalsIgnoreCase(vehicleType) || vehicleType == null
@@ -111,11 +108,9 @@ public class ParkingSlotService {
         List<String> slotIds = slots.stream().map(ParkingSlot::getSlotId).toList();
 
         // Step 2: Find overlapping bookings
-        List<Booking> overlappingBookings =
-                bookingRepository.findOverlappingBookings(slotIds, startTime, endTime);
+        List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(slotIds, startTime, endTime);
 
-        Set<String> bookedSlotIds =
-                overlappingBookings.stream().map(Booking::getSlotId).collect(Collectors.toSet());
+        Set<String> bookedSlotIds = overlappingBookings.stream().map(Booking::getSlotId).collect(Collectors.toSet());
 
         // Step 3: Filter available slots
         return slots.stream().filter(s -> !bookedSlotIds.contains(s.getSlotId())).toList();
