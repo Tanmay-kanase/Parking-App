@@ -13,7 +13,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import axios from "axios";
+import axios from "../config/axiosInstance";
 import Contact_Footer from "../components/Contact_Footer";
 import Footer from "../components/Footer";
 import HowItWorks from "../components/Howitworks";
@@ -27,6 +27,8 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   // Use a custom modal for alerts
   const { logout, user } = useAuth();
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -35,10 +37,27 @@ const Home = () => {
     setIsAlertVisible(true);
   };
 
+  const fetchSuggestions = async (query) => {
+    try {
+      if (!query.trim()) {
+        setSuggestions([]);
+        return;
+      }
+
+      const res = await axios.get(
+        `api/parking-locations/search?searchLoc=${query}`,
+      );
+
+      setSuggestions(res.data);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   // Handles search for a specific location
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      navigate(`/show-parkings?query=${encodeURIComponent(searchQuery)}`);
+      navigate(`/searchParking?query=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -133,14 +152,40 @@ const Home = () => {
                   type="text"
                   placeholder="Search for a city, address, or landmark..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    fetchSuggestions(e.target.value);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition duration-300"
                 />
+
                 <Search
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
                   size={20}
                 />
+
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 max-h-72 overflow-y-auto">
+                    {suggestions.map((item) => (
+                      <div
+                        key={item.locationId}
+                        onClick={() => {
+                          setSearchQuery(item.address);
+                          setShowSuggestions(false);
+
+                          navigate(`/searchParking?query=${item.address}`);
+                        }}
+                        className="px-4 py-3 hover:bg-yellow-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                      >
+                        <p className="text-sm text-gray-800 dark:text-white">
+                          {item.address}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}

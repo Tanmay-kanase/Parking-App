@@ -23,6 +23,17 @@ public class ParkingLocationController {
         return parkingLocationService.getAllParkingLocations();
     }
 
+    @GetMapping("/getLocationsByAddress")
+    public ResponseEntity<List<ParkingLocationResponse>> getLocationsByAddress(@RequestParam String address) {
+        List<ParkingLocationResponse> responses = parkingLocationService.getLocationsByAddress(address);
+
+        if (responses.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Returns a 204 if no locations match the address
+        }
+
+        return ResponseEntity.ok(responses); // Returns 200 with the list of locations
+    }
+
     @GetMapping("/user/{userId}")
     public List<ParkingLocation> getByUserId(@PathVariable String userId) {
         return parkingLocationService.getParkingLocationsByUserId(userId);

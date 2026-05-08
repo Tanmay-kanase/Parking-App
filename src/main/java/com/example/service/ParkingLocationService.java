@@ -173,6 +173,10 @@ public class ParkingLocationService {
         return responses;
     }
 
+    public List<ParkingLocationResponse> getLocationsByAddress(String address) {
+        return parkingLocationRepository.getParkingLocationsByAddress(address);
+    }
+
     public ParkingLocation updateParkingLocation(String id, ParkingLocation updatedLocation) {
         return parkingLocationRepository.findById(id).map(existingLocation -> {
             existingLocation.setName(updatedLocation.getName());
@@ -196,7 +200,7 @@ public class ParkingLocationService {
     public List<LocationSuggestionDTO> searchLocations(
             String searchLoc) {
 
-        List<ParkingLocation> locations = parkingLocationRepository.searchLocations("^" + searchLoc);
+        List<ParkingLocation> locations = parkingLocationRepository.searchLocations(searchLoc);
 
         return locations.stream().map(location -> {
 
