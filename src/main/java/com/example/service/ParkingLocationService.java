@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.dto.LocationSuggestionDTO;
 import com.example.dto.ParkingLocationResponse;
 import com.example.dto.UserDTO;
 import com.example.model.Booking;
@@ -62,6 +63,32 @@ public class ParkingLocationService {
             GeoJsonPoint point = new GeoJsonPoint(location.getLng(), location.getLat());
             location.setLocation(point);
         }
+        String fullAddress = "";
+
+        if (location.getAddress() != null) {
+            fullAddress += location.getAddress().trim();
+        }
+
+        if (location.getCity() != null &&
+                !location.getCity().isBlank()) {
+
+            fullAddress += ", " + location.getCity().trim();
+        }
+
+        if (location.getState() != null &&
+                !location.getState().isBlank()) {
+
+            fullAddress += ", " + location.getState().trim();
+        }
+
+        if (location.getZipCode() != null &&
+                !location.getZipCode().isBlank()) {
+
+            fullAddress += " " + location.getZipCode().trim();
+        }
+
+        location.setAddress(fullAddress);
+
         return parkingLocationRepository.save(location);
     }
 
@@ -164,6 +191,24 @@ public class ParkingLocationService {
             return true;
         }
         return false;
+    }
+
+    public List<LocationSuggestionDTO> searchLocations(
+            String searchLoc) {
+
+        List<ParkingLocation> locations = parkingLocationRepository.searchLocations("^" + searchLoc);
+
+        return locations.stream().map(location -> {
+
+            LocationSuggestionDTO dto = new LocationSuggestionDTO();
+
+            dto.setLocationId(location.getLocationId());
+
+            dto.setAddress(location.getAddress());
+
+            return dto;
+
+        }).toList();
     }
 
     public void addSlotToParking(String locationId, String slotId) {

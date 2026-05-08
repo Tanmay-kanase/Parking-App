@@ -29,7 +29,6 @@ public class ParkingLocation {
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location; 
 
-
     @Transient
     private Double lat;
 

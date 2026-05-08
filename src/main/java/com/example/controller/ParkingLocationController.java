@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.LocationSuggestionDTO;
 import com.example.dto.ParkingLocationResponse;
 import com.example.model.ParkingLocation;
 import com.example.service.ParkingLocationService;
@@ -42,6 +43,13 @@ public class ParkingLocationController {
     @PostMapping
     public ResponseEntity<ParkingLocation> addParkingLocation(@RequestBody ParkingLocation location) {
         return ResponseEntity.ok(parkingLocationService.addParkingLocation(location));
+    }
+
+    @GetMapping("/search")
+    public List<LocationSuggestionDTO> searchLocations(
+            @RequestParam String searchLoc) {
+
+        return parkingLocationService.searchLocations(searchLoc);
     }
 
     @PutMapping("/{id}")

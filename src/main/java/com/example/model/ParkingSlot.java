@@ -16,4 +16,5 @@ public class ParkingSlot {
     private String location;
     private double pricePerHour;
     private String vehicleType;
+    private boolean isAvailable;
 }

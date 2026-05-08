@@ -14,6 +14,7 @@ const Signin = () => {
   const [error, setError] = useState(""); // For general error messages
   const [message, setMessage] = useState(""); // For success/info messages
 
+  const GoogleClient = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
   const showError = (msg) => toast.error(msg);
@@ -34,7 +35,7 @@ const Signin = () => {
       showError(
         err.response?.data?.message ||
           err.message ||
-          "Login failed. Please check your credentials."
+          "Login failed. Please check your credentials.",
       );
     } finally {
       setLoading(false);
@@ -54,7 +55,7 @@ const Signin = () => {
 
       // Check if user already exists
       const checkRes = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${googleEmail}`
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${googleEmail}`,
       );
 
       const isNewUser = !checkRes?.data?.email;
@@ -79,7 +80,7 @@ const Signin = () => {
 
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
-        userData
+        userData,
       );
       console.log(res);
       console.log("success");
@@ -245,7 +246,7 @@ const Signin = () => {
 
           {/* Google Login Button */}
           <div className="w-full">
-            <GoogleOAuthProvider clientId="526992097258-an7ps4j6qetf8mcjcd0g0d8deok1lmsf.apps.googleusercontent.com">
+            <GoogleOAuthProvider clientId={GoogleClient}>
               <GoogleLogin
                 onSuccess={handleSuccess}
                 onError={() =>

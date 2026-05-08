@@ -11,8 +11,8 @@ public class ParkingLocationResponse {
     private String state;
     private String zipCode;
     private int totalSlots;
-    private Double lat; // Latitude
-    private Double lng; // Longitude
+    private Double lat; 
+    private Double lng; 
     private boolean evCharging;
     private boolean cctvCamera;
     private boolean washing;

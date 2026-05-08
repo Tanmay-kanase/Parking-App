@@ -1,40 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-
-import Home from "./Pages/Home";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Contact_Footer from "./components/Contact_Footer";
-import ParkingSpots from "./Pages/parkings/Parking_Spots";
-import Profile from "./Pages/Profile/Profile";
-import ParkingSlots from "./Pages/parkings/parking_slots";
-import EditProfile from "./Pages/Profile/editprofile";
-import HowItWorks from "./components/Howitworks";
-import ParkingHistory from "./Pages/parkings/parkhistoy";
-import Payments from "./Pages/Bookings/Payments";
-import Bookings from "./Pages/Bookings/Booking";
-import DoBookings from "./Pages/Bookings/dobooking";
-import UploadParkingSpots from "./Pages/Parking_Service/upload_parking";
-import UploadParkingLocations from "./Pages/Parking_Service/uploadparkinglocations";
-import ShowParkings from "./Pages/Parking_Service/showparkings";
-import Shownearbyparkings from "./Pages/Parking_Service/shownearbyparkings";
-import Verify from "./Pages/Parking_Service/verify";
-import Admin from "./Pages/Admin/Admin";
-import SkeletonLoader from "./components/SkeletonLoader";
-import { useAuth } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoutes";
-import Signup from "./Pages/Auth/Signup";
-import Signin from "./Pages/Auth/Signin";
 import axios from "axios";
-import SystemArchitecture from "./Pages/Architecture/SystemArchitecture";
-import Demo from "./Pages/Auth/Demo";
-import PaymentsPage from "./Pages/Paments/Payments";
+
+// 1. KEEP STATIC IMPORTS for core layout, wrappers, and initial load components
+import Navbar from "./components/Navbar";
+import SkeletonLoader from "./components/SkeletonLoader";
+import ProtectedRoute from "./components/ProtectedRoutes";
+import { useAuth } from "./context/AuthContext";
+import SearchParkings from "./Pages/Parking_Service/showparkingsbylocation";
+
+// 2. USE LAZY IMPORTS for your page/route components
+const Home = lazy(() => import("./Pages/Home"));
+const ParkingSpots = lazy(() => import("./Pages/parkings/Parking_Spots"));
+const Profile = lazy(() => import("./Pages/Profile/Profile"));
+const ParkingSlots = lazy(() => import("./Pages/parkings/parking_slots"));
+const EditProfile = lazy(() => import("./Pages/Profile/editprofile"));
+const ParkingHistory = lazy(() => import("./Pages/parkings/parkhistoy"));
+const Payments = lazy(() => import("./Pages/Bookings/Payments"));
+const Bookings = lazy(() => import("./Pages/Bookings/Booking"));
+const DoBookings = lazy(() => import("./Pages/Bookings/dobooking"));
+const UploadParkingSpots = lazy(
+  () => import("./Pages/Parking_Service/upload_parking"),
+);
+const UploadParkingLocations = lazy(
+  () => import("./Pages/Parking_Service/uploadparkinglocations"),
+);
+const ShowParkings = lazy(() => import("./Pages/Parking_Service/showparkings"));
+const Shownearbyparkings = lazy(
+  () => import("./Pages/Parking_Service/shownearbyparkings"),
+);
+const Verify = lazy(() => import("./Pages/Parking_Service/verify"));
+const Admin = lazy(() => import("./Pages/Admin/Admin"));
+const Signup = lazy(() => import("./Pages/Auth/Signup"));
+const Signin = lazy(() => import("./Pages/Auth/Signin"));
+const SystemArchitecture = lazy(
+  () => import("./Pages/Architecture/SystemArchitecture"),
+);
+const Demo = lazy(() => import("./Pages/Auth/Demo"));
+const PaymentsPage = lazy(() => import("./Pages/Paments/Payments"));
 
 function App() {
   const { user, loading } = useAuth();
 
   const [darkMode, setDarkMode] = useState(() => {
-    // Load from localStorage or system preference
     return (
       localStorage.theme === "dark" ||
       (!("theme" in localStorage) &&
@@ -64,112 +72,120 @@ function App() {
   return (
     <>
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/parking-spots" element={<ParkingSpots />} />
-        <Route path="/parking-slots" element={<ParkingSlots />} />
-        <Route path="/park-history" element={<ParkingHistory />} />
-        <Route path="/show-parkings" element={<ShowParkings />} />
-        <Route path="signup" element={<Signup />} />
-        <Route path="/arch" element={<SystemArchitecture />} />
-        <Route path="/demo" element={<Demo />} />
-        {/* Protected Routes - Any Authenticated User */}
-        <Route
-          path="/verify"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "parking_owner"]}>
-              <Verify />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/show-parkings-nearby"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
-              <Shownearbyparkings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/edit-profile"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
-              <EditProfile />
-            </ProtectedRoute>
-          }
-        />
-        {/* Protected Routes - User Only */}
-        <Route
-          path="/booking"
-          element={
-            <ProtectedRoute allowedRoles={["user"]}>
-              <Bookings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/do-booking"
-          element={
-            <ProtectedRoute allowedRoles={["user"]}>
-              <DoBookings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/mybookings"
-          element={
-            <ProtectedRoute allowedRoles={["user"]}>
-              <Bookings />
-            </ProtectedRoute>
-          }
-        />
 
-        {/* Protected Routes - Parking Owner and Admin */}
-        <Route
-          path="/upload-parking-location"
-          element={
-            <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
-              <UploadParkingLocations />
-            </ProtectedRoute>
-          }
-        />
+      {/* 3. WRAP ROUTES IN SUSPENSE with your fallback UI */}
+      <Suspense fallback={<SkeletonLoader />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/signin" element={<Signin />} />
+          <Route path="/parking-spots" element={<ParkingSpots />} />
+          <Route path="/parking-slots" element={<ParkingSlots />} />
+          <Route path="/park-history" element={<ParkingHistory />} />
+          <Route path="/show-parkings" element={<ShowParkings />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/arch" element={<SystemArchitecture />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/searchParking" element={<SearchParkings />} />
 
-        <Route
-          path="/payments"
-          element={
-            <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
-              <PaymentsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/upload-parking-slots"
-          element={
-            <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
-              <UploadParkingSpots />
-            </ProtectedRoute>
-          }
-        />
-        {/* Protected Routes - Admin Only */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+          {/* Protected Routes - Any Authenticated User */}
+          <Route
+            path="/verify"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "parking_owner"]}>
+                <Verify />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/show-parkings-nearby"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
+                <Shownearbyparkings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-profile"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "user", "parking_owner"]}>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Routes - User Only */}
+          <Route
+            path="/booking"
+            element={
+              <ProtectedRoute allowedRoles={["user"]}>
+                <Bookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/do-booking"
+            element={
+              <ProtectedRoute allowedRoles={["user"]}>
+                <DoBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mybookings"
+            element={
+              <ProtectedRoute allowedRoles={["user"]}>
+                <Bookings />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Routes - Parking Owner and Admin */}
+          <Route
+            path="/upload-parking-location"
+            element={
+              <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
+                <UploadParkingLocations />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
+                <PaymentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upload-parking-slots"
+            element={
+              <ProtectedRoute allowedRoles={["parking_owner", "admin"]}>
+                <UploadParkingSpots />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Routes - Admin Only */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Suspense>
     </>
   );
 }
