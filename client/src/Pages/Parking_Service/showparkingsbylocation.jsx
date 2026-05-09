@@ -12,6 +12,7 @@ import {
   FaVideo,
   FaChargingStation,
   FaMapMarkerAlt,
+  FaSearch, // <-- Added FaSearch icon
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,42 +22,57 @@ export default function SearchParkings() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const searchQuery = params.get("query") || "";
-
-  const showError = (msg) => toast.error(msg);
-  const [flashId, setFlashId] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selections, setSelections] = useState({});
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  // Added local state for the input field
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const [loading, setLoading] = useState(false); // Default to false until query exists
   const [parkings, setParkings] = useState([]);
+  const fetchSuggestions = async (query) => {
+    try {
+      if (!query.trim()) {
+        setSuggestions([]);
+        return;
+      }
+
+      const res = await axios.get(
+        `api/parking-locations/search?searchLoc=${query}`,
+      );
+
+      setSuggestions(res.data);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  // Sync input field if the user uses the browser back/forward buttons
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
 
   const handleBooking = (parkingId, name) => {
-    const selection = selections[parkingId];
-    if (!selection || !selection.vehicleType) {
-      setFlashId(parkingId);
+    navigate(`/do-booking?locID=${parkingId}&name=${name}`);
+  };
 
-      // Remove the flash class after the animation completes
-      setTimeout(() => {
-        setFlashId(null);
-      }, 1400);
-      return;
+  // Handle the new search submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      // Update the URL, which automatically triggers the useEffect below
+      navigate(`?query=${encodeURIComponent(searchInput.trim())}`);
     }
-    const selectedVehicleType = selection.vehicleType;
-    navigate(
-      `/do-booking?locID=${parkingId}&name=${name}&vType=${selectedVehicleType}`,
-    );
   };
 
   useEffect(() => {
-    setLoading(true);
     if (searchQuery) {
+      setLoading(true);
       axios
         .get(
-          // Updated to match the new Spring Boot Controller mapping
           `api/parking-locations/getLocationsByAddress?address=${searchQuery}`,
-          { withCredentials: true },
         )
         .then((response) => {
-          // Handle cases where 204 No Content might return empty data
           setParkings(response.data || []);
+          console.log(response.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -64,19 +80,10 @@ export default function SearchParkings() {
           setLoading(false);
         });
     } else {
+      setParkings([]);
       setLoading(false);
     }
   }, [searchQuery]);
-
-  const handleVehicleChange = (locationId, vehicleType) => {
-    setSelections((prev) => ({
-      ...prev,
-      [locationId]: {
-        ...prev[locationId],
-        vehicleType,
-      },
-    }));
-  };
 
   if (loading)
     return (
@@ -84,7 +91,7 @@ export default function SearchParkings() {
         <div className="flex flex-col items-center p-8 bg-gray-800 rounded-xl shadow-2xl space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400"></div>
           <p className="text-xl font-semibold text-gray-100 mt-4 text-center">
-            Searching Parkings ...
+            Searching for `{searchQuery}`...
           </p>
           <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
             <div className="w-full h-full bg-blue-400 animate-pulse-width"></div>
@@ -96,31 +103,77 @@ export default function SearchParkings() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-10">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-          Search Results for `{searchQuery}`
-        </h2>
+        {/* NEW: Search Bar Form */}
+        <form
+          onSubmit={handleSearch}
+          className="mb-10 flex flex-col sm:flex-row gap-4 max-w-3xl mx-auto"
+        >
+          <div className="relative flex-grow">
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                fetchSuggestions(e.target.value);
+              }}
+              placeholder="Search by address, city, or zip code..."
+              className="w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/50 transition-all text-lg shadow-inner"
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 max-h-72 overflow-y-auto">
+                {suggestions.map((item) => (
+                  <div
+                    key={item.locationId}
+                    onClick={() => {
+                      setShowSuggestions(false);
+
+                      navigate(`/searchParking?query=${item.address}`);
+                    }}
+                    className="px-4 py-3 hover:bg-yellow-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                  >
+                    <p className="text-sm text-gray-800 dark:text-white">
+                      {item.address}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="bg-yellow-500 text-gray-900 font-bold py-4 px-8 rounded-xl hover:bg-yellow-400 transition-colors shadow-lg hover:shadow-yellow-500/20 active:scale-95"
+          >
+            Search
+          </button>
+        </form>
+
+        {searchQuery && (
+          <h2 className="text-3xl font-bold text-yellow-400 mb-6">
+            Search Results for `${searchQuery}`
+          </h2>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {parkings.length > 0 ? (
+          {!searchQuery ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 bg-gray-800/50 rounded-xl border border-gray-700 border-dashed">
+              <FaSearch className="text-gray-600 text-5xl mb-4" />
+              <p className="text-gray-300 text-xl font-semibold">
+                Enter a location to find parking
+              </p>
+            </div>
+          ) : parkings.length > 0 ? (
             parkings.map((parking) => {
-              const isFlashing = flashId === parking.locationId;
-              const shouldBeDimmed = flashId !== null && !isFlashing;
-
-              if (isFlashing) showError("Select one of the vehicle types");
-
               return (
                 <div
                   key={parking.locationId}
-                  className={`bg-gray-800 shadow-lg rounded-xl p-6 flex flex-col justify-between ${
-                    shouldBeDimmed ? "opacity-50 blur-[1px]" : ""
-                  }`}
+                  className="bg-gray-800 shadow-lg rounded-xl p-6 flex flex-col justify-between"
                 >
                   <div>
                     <h3 className="text-xl font-semibold text-gray-50 mb-1">
                       {parking.name}
                     </h3>
 
-                    {/* Added Address Display directly from DTO */}
                     <div className="flex items-start gap-2 text-gray-400 text-sm mb-3">
                       <FaMapMarkerAlt className="mt-1 flex-shrink-0 text-red-400" />
                       <p>
@@ -136,14 +189,10 @@ export default function SearchParkings() {
                       </span>
                     </p>
 
-                    {/* Vehicle Type Selection */}
                     <div className="mb-4">
-                      <label
-                        htmlFor={`vehicle-${parking.locationId}`}
-                        className="block text-gray-300 font-semibold mb-2"
-                      >
+                      <p className="block text-gray-300 font-semibold mb-2">
                         Available Parking:
-                      </label>
+                      </p>
                       <div className="grid grid-cols-2 gap-2 text-sm font-semibold">
                         {[
                           {
@@ -171,48 +220,27 @@ export default function SearchParkings() {
                             slots: parking.busSlots,
                           },
                         ].map((v) => {
-                          const isSelected =
-                            selections[parking.locationId]?.vehicleType ===
-                            v.type;
                           const Icon = v.icon;
                           return (
-                            <button
+                            <div
                               key={v.type}
-                              onClick={() =>
-                                handleVehicleChange(parking.locationId, v.type)
-                              }
-                              disabled={v.slots === 0}
-                              className={`flex items-center justify-center gap-2 p-2 rounded-lg transition duration-200 
+                              className={`flex items-center justify-center gap-2 p-2 rounded-lg 
                               ${
-                                isSelected
-                                  ? "bg-yellow-500 text-gray-900 shadow-lg"
-                                  : v.slots === 0
-                                    ? "bg-gray-800 text-gray-600 border border-gray-700 cursor-not-allowed"
-                                    : "bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600"
-                              } transition-all duration-300 ${
-                                flashId === parking.locationId && v.slots > 0
-                                  ? "animate-flash-glow border-2 border-yellow-500 rounded-lg scale-[1.05] shadow-2xl"
-                                  : ""
+                                v.slots === 0
+                                  ? "bg-gray-800 text-gray-600 border border-gray-700"
+                                  : "bg-gray-700 text-gray-300 border border-gray-600"
                               }`}
                             >
                               <Icon
                                 className={`${
-                                  isSelected
-                                    ? "text-gray-900"
-                                    : v.slots === 0
-                                      ? "text-gray-600"
-                                      : v.color
+                                  v.slots === 0 ? "text-gray-600" : v.color
                                 } text-lg`}
                               />
                               <span className="capitalize">{v.type}</span>
-                              <span
-                                className={`${
-                                  isSelected ? "text-gray-900" : "text-blue-500"
-                                } font-bold`}
-                              >
+                              <span className="text-blue-500 font-bold">
                                 {v.slots}
                               </span>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -222,7 +250,6 @@ export default function SearchParkings() {
                       Features
                     </p>
                     <div className="grid grid-cols-2 gap-2 mb-4">
-                      {/* EV Charging */}
                       <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg bg-gray-800">
                         <FaChargingStation className="text-blue-400 text-lg" />
                         <span className="text-sm">Charging:</span>
@@ -233,7 +260,6 @@ export default function SearchParkings() {
                         )}
                       </div>
 
-                      {/* CCTV Camera */}
                       <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg bg-gray-800">
                         <FaVideo className="text-yellow-500 text-lg" />
                         <span className="text-sm">CCTV:</span>
@@ -244,7 +270,6 @@ export default function SearchParkings() {
                         )}
                       </div>
 
-                      {/* Washing */}
                       <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg bg-gray-800">
                         <FaShower className="text-blue-300 text-lg" />
                         <span className="text-sm">Washing:</span>
@@ -256,33 +281,23 @@ export default function SearchParkings() {
                       </div>
                     </div>
 
-                    {/* Updated User Info mapping from DTO */}
                     {parking.user && (
                       <div className="mb-6 bg-gray-700/30 p-3 rounded-lg border border-gray-700">
                         <p className="text-gray-400 text-sm mb-1">
                           <strong className="text-gray-300">Owner:</strong>{" "}
                           {parking.user.name}
                         </p>
-                        <p className="text-gray-400 text-sm">
-                          <strong className="text-gray-300">Email:</strong>{" "}
-                          {parking.user.email}
-                        </p>
                       </div>
                     )}
                   </div>
 
                   <button
-                    className={`mt-auto font-bold py-3 px-4 rounded-lg transition-colors ${
-                      parking.available
-                        ? "bg-yellow-500 text-gray-900 hover:bg-yellow-400 shadow-md"
-                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    }`}
-                    disabled={!parking.available}
+                    className="mt-4 bg-yellow-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-yellow-400 transition-colors"
                     onClick={() =>
                       handleBooking(parking.locationId, parking.name)
                     }
                   >
-                    {parking.available ? "Park Here ..." : "Location Full"}
+                    Park Here ...
                   </button>
                 </div>
               );
@@ -294,7 +309,7 @@ export default function SearchParkings() {
                 No parking slots found
               </p>
               <p className="text-gray-500 mt-2 text-center max-w-md">
-                We couldnt find any parking locations matching "{searchQuery}".
+                We couldn find any parking locations matching "{searchQuery}".
                 Try searching for a different address or city.
               </p>
             </div>

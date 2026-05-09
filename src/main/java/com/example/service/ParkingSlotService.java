@@ -89,31 +89,11 @@ public class ParkingSlotService {
         }).collect(Collectors.toList());
     }
 
-    public List<ParkingSlot> getAvailableSlots(String parkingId, String vehicleType, Instant startTime,
-            Instant endTime) {
+    public List<ParkingSlot> getAvailableSlots(String parkingId, Instant startTime, Instant endTime) {
 
-        List<ParkingSlot> slots;
-        if ("ALL".equalsIgnoreCase(vehicleType) || vehicleType == null
-                || vehicleType.trim().isEmpty()) {
-            // If ALL, get all slots for the given parking lot.
-            slots = parkingSlotRepository.findByParkingId(parkingId);
-        } else {
-            // Otherwise, filter by the specific vehicle type.
-            slots = parkingSlotRepository.findByParkingIdAndVehicleType(parkingId, vehicleType);
-        }
-        if (slots.isEmpty())
-            return Collections.emptyList();
-
-        // Extract slot IDs
-        List<String> slotIds = slots.stream().map(ParkingSlot::getSlotId).toList();
-
-        // Step 2: Find overlapping bookings
-        List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(slotIds, startTime, endTime);
-
-        Set<String> bookedSlotIds = overlappingBookings.stream().map(Booking::getSlotId).collect(Collectors.toSet());
-
-        // Step 3: Filter available slots
-        return slots.stream().filter(s -> !bookedSlotIds.contains(s.getSlotId())).toList();
+        return parkingSlotRepository.findAvailableSlotsByAggregation(
+                parkingId,
+                startTime,
+                endTime);
     }
-
 }

@@ -1,9 +1,12 @@
 package com.example.dto;
 
+import org.springframework.data.annotation.Id;
+
 import lombok.Data;
 
 @Data
 public class ParkingLocationResponse {
+    @Id
     private String locationId;
     private String name;
     private String address;
@@ -11,8 +14,8 @@ public class ParkingLocationResponse {
     private String state;
     private String zipCode;
     private int totalSlots;
-    private Double lat; 
-    private Double lng; 
+    private Double lat;
+    private Double lng;
     private boolean evCharging;
     private boolean cctvCamera;
     private boolean washing;

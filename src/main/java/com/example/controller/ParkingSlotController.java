@@ -106,11 +106,10 @@ public class ParkingSlotController {
     @GetMapping("/availableByVehicle")
     public List<ParkingSlot> getAvailableSlots(
             @RequestParam String parkingId,
-            @RequestParam String vehicleType,
             @RequestParam Instant startTime, // Removed the annotation
             @RequestParam Instant endTime) { // Removed the annotation
 
-        return parkingSlotService.getAvailableSlots(parkingId, vehicleType, startTime, endTime);
+        return parkingSlotService.getAvailableSlots(parkingId, startTime, endTime);
     }
 
 }
