@@ -42,6 +42,9 @@ public class BookingService {
     private PaymentService paymentService;
 
     @Autowired
+    private SlotLockService slotLockService;
+
+    @Autowired
     private ParkingSlotService parkingSlotService;
 
     @Autowired
@@ -128,7 +131,11 @@ public class BookingService {
         }
 
         boolean locked = parkingSlotRepository.lockSlot(request.slotId);
+        String owner = slotLockService.getLockOwner(request.slotId);
 
+        if (owner == null || !owner.equals(request.userId)) {
+            throw new RuntimeException("Invalid slot lock");
+        }
         if (!locked) {
             throw new RuntimeException("Slot already booked by another user");
         }
@@ -306,6 +313,7 @@ public class BookingService {
         } catch (Exception e) {
             System.out.println("Error in fetching payment details");
         }
+        slotLockService.unlockSlot(request.slotId);
         return savedBooking;
     }
 }
