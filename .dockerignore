@@ -1,0 +1,17 @@
+# Ignore frontend build files and dependencies
+client/node_modules
+client/dist
+client/.npm
+
+# Ignore backend build files
+target/
+.mvn/
+!mvnw
+!mvnw.cmd
+
+# Ignore IDE and Git files
+.git
+.gitignore
+.idea/
+.vscode/
+*.iml
