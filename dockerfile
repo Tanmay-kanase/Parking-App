@@ -1,44 +1,58 @@
-# --- Stage 1: Build the React/Vite Frontend ---
+# ================================
+# Stage 1: Build React/Vite Frontend
+# ================================
 FROM node:20-alpine AS frontend-builder
+
 WORKDIR /app/client
 
-# Copy package files first to leverage Docker layer caching
+# Copy package files first (better caching)
 COPY client/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the client code and build
+# Copy remaining frontend files
 COPY client/ ./
+
+# Build frontend
 RUN npm run build
-# The built files are now inside /app/client/dist
 
 
-# --- Stage 2: Build the Spring Boot Application ---
+# ================================
+# Stage 2: Build Spring Boot Backend
+# ================================
 FROM maven:3.9.6-eclipse-temurin-21 AS backend-builder
+
 WORKDIR /app
 
-# Copy the pom.xml and backend source code
-COPY pom.xml .
+# Copy Maven files
+COPY pom.xml ./
+
+# Copy backend source
 COPY src ./src
 
-# Create the static directory (just in case it doesn't exist) and 
-# copy the compiled frontend directly into Spring Boot's static resources folder
+# Create static resources folder
 RUN mkdir -p ./src/main/resources/static
+
+# Copy frontend build into Spring Boot static folder
 COPY --from=frontend-builder /app/client/dist/ ./src/main/resources/static/
 
-# Package the Spring Boot application
-# The resulting JAR will now have the React frontend bundled inside it
+# Build Spring Boot JAR
 RUN mvn clean package -DskipTests
 
 
-# --- Stage 3: Production Runtime Image ---
+# ================================
+# Stage 3: Production Runtime
+# ================================
 FROM eclipse-temurin:21-jdk-alpine
+
 WORKDIR /app
 
-# Copy ONLY the final JAR file from the backend-builder stage
+# Copy built JAR from backend stage
 COPY --from=backend-builder /app/target/*.jar app.jar
 
-# Expose the port the app runs on
+# Expose application port
 EXPOSE 8080
 
-# Run the Spring Boot application
+# Run application
 ENTRYPOINT ["java", "-jar", "app.jar"]
