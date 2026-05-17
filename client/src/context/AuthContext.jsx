@@ -22,10 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     console.log("credentials : ", credentials);
-    const res = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
-      credentials,
-    );
+    const res = await axios.post(`/api/users/login`, credentials);
     console.log(res);
     localStorage.setItem("token", res.data.token);
     localStorage.setItem("user", JSON.stringify(res.data.user));
