@@ -1,7 +1,7 @@
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-const socket = new SockJS("http://localhost:8088/ws");
+const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/ws`);
 
 const stompClient = new Client({
   webSocketFactory: () => socket,
