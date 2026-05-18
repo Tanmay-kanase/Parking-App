@@ -54,9 +54,7 @@ const Signin = () => {
       console.log(userInfo);
 
       // Check if user already exists
-      const checkRes = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${googleEmail}`,
-      );
+      const checkRes = await axios.get(`/api/users/email/${googleEmail}`);
 
       const isNewUser = !checkRes?.data?.email;
 
@@ -78,10 +76,7 @@ const Signin = () => {
 
       console.log("checking user Data before hit request ", userData);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
-        userData,
-      );
+      const res = await axios.post(`/api/users/google-login`, userData);
       console.log(res);
       console.log("success");
       localStorage.setItem("token", res.data.token);

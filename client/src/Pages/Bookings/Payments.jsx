@@ -19,9 +19,7 @@ const Payments = () => {
 
     const fetchPayments = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/payments/user/${user.userId}`
-        );
+        const res = await axios.get(`/api/payments/user/${user.userId}`);
         setPayments(res.data);
         console.log("Response from the backend ", res.data);
       } catch (error) {

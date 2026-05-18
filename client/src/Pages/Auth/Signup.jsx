@@ -37,12 +37,9 @@ const Signup = () => {
     setError("");
     setMessage("");
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/send-otp`,
-        {
-          email: email,
-        },
-      );
+      const res = await axios.post(`/api/users/send-otp`, {
+        email: email,
+      });
       if (res.data.message) {
         setOtpVisible(true);
         setGeneratedOtp(res.data.otp);

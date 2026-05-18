@@ -59,10 +59,9 @@ const DoBooking = () => {
 
       // Depending on your backend, Razorpay usually expects the amount in the smallest currency unit (e.g., paise).
       // If your backend doesn't multiply by 100, you might need to do it here: totalAmount * 100.
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/payments/create-order`,
-        { amount: totalAmount },
-      );
+      const response = await axios.post(`/api/payments/create-order`, {
+        amount: totalAmount,
+      });
 
       const order = response.data;
       console.log("ORDER:", order);
@@ -110,10 +109,7 @@ const DoBooking = () => {
           console.log("=================================================");
           console.log("Booking Payload:", bookingPayload);
 
-          await axios.post(
-            `${import.meta.env.VITE_BACKEND_URL}/api/bookings/complete`,
-            bookingPayload,
-          );
+          await axios.post(`/api/bookings/complete`, bookingPayload);
           await unlockSlot(selectedSpot.slotId);
           navigate("/booking");
         },
@@ -193,9 +189,7 @@ const DoBooking = () => {
 
     if (user.userId) {
       axios
-        .get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${user.userId}`,
-        )
+        .get(`/api/vehicles/user/${user.userId}`)
         .then((response) => {
           const data = response.data;
           setVehicles(data);
@@ -304,7 +298,7 @@ const DoBooking = () => {
       // --- CHANGE END ---
 
       // Construct the URL with all query parameters
-      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/availableByVehicle?parkingId=${locationId}&startTime=${startUTC}&endTime=${endUTC}`;
+      const apiUrl = `/api/parking-slots/availableByVehicle?parkingId=${locationId}&startTime=${startUTC}&endTime=${endUTC}`;
 
       try {
         // 2. **Updated API Call**
@@ -400,13 +394,10 @@ const DoBooking = () => {
 
   const lockSlot = async (slot) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/slots/lock`,
-        {
-          slotId: slot.slotId,
-          userId: user.userId,
-        },
-      );
+      const response = await axios.post(`/api/slots/lock`, {
+        slotId: slot.slotId,
+        userId: user.userId,
+      });
 
       if (response.data.success) {
         setSelectedSpot(slot);
@@ -422,7 +413,7 @@ const DoBooking = () => {
 
   const unlockSlot = async (slotId) => {
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/slots/unlock`, {
+      await axios.post(`/api/slots/unlock`, {
         slotId,
         userId: user.userId,
       });

@@ -75,9 +75,7 @@ export default function UploadParkingLocations() {
     const fetchParkings = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/user/${
-            user.userId
-          }`,
+          `/api/parking-locations/user/${user.userId}`,
         );
         setParkings(response.data); // Set the parking data
       } catch (error) {
@@ -101,7 +99,7 @@ export default function UploadParkingLocations() {
       if (isEditing) {
         // Edit Existing (PUT Request)
         const response = await axios.put(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/${editId}`,
+          `/api/parking-locations/${editId}`,
           formData,
         );
         // Update the item in the local state array
@@ -113,10 +111,7 @@ export default function UploadParkingLocations() {
         setEditId(null);
       } else {
         // Create New (POST Request)
-        const response = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations`,
-          formData,
-        );
+        const response = await axios.post(`/api/parking-locations`, formData);
         setParkings([...parkings, response.data]);
         navigate(
           `/upload-parking-slots?locationId=${response.data.locationId}&name=${response.data.name}`,
@@ -171,9 +166,7 @@ export default function UploadParkingLocations() {
       return;
 
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/${id}`,
-      );
+      await axios.delete(`/api/parking-locations/${id}`);
       // Remove the deleted item from UI
       setParkings(parkings.filter((p) => p.locationId !== id));
     } catch (error) {

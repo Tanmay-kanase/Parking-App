@@ -28,17 +28,11 @@ const Profile = () => {
       try {
         if (user.role === "parking host") {
           const response = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/api/parking-locations/user/${
-              user.userId
-            }`
+            `/api/parking-locations/user/${user.userId}`,
           );
           setParkings(response.data);
         } else if (user.role === "customer") {
-          const res = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${
-              user.userId
-            }`
-          );
+          const res = await axios.get(`/api/vehicles/user/${user.userId}`);
           setVehicles(res.data);
         }
       } catch (error) {
@@ -53,11 +47,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${
-            user?.userId
-          }`
-        );
+        const res = await axios.get(`/api/vehicles/user/${user?.userId}`);
         setVehicles(res.data);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
@@ -142,7 +132,7 @@ const Profile = () => {
                     <div
                       onClick={() =>
                         navigate(
-                          `/upload-parking-slots?locationId=${parking.locationId}&name=${parking.name}`
+                          `/upload-parking-slots?locationId=${parking.locationId}&name=${parking.name}`,
                         )
                       }
                       key={parking.locationId}

@@ -32,7 +32,7 @@ const UploadParkingSpots = () => {
         const response = await axios.get(
           `${
             import.meta.env.VITE_BACKEND_URL
-          }/api/parking-slots/parking/${locationId}`
+          }/api/parking-slots/parking/${locationId}`,
         );
         setSpots(response.data); // Storing response data in 'spots'
       } catch (error) {
@@ -62,7 +62,7 @@ const UploadParkingSpots = () => {
   //     console.log(formData);
 
   //     const response = await axios.post(
-  //       `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots`,
+  //       `/api/parking-slots`,
   //       formData
   //     );
 
@@ -95,9 +95,7 @@ const UploadParkingSpots = () => {
     if (!confirm("Are you sure you want to delete this slot?")) return;
 
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${slotId}`
-      );
+      await axios.delete(`/api/parking-slots/${slotId}`);
       setSpots((prev) => prev.filter((slot) => slot.slotId !== slotId));
     } catch (err) {
       console.error("Error deleting slot:", err);
@@ -113,14 +111,14 @@ const UploadParkingSpots = () => {
           `${
             import.meta.env.VITE_BACKEND_URL
           }/api/parking-slots/${editingSlotId}`,
-          formData
+          formData,
         );
         const updatedSlot = response.data;
 
         setSpots((prev) =>
           prev.map((slot) =>
-            slot.slotId === editingSlotId ? updatedSlot : slot
-          )
+            slot.slotId === editingSlotId ? updatedSlot : slot,
+          ),
         );
 
         setIsEditMode(false);
@@ -166,10 +164,7 @@ const UploadParkingSpots = () => {
     console.log(payload);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/batch`,
-        payload
-      );
+      const response = await axios.post(`/api/parking-slots/batch`, payload);
       const newSlots = response.data;
       setSpots((prev) => [...prev, ...newSlots]);
       setShowModal(false);

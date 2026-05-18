@@ -249,9 +249,7 @@ const Admin = () => {
       try {
         setLoading(true);
         setShowSpinnerForDuration(true); // Start showing spinner
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/users/getAllUsers`
-        );
+        const res = await axios.get(`/api/users/getAllUsers`);
         setUsers(res.data);
         console.log("Users", res.data);
       } catch (error) {
@@ -292,22 +290,16 @@ const Admin = () => {
       try {
         if (action === "makeAdmin") {
           console.log("Admin change request called for user ID:", id);
-          await axios.put(
-            `${import.meta.env.VITE_BACKEND_URL}/api/users/make-admin/${id}`
-          );
+          await axios.put(`/api/users/make-admin/${id}`);
           showMessage("User role updated to Admin!", "success");
         } else if (action === "delete") {
-          await axios.delete(
-            `${import.meta.env.VITE_BACKEND_URL}/api/users/delete/${id}`
-          );
+          await axios.delete(`/api/users/delete/${id}`);
           setUsers(users.filter((user) => user._id !== id)); // Optimistic update
           showMessage("User deleted successfully!", "success");
         }
 
         // ✅ Fix: Axios doesn't need .json()
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/users/getAllUsers`
-        );
+        const res = await axios.get(`/api/users/getAllUsers`);
         const data = res.data; // or res.data.data if your backend wraps it
         setUsers(data);
       } catch (err) {
@@ -354,7 +346,7 @@ const Admin = () => {
       setIsConfirmModalOpen(false);
     });
     setConfirmMessage(
-      `Are you sure you want to delete this ${type.slice(0, -1)}?`
+      `Are you sure you want to delete this ${type.slice(0, -1)}?`,
     );
     setIsConfirmModalOpen(true);
   };
@@ -369,7 +361,7 @@ const Admin = () => {
       }
       showMessage(
         `${modalItemType.slice(0, -1)} added successfully!`,
-        "success"
+        "success",
       );
     } else if (modalMode === "edit") {
       if (modalItemType === "services") {
@@ -379,7 +371,7 @@ const Admin = () => {
       }
       showMessage(
         `${modalItemType.slice(0, -1)} updated successfully!`,
-        "success"
+        "success",
       );
     }
     setIsModalOpen(false);

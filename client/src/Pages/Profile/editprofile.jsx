@@ -54,7 +54,7 @@ const EditProfile = () => {
 
   const submitVehicle = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/vehicles/add`, {
+      await axios.post(`/api/vehicles/add`, {
         ...vehicle,
         userId,
       });
@@ -67,10 +67,7 @@ const EditProfile = () => {
 
   const updateUser = async () => {
     try {
-      const response = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`,
-        user,
-      );
+      const response = await axios.put(`/api/users/${userId}`, user);
       localStorage.setItem("user", JSON.stringify(response.data));
       alert("Profile updated successfully!");
       navigate("/profile");
@@ -87,9 +84,7 @@ const EditProfile = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`,
-        );
+        const response = await axios.get(`/api/users/${userId}`);
         setUser(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -103,9 +98,7 @@ const EditProfile = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/vehicles/user/${userId}`,
-        );
+        const res = await axios.get(`/api/vehicles/user/${userId}`);
         setVehicles(res.data);
       } catch (error) {
         console.error("Error fetching vehicles:", error);

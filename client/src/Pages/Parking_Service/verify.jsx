@@ -42,7 +42,7 @@ const Verify = () => {
         },
         (err) => {
           console.warn("QR scan error:", err);
-        }
+        },
       )
       .catch((err) => console.error("Start error:", err));
   };
@@ -65,10 +65,10 @@ const Verify = () => {
   };
 
   const successSound = new Audio(
-    "https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"
+    "https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3",
   );
   const errorSound = new Audio(
-    "https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"
+    "https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3",
   );
 
   const handleScan = async (data) => {
@@ -77,9 +77,7 @@ const Verify = () => {
       const slotId = data.trim();
 
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/parking-slots/${slotId}`
-        );
+        const response = await axios.get(`/api/parking-slots/${slotId}`);
         const isValid = response.data;
 
         if (isValid) {

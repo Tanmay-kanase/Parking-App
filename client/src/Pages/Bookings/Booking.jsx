@@ -24,9 +24,7 @@ const MyBookings = () => {
       if (!user.userId) return;
 
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/bookings/user/${user.userId}`,
-        );
+        const response = await axios.get(`/api/bookings/user/${user.userId}`);
         setBookings(response.data);
       } catch (error) {
         console.error("Error fetching bookings:", error);
