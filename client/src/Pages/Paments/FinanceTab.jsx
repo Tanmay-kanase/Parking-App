@@ -1,18 +1,59 @@
 import { Download, PieChart, XCircle } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PaginationFooter from "../../components/PaginationFooter";
 import usePagination from "../../hooks/usePagination";
+import axios from "../../config/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
+function FinanceTab({ locationId }) {
+  const { user } = useAuth();
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-function FinanceTab() {
-  const payments = Array.from({ length: 15 }, (_, i) => ({
-    paymentId: `PAY-00${i + 1}`,
-    transactionId: `TXN-998${i + 1}`,
-    paymentMethod: i % 2 === 0 ? "credit_card" : "paypal",
-    paymentTime: new Date(Date.now() - i * 10000000).toISOString(),
-    amount: Math.floor(Math.random() * 50) + 10,
-    status: i % 4 === 0 ? "failed" : "completed",
-  }));
+  useEffect(() => {
+    const fetchPayments = async () => {
+      // Return early if we don't have the user yet
+      if (!user?.userId) return;
+
+      try {
+        setLoading(true);
+        // Fetching by userId based on your PaymentController
+        const response = await axios.get(`/api/payments/user/${user.userId}`);
+
+        // Map backend variables to match your existing frontend keys safely
+        const formattedData = response.data.map((p) => ({
+          paymentId: p.paymentId || "N/A",
+          transactionId: p.transactionId || "N/A",
+          paymentMethod: p.paymentMethod || "unknown",
+          paymentTime: p.paymentTime || new Date().toISOString(),
+          // Note: If Razorpay saves this to your DB in paise, change this to p.amount / 100
+          amount: p.amount / 100 || 0,
+          status: p.status || "pending",
+        }));
+
+        // Optional: Sort so newest payments are on top
+        formattedData.sort(
+          (a, b) => new Date(b.paymentTime) - new Date(a.paymentTime),
+        );
+
+        setPayments(formattedData);
+      } catch (err) {
+        console.error("Failed to fetch payments:", err);
+        setError("Failed to load financial data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, [user]);
+
   const paymentsPagination = usePagination(payments, 10);
+
+  // Return loading/error states before rendering the main UI
+  if (loading)
+    return <p className="text-gray-500">Loading financial data...</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -93,15 +134,11 @@ function FinanceTab() {
                     {new Date(p.paymentTime).toLocaleString()}
                   </td>
                   <td className="p-4 font-bold text-gray-900 dark:text-white">
-                    ${p.amount.toFixed(2)}
+                    {p.amount.toFixed(2)}
                   </td>
                   <td className="p-4">
                     <span
-                      className={`px-2 py-1 rounded text-xs font-bold ${
-                        p.status === "completed"
-                          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                          : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                      }`}
+                      className={`px-2 py-1 rounded text-xs font-bold ${"bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"}`}
                     >
                       {p.status.toUpperCase()}
                     </span>

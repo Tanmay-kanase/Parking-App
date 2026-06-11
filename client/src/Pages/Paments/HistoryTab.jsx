@@ -1,27 +1,65 @@
 import { Archive } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import PaginationFooter from "../../components/PaginationFooter";
+import usePagination from "../../hooks/usePagination";
+import axios from "../../config/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
+import { Archive } from "lucide-react";
 import React from "react";
 import PaginationFooter from "../../components/PaginationFooter";
 import usePagination from "../../hooks/usePagination";
 
 function HistoryTab(userId) {
-  const generateHistory = (count) => {
-    return Array.from({ length: count }, (_, i) => {
-      const entry = new Date(Date.now() - (i + 5) * 3600000);
-      const exit = new Date(entry.getTime() + Math.random() * 5 * 3600000);
+  const { user } = useAuth();
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-      return {
-        history_id: `H-${500 + i}`,
-        vehicleId: `CAR-${1000 + i}`,
-        slotId: `S${(i % 10) + 1}`,
-        entryTime: entry.toISOString(),
-        exitTime: exit.toISOString(),
-        amountPaid: (Math.random() * 50).toFixed(2),
-      };
-    });
-  };
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!user?.userId) return;
 
-  const history = generateHistory(10);
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `/api/parking-history/user/${user.userId}`,
+        );
+
+        // Map the backend data to match the table's expected format
+        const formattedData = response.data.map((h) => ({
+          // Using h.histroy_id to match the typo in your Spring Boot model
+          history_id: h.histroy_id || h.historyId || "N/A",
+          vehicleId: h.vehicleId || "N/A",
+          slotId: h.slotId || "N/A",
+          entryTime: h.entryTime
+            ? new Date(h.entryTime).toLocaleString()
+            : "N/A",
+          exitTime: h.exitTime ? new Date(h.exitTime).toLocaleString() : "N/A",
+          amountPaid: h.amountPaid || "0.00",
+          parking_lot_id: h.parking_lot_id, // Keep this for potential filtering later
+        }));
+
+        // Optional: If you only want to show history for the currently selected location from the dropdown
+        const filteredByLocation = locationId
+          ? formattedData.filter((h) => h.parking_lot_id === locationId)
+          : formattedData;
+
+        setHistory(filteredByLocation);
+      } catch (err) {
+        console.error("Failed to fetch history:", err);
+        setError("Failed to load historical data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [user, locationId]); // Re-run if user or selected location changes
+
   const historyPagination = usePagination(history, 5);
+
+  if (loading) return <p className="text-gray-500">Loading history...</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">

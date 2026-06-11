@@ -3,7 +3,7 @@ import PaginationFooter from "../../components/PaginationFooter";
 import { FileText } from "lucide-react";
 import usePagination from "../../hooks/usePagination";
 import axios from "../../config/axiosInstance";
-function BookingsTab() {
+function BookingsTab({ locationId }) {
   // --- YOUR MOCK DATA GOES HERE (bookings, payments, history, etc.) ---
 
   const [bookings, setBookings] = useState([]);
@@ -14,7 +14,7 @@ function BookingsTab() {
     const fetchBookings = async () => {
       try {
         const response = await axios.get(
-          "/api/bookings/location/69d7d255bae40612cb6796be",
+          `/api/bookings/location/${locationId}`,
         );
 
         // Axios already gives data in response.data
@@ -51,7 +51,7 @@ function BookingsTab() {
     };
 
     fetchBookings();
-  }, []);
+  }, [locationId]);
 
   const bookingsPagination = usePagination(bookings);
 

@@ -4,16 +4,23 @@ import usePagination from "../../hooks/usePagination";
 import PaginationFooter from "../../components/PaginationFooter";
 import axios from "../../config/axiosInstance";
 
-const LiveSlotsTab = (userId) => {
+// 1. Accept locationId as a destructured prop
+const LiveSlotsTab = ({ locationId }) => {
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSlots = async () => {
+      // Prevent fetching if locationId is missing
+      if (!locationId) return;
+
+      setLoading(true);
+
       try {
+        // 2. Inject the dynamic locationId into the API endpoint
         const response = await axios.get(
-          "/api/parking-slots/parking/69d7d255bae40612cb6796be",
+          `/api/parking-slots/parking/${locationId}`,
         );
 
         const data = response.data;
@@ -45,7 +52,8 @@ const LiveSlotsTab = (userId) => {
     };
 
     fetchSlots();
-  }, []);
+  }, [locationId]); // 3. Add locationId to the dependency array
+
   // 1. Move the filter state inside the child component
   const [slotFilterType, setSlotFilterType] = useState("All");
   const [slotFilterStatus, setSlotFilterStatus] = useState("All");
@@ -63,8 +71,10 @@ const LiveSlotsTab = (userId) => {
 
   // 3. Move the pagination hook inside the child component
   const parkingSlotsPagination = usePagination(filteredParkingSlots, 5);
+
   if (loading) return <p>Loading slots...</p>;
   if (error) return <p>Error: {error}</p>;
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
