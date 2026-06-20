@@ -15,7 +15,7 @@ const ParkingHistory = () => {
 
       try {
         const response = await axios.get(
-          `/api/parking-history/user/${user.userId}`
+          `/api/parking-history/user/${user.userId}`,
         );
         console.log(response);
 
@@ -114,7 +114,7 @@ const ParkingHistory = () => {
                     </span>
                     <span className="flex items-center gap-2">
                       <FaMoneyBill className="text-yellow-600 dark:text-yellow-500" />{" "}
-                      {history.amountPaid}
+                      {history.amountPaid / 100}
                     </span>
                   </td>
                 </tr>

@@ -2,6 +2,7 @@ package com.example.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.retry.annotation.Retryable;
@@ -40,6 +41,9 @@ public class BookingService {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     private SlotLockService slotLockService;
@@ -114,6 +118,10 @@ public class BookingService {
     @Transactional
     public Booking completeBooking(CompleteBookingRequest request) {
 
+        System.out.println("\n[DEBUG] === STARTING completeBooking ===");
+        System.out.println("[DEBUG] Request data: OrderId=" + request.orderId + ", PaymentId=" + request.paymentId
+                + ", SlotId=" + request.slotId);
+
         boolean isValid = RazorpayUtils.verifySignature(
                 request.orderId,
                 request.paymentId,
@@ -129,15 +137,16 @@ public class BookingService {
         if (existing.isPresent()) {
             throw new RuntimeException("Duplicate payment detected");
         }
+        System.out.println("[DEBUG] 3. Validating slot locks for slotId: " + request.slotId);
 
-        boolean locked = parkingSlotRepository.lockSlot(request.slotId);
         String owner = slotLockService.getLockOwner(request.slotId);
-
-        if (owner == null || !owner.equals(request.userId)) {
-            throw new RuntimeException("Invalid slot lock");
+        System.out.println("[DEBUG] 3. Redis getLockOwner result: " + owner + " | Expected userId: " + request.userId);
+        if (owner == null) {
+            throw new RuntimeException("Slot lock has expired. Please try booking again.");
         }
-        if (!locked) {
-            throw new RuntimeException("Slot already booked by another user");
+
+        if (!owner.equals(request.userId)) {
+            throw new RuntimeException("Slot is currently locked/booked by another user.");
         }
 
         // 2. Save Parking History
@@ -314,6 +323,8 @@ public class BookingService {
             System.out.println("Error in fetching payment details");
         }
         slotLockService.unlockSlot(request.slotId);
+        String wsMessage = String.format("{\"slotId\":\"%s\", \"status\":\"BOOKED\"}", request.slotId);
+        messagingTemplate.convertAndSend("/topic/slot-updates", wsMessage);
         return savedBooking;
     }
 }

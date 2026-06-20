@@ -4,10 +4,6 @@ import PaginationFooter from "../../components/PaginationFooter";
 import usePagination from "../../hooks/usePagination";
 import axios from "../../config/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import { Archive } from "lucide-react";
-import React from "react";
-import PaginationFooter from "../../components/PaginationFooter";
-import usePagination from "../../hooks/usePagination";
 
 function HistoryTab(userId) {
   const { user } = useAuth();

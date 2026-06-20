@@ -40,7 +40,7 @@ const Hero = () => {
           {/* Call to Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link
-              to="/signup"
+              to="/signin"
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
             >
               Get Started

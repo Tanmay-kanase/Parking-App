@@ -7,7 +7,6 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  // ✅ Restore user on app load
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser && storedUser !== "undefined") {
@@ -22,7 +21,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     console.log("credentials : ", credentials);
-    const res = await axios.post(`/api/users/login`, credentials);
+    const res = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
+      credentials,
+    );
     console.log(res);
     localStorage.setItem("token", res.data.token);
     localStorage.setItem("user", JSON.stringify(res.data.user));

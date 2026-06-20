@@ -75,7 +75,10 @@ const DoBooking = () => {
         description: "Parking Slot Booking",
         order_id: order.id,
         handler: async function (response) {
-          // 👇 THIS IS WHAT YOU NEED
+          //  THIS IS WHAT YOU NEED
+          setShowPopup(false); // Close the payment modal if it's still open
+          setMessage("Booking in progress...");
+          setLoadingBooking(true);
           const bookingPayload = {
             userId: user.userId,
             email: user.email,
@@ -111,7 +114,16 @@ const DoBooking = () => {
 
           await axios.post(`/api/bookings/complete`, bookingPayload);
           await unlockSlot(selectedSpot.slotId);
-          navigate("/booking");
+          setMessage("Booking Successful! Redirecting...");
+          setTimeout(() => {
+            navigate("/booking");
+          }, 500);
+        },
+        catch(backendError) {
+          console.error("Backend booking settlement failed:", backendError);
+          alert(
+            "Payment received, but booking confirmation failed. Please contact support.",
+          );
         },
         prefill: {
           name: "Tanmay",
@@ -120,6 +132,19 @@ const DoBooking = () => {
         },
         theme: {
           color: "#FACC15",
+        },
+        modal: {
+          // 👇 CRITICAL FIX: Triggered when user exits the checkout manually without paying
+          ondismiss: async function () {
+            console.log("Razorpay checkout closed by the user.");
+            try {
+              if (selectedSpot) {
+                await unlockSlot(selectedSpot.slotId);
+              }
+            } catch (unlockErr) {
+              console.error("Failed to unlock slot on dismiss:", unlockErr);
+            }
+          },
         },
       };
 
@@ -133,10 +158,6 @@ const DoBooking = () => {
         console.error("FAILED:", response);
         alert(response.error.description);
       });
-
-      console.log("=== RAZORPAY HANDLER RESPONSE ===");
-      console.log(JSON.stringify(response, null, 2));
-      navigate("/booking");
     } catch (error) {
       console.error("Payment failed", error);
       alert("Payment Failed");
@@ -229,6 +250,32 @@ const DoBooking = () => {
             return updated;
           });
         }
+
+        if (data.status === "BOOKED") {
+          // 1. Remove from the locked state just in case
+          setLockedSlots((prev) => {
+            const updated = { ...prev };
+            delete updated[data.slotId];
+            return updated;
+          });
+
+          // 2. Filter the slot out of the grouped spots list
+          setSpots((prevSpots) => {
+            return (
+              prevSpots
+                .map((group) => {
+                  return {
+                    ...group,
+                    slots: group.slots.filter(
+                      (slot) => slot.slotId !== data.slotId,
+                    ),
+                  };
+                })
+                // Optional: completely hide the vehicle group if 0 slots are left
+                .filter((group) => group.slots.length > 0)
+            );
+          });
+        }
       });
     };
 
@@ -276,6 +323,7 @@ const DoBooking = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const fetchAndFilterParkingSlots = async () => {
+      setMessage("Getting Parkings ...");
       // 1. **Early Exit for Incomplete Data**
       if (!locationId || !filterData.startTime || !filterData.duration) {
         // If critical filter data is missing, we don't fetch.
