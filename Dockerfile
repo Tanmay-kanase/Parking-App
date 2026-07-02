@@ -14,6 +14,8 @@ RUN npm install
 # Copy remaining frontend files
 COPY client/ ./
 
+RUN --mount=type=secret,id=_env,dst=/app/client/.env 
+
 # Build frontend
 RUN npm run build
 
