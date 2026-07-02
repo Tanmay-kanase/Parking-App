@@ -9,11 +9,10 @@ import {
   Users,
   Briefcase,
   ShoppingBag,
-  Info, // For message box
+  Info,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// Mock data for services and products
 const initialServices = [
   { id: 1, label: "Website Designing", href: "/services/website-designing" },
   {
@@ -52,31 +51,29 @@ const initialProducts = [
 
 const Admin = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("users"); // 'users', 'services', 'products'
+  const [activeTab, setActiveTab] = useState("users");
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState(initialServices);
   const [products, setProducts] = useState(initialProducts);
   const [loading, setLoading] = useState(true);
-  const [showSpinnerForDuration, setShowSpinnerForDuration] = useState(true); // New state for controlled spinner display
+  const [showSpinnerForDuration, setShowSpinnerForDuration] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
-  const [modalItemType, setModalItemType] = useState(""); // 'services' or 'products'
+  const [modalMode, setModalMode] = useState("add");
+  const [modalItemType, setModalItemType] = useState("");
   const [currentEditingItem, setCurrentEditingItem] = useState(null);
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState("");
 
-  const [message, setMessage] = useState({ text: "", type: "" }); // { text: "...", type: "success" | "error" }
+  const [message, setMessage] = useState({ text: "", type: "" });
 
-  // Function to show a temporary message
   const showMessage = (text, type) => {
     setMessage({ text, type });
-    setTimeout(() => setMessage({ text: "", type: "" }), 3000); // Clear after 3 seconds
+    setTimeout(() => setMessage({ text: "", type: "" }), 3000);
   };
 
-  // Custom Confirmation Modal Component
   const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
     if (!isOpen) return null;
     return (
@@ -121,7 +118,6 @@ const Admin = () => {
     );
   };
 
-  // Modal component for adding/editing services/products
   const ItemModal = ({
     isOpen,
     onClose,
@@ -226,7 +222,6 @@ const Admin = () => {
     );
   };
 
-  // Reusable Tab Button Component
   const TabButton = ({ icon, label, isActive, onClick }) => (
     <button
       onClick={onClick}
@@ -248,7 +243,7 @@ const Admin = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        setShowSpinnerForDuration(true); // Start showing spinner
+        setShowSpinnerForDuration(true);
         const res = await axios.get(`/api/users/getAllUsers`);
         setUsers(res.data);
         console.log("Users", res.data);
@@ -256,11 +251,10 @@ const Admin = () => {
         console.error("Error fetching users:", error.message);
         showMessage("Failed to fetch users.", "error");
       } finally {
-        // Ensure spinner shows for at least 2.5 seconds
         setTimeout(() => {
           setLoading(false);
-          setShowSpinnerForDuration(false); // Hide spinner after duration
-        }, 500); // 2.5 seconds
+          setShowSpinnerForDuration(false);
+        }, 500);
       }
     };
 
@@ -294,13 +288,12 @@ const Admin = () => {
           showMessage("User role updated to Admin!", "success");
         } else if (action === "delete") {
           await axios.delete(`/api/users/delete/${id}`);
-          setUsers(users.filter((user) => user._id !== id)); // Optimistic update
+          setUsers(users.filter((user) => user._id !== id));
           showMessage("User deleted successfully!", "success");
         }
 
-        // ✅ Fix: Axios doesn't need .json()
         const res = await axios.get(`/api/users/getAllUsers`);
-        const data = res.data; // or res.data.data if your backend wraps it
+        const data = res.data;
         setUsers(data);
       } catch (err) {
         console.error(`Error performing ${action} on user:`, err);
@@ -319,7 +312,6 @@ const Admin = () => {
     setIsConfirmModalOpen(true);
   };
 
-  // --- Service/Product Management Actions (in-memory) ---
   const handleAddItem = (type) => {
     setModalItemType(type);
     setModalMode("add");
@@ -353,7 +345,7 @@ const Admin = () => {
 
   const handleModalSubmit = (item) => {
     if (modalMode === "add") {
-      const newItem = { ...item, id: Date.now() }; // Use Date.now() for unique ID
+      const newItem = { ...item, id: Date.now() };
       if (modalItemType === "services") {
         setServices([...services, newItem]);
       } else if (modalItemType === "products") {
@@ -378,7 +370,6 @@ const Admin = () => {
   };
 
   const renderContent = () => {
-    // Display spinner if showSpinnerForDuration is true
     if (showSpinnerForDuration) {
       return (
         <div className="flex justify-center items-center h-64">
@@ -387,7 +378,6 @@ const Admin = () => {
       );
     }
 
-    // Render content only when spinner duration is over
     switch (activeTab) {
       case "users":
         return (
@@ -444,7 +434,7 @@ const Admin = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
                   <motion.tr
-                    key={user.userId} // Assuming user._id from backend
+                    key={user.userId}
                     variants={itemVariants}
                     whileHover={{ scale: 1.01, backgroundColor: "#f9fafb" }}
                   >

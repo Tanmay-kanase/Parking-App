@@ -20,12 +20,12 @@ import HowItWorks from "../components/Howitworks";
 import { useAuth } from "../context/AuthContext";
 import Hero from "../components/Hero";
 
-// Use Tailwind CSS to define styles
+
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  // Use a custom modal for alerts
+  
   const { logout, user } = useAuth();
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -54,30 +54,30 @@ const Home = () => {
       console.error(err);
     }
   };
-  // Handles search for a specific location
+  
   const handleSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/searchParking?query=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  // This useEffect hook is the core of the dark mode fix.
-  // It adds or removes the 'dark' class from the HTML element,
-  // which enables all Tailwind CSS 'dark:' variants.
-  // useEffect(() => {
-  //   console.log("USe Efffect called");
+  
+  
+  
+  
+  
 
-  //   const htmlElement = document.documentElement;
-  //   if (darkMode) {
-  //     htmlElement.classList.add("dark");
-  //   } else {
-  //     htmlElement.classList.remove("dark");
-  //   }
-  // }, [darkMode]);
+  
+  
+  
+  
+  
+  
+  
 
-  // Handles finding nearby parking spots using geolocation
+  
   const handleNearby = () => {
-    // Check if the browser supports geolocation
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -86,7 +86,7 @@ const Home = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          // Fallback or user-friendly message
+          
           showAlert(
             "Unable to get your location. Please try again or search manually.",
           );

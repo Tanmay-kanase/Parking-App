@@ -19,7 +19,7 @@ const Verify = () => {
     Html5Qrcode.getCameras().then((devices) => {
       if (devices && devices.length) {
         setCameras(devices);
-        startScanner(devices[0].id); // start with first camera
+        startScanner(devices[0].id); 
       }
     });
 

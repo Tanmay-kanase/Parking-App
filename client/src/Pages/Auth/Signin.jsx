@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext"; // Changed from useAuth to useAuth based on your SignUpForm
+import { useAuth } from "../../context/AuthContext"; 
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const Signin = () => {
-  const { login, setUser } = useAuth(); // fetchUser is not directly used here
+  const { login, setUser } = useAuth(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); // For local login loading
-  const [error, setError] = useState(""); // For general error messages
-  const [message, setMessage] = useState(""); // For success/info messages
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState(""); 
+  const [message, setMessage] = useState(""); 
 
   const GoogleClient = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const navigate = useNavigate();
@@ -20,16 +20,15 @@ const Signin = () => {
   const showError = (msg) => toast.error(msg);
   const showMessage = (msg) => toast.success(msg);
 
-  // Handle traditional email/password login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(""); // Reset previous error
+    setError(""); 
     setMessage("");
     try {
-      await login({ email, password }); // Call context login
+      await login({ email, password }); 
       showMessage("Login successful! Redirecting...");
-      navigate("/"); // Redirect on success
+      navigate("/"); 
     } catch (err) {
       console.error("Login failed:", err.response?.data || err.message);
       showError(
@@ -42,9 +41,8 @@ const Signin = () => {
     }
   };
 
-  // Handle Google OAuth success
   const handleSuccess = async (response) => {
-    setError(""); // Reset previous error
+    setError("");
     setMessage("");
     let password;
     try {
@@ -53,7 +51,7 @@ const Signin = () => {
       const { name, email: googleEmail, sub: googleUserId, picture } = userInfo;
       console.log(userInfo);
 
-      // Check if user already exists
+     
       const checkRes = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${googleEmail}`,
       );
@@ -70,10 +68,10 @@ const Signin = () => {
 
       const userData = {
         name,
-        email: googleEmail, // use the correct variable
+        email: googleEmail, 
         userId: googleUserId,
         photo: picture,
-        password, // only for new users
+        password,
       };
 
       console.log("checking user Data before hit request ", userData);

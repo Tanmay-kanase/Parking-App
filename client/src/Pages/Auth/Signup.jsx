@@ -1,33 +1,31 @@
 import React, { useState } from "react";
-import { storage } from "../../config/firebase"; // Assuming this path is correct
+import { storage } from "../../config/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // Assuming this path is correct
+import { useAuth } from "../../context/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Signup = () => {
-  // State variables
   const [otpVisible, setOtpVisible] = useState(false);
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [otp, setOtp] = useState("");
-  const [isSendingOtp, setIsSendingOtp] = useState(false); // Renamed for clarity
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false); // New state for OTP verification loading
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [email, setEmail] = useState("");
-  const [error, setError] = useState(""); // For general error messages
-  const [message, setMessage] = useState(""); // For success/info messages (replaces alerts)
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  const [loading, setLoading] = useState(false); // For user registration loading
+  const [loading, setLoading] = useState(false);
 
-  const { setUser } = useAuth(); // fetchUser is not used in the provided snippet
+  const { setUser } = useAuth();
   const navigate = useNavigate();
 
-  // Function to display error message temporarily
   const showError = (msg) => toast.error(msg);
   const showMessage = (msg) => toast.success(msg);
-  // Handle sending OTP
+
   const handleSendOtp = async () => {
     if (!email) {
       showError("Please enter an email address.");
@@ -76,15 +74,14 @@ const Signup = () => {
       }
 
       setIsVerifyingOtp(false);
-    }, 500); // small delay for UI feel
+    }, 500);
   };
 
-  // Handle form submission (user signup)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setMessage("");
-    setLoading(true); // Start loading for registration
+    setLoading(true);
 
     const formData = new FormData(e.target);
     const fullName = formData.get("fullName");
@@ -93,7 +90,6 @@ const Signup = () => {
     const phone = formData.get("phone");
     const role = formData.get("role");
 
-    // Basic client-side validations
     if (password.length < 8) {
       showError("Password must be at least 8 characters long.");
       setLoading(false);
@@ -122,7 +118,7 @@ const Signup = () => {
         `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
         {
           name: fullName,
-          email: email, // Use submittedEmail
+          email: email,
           phone,
           password,
           photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
@@ -281,7 +277,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
-                  disabled={isVerifyingOtp || isSendingOtp} // Disable if sending or verifying
+                  disabled={isVerifyingOtp || isSendingOtp}
                   className={`flex-shrink-0 px-4 py-3 sm:py-0 sm:h-auto sm:w-auto text-sm font-medium rounded-r-lg sm:rounded-l-none sm:rounded-r-lg transition-all duration-300
                     ${
                       isVerifyingOtp
@@ -391,7 +387,7 @@ const Signup = () => {
                 </svg>
               </div>
               <input
-                type="tel" // Changed to tel for semantic correctness
+                type="tel"
                 name="phone"
                 id="phone"
                 min={10}
@@ -423,7 +419,7 @@ const Signup = () => {
               <select
                 name="role"
                 id="role"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-3 shadow-sm transition-all duration-200 appearance-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // appearance-none to remove default arrow
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-3 shadow-sm transition-all duration-200 appearance-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 required
               >
                 <option value="" disabled selected className="text-gray-400">

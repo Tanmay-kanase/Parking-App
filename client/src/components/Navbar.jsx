@@ -6,27 +6,22 @@ import {
   User,
   MapPinPlusInside,
   History,
-  Wallet, // Changed from RussianRuble for better clarity/iconography
+  Wallet,
   Bookmark,
   Moon,
   Sun,
-  LogIn, // Icon for Get Started
-  Settings, // Icon for Settings
-  ShieldCheck, // Icon for Verify
+  LogIn,
+  Settings,
+  ShieldCheck,
 } from "lucide-react";
-// Removed useSelector and useAuth from original, adding back useAuth as it's needed
 import { useAuth } from "../context/AuthContext";
 
-// eslint-disable-next-line react/prop-types
 const Navbar = ({ darkMode, setDarkMode }) => {
-  const [isOpen, setIsOpen] = useState(false); // Mobile menu open/close
-  const [dropdownOpen, setDropdownOpen] = useState(false); // Profile dropdown open/close
-  const { logout, user } = useAuth(); // Assuming useAuth provides user object and logout function
+  const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { logout, user } = useAuth();
   const toggleDarkMode = () => setDarkMode(!darkMode);
-  // Log user object for debugging (can be removed in production)
-  // console.log(user);
 
-  // Links for Parking Owner
   const parkingOwnerLinks = [
     {
       name: "Verify",
@@ -48,7 +43,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
     },
   ];
 
-  // Links for General User
   const userLinks = [
     {
       name: "Parking History",
@@ -70,15 +64,13 @@ const Navbar = ({ darkMode, setDarkMode }) => {
     },
   ];
 
-  // Combine and filter links based on user role
   const getNavLinks = () => {
     if (!user) {
-      return []; // No links if not logged in (besides Get Started)
+      return [];
     }
     if (user.role === "parking_owner") {
       return parkingOwnerLinks;
     }
-    // Default to userLinks if role is 'user' or undefined (for generic authenticated users)
     return userLinks;
   };
 
@@ -105,7 +97,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               <a
                 key={link.name}
                 href={link.href}
-                className="flex items-center space-x-2 text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative group py-2" // Added py-2 for bigger click area
+                className="flex items-center space-x-2 text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative group py-2"
               >
                 {link.icon}
                 <span>{link.name}</span>
@@ -221,7 +213,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
         className={`md:hidden absolute top-20 left-0 w-full bg-white dark:bg-gray-900 shadow-xl py-4 overflow-hidden transform transition-all duration-300 ease-in-out ${
           isOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
         }`}
-        style={{ height: isOpen ? "auto" : "0px" }} // Control height for smooth collapse
+        style={{ height: isOpen ? "auto" : "0px" }}
       >
         <div className="px-4 pt-2 pb-3 space-y-2">
           {navLinks.map((link) => (
@@ -229,7 +221,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               key={link.name}
               href={link.href}
               className="block px-3 py-3 rounded-lg text-base font-medium text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-300 flex items-center space-x-3"
-              onClick={() => setIsOpen(false)} // Close menu on link click
+              onClick={() => setIsOpen(false)}
             >
               {link.icon}
               <span>{link.name}</span>

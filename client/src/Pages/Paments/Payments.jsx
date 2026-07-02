@@ -31,15 +31,15 @@ const PaymentsPage = () => {
       console.log("Fetching parking location started");
 
       try {
-        // 1. Get the response from axios
+        
         const response = await axios.get(
           `/api/parking-locations/user/${user.userId}`,
         );
 
-        // 2. Extract the actual array from response.data
+        
         const fetchedLocations = response.data;
 
-        // 3. Now use fetchedLocations safely
+        
         if (fetchedLocations && fetchedLocations.length > 0) {
           setLocations(fetchedLocations);
           setLocationId(fetchedLocations[0].locationId);
@@ -55,7 +55,7 @@ const PaymentsPage = () => {
 
     fetchHostLocation();
   }, [user]);
-  // --- RENDER HELPERS ---
+  
   const renderTabs = () => (
     <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
       {[
@@ -80,7 +80,7 @@ const PaymentsPage = () => {
     </div>
   );
 
-  // Show a loading screen while fetching the locationId
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -89,7 +89,7 @@ const PaymentsPage = () => {
     );
   }
 
-  // Handle the edge case where a host doesn't have a location set up yet
+  
   if (!locationId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">

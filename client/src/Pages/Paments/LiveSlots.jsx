@@ -4,7 +4,6 @@ import usePagination from "../../hooks/usePagination";
 import PaginationFooter from "../../components/PaginationFooter";
 import axios from "../../config/axiosInstance";
 
-// 1. Accept locationId as a destructured prop
 const LiveSlotsTab = ({ locationId }) => {
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,27 +11,24 @@ const LiveSlotsTab = ({ locationId }) => {
 
   useEffect(() => {
     const fetchSlots = async () => {
-      // Prevent fetching if locationId is missing
       if (!locationId) return;
 
       setLoading(true);
 
       try {
-        // 2. Inject the dynamic locationId into the API endpoint
         const response = await axios.get(
           `/api/parking-slots/parking/${locationId}`,
         );
 
         const data = response.data;
 
-        // 🔥 Transform backend → frontend format
         const formattedSlots = data.map((item) => ({
           slotId: item.slotId,
           slotNumber: item.slotNumber,
           location: item.location,
           pricePerHour: item.pricePerHour,
           vehicleType: item.vehicleType,
-          isAvailable: item.available, // rename for UI
+          isAvailable: item.available,
         }));
 
         setParkingSlots(formattedSlots);
@@ -52,13 +48,11 @@ const LiveSlotsTab = ({ locationId }) => {
     };
 
     fetchSlots();
-  }, [locationId]); // 3. Add locationId to the dependency array
+  }, [locationId]);
 
-  // 1. Move the filter state inside the child component
   const [slotFilterType, setSlotFilterType] = useState("All");
   const [slotFilterStatus, setSlotFilterStatus] = useState("All");
 
-  // 2. Move the filtering logic inside the child component
   const filteredParkingSlots = parkingSlots.filter((slot) => {
     const typeMatch =
       slotFilterType === "All" || slot.vehicleType === slotFilterType;
@@ -69,7 +63,6 @@ const LiveSlotsTab = ({ locationId }) => {
     return typeMatch && statusMatch;
   });
 
-  // 3. Move the pagination hook inside the child component
   const parkingSlotsPagination = usePagination(filteredParkingSlots, 5);
 
   if (loading) return <p>Loading slots...</p>;

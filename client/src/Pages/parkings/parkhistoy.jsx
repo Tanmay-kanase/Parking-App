@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "../../config/axiosInstance";
 
 const ParkingHistory = () => {
-  const { user, loading } = useAuth(); // get current user
+  const { user, loading } = useAuth();
   if (loading) {
     return <div>Loading user info...</div>;
   }
@@ -29,7 +29,6 @@ const ParkingHistory = () => {
   }, [user]);
 
   return (
-    // Main container with responsive padding and dark mode background/text colors
     <div className="min-h-screen bg-yellow-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-8">
       <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6">
         {/* Header */}

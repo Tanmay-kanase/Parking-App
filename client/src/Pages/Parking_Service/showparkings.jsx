@@ -30,7 +30,7 @@ const ShowParkings = () => {
       .get(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/api/parking-locations/city/${searchLocation}`
+        }/api/parking-locations/city/${searchLocation}`,
       )
       .then((response) => {
         setParkings(response.data);

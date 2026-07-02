@@ -12,7 +12,7 @@ const UploadParkingSpots = () => {
   const locationId = params.get("locationId");
   const name = params.get("name");
   const [showModal, setShowModal] = useState(false);
-  const [uploadMode, setUploadMode] = useState("single"); // "single" or "multiple"
+  const [uploadMode, setUploadMode] = useState("single"); 
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingSlotId, setEditingSlotId] = useState(null);
 
@@ -22,8 +22,8 @@ const UploadParkingSpots = () => {
     location: `${name}`,
     userId: `${userId}`,
     pricePerHour: "",
-    vehicleType: "", // Updated for multiple selections
-    available: true, // Default to available
+    vehicleType: "", 
+    available: true, 
   });
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const UploadParkingSpots = () => {
             import.meta.env.VITE_BACKEND_URL
           }/api/parking-slots/parking/${locationId}`,
         );
-        setSpots(response.data); // Storing response data in 'spots'
+        setSpots(response.data); 
       } catch (error) {
         console.error("Error fetching parking slots:", error);
       }
@@ -56,29 +56,29 @@ const UploadParkingSpots = () => {
     setFormData({ ...formData, vehicleType: type });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     console.log(formData);
+  
+  
+  
+  
 
-  //     const response = await axios.post(
-  //       `/api/parking-slots`,
-  //       formData
-  //     );
+  
+  
+  
+  
 
-  //     console.log("Parking slot uploaded:", response.data);
-  //     setShowModal(false);
-  //     window.location.reload();
-  //   } catch (error) {
-  //     console.error("Error uploading parking slot:", error);
-  //   }
-  // };
+  
+  
+  
+  
+  
+  
+  
 
   const handleEdit = (spot) => {
     setIsEditMode(true);
     setShowModal(true);
     setEditingSlotId(spot.slotId);
-    setUploadMode("single"); // Only single edit allowed
+    setUploadMode("single"); 
 
     setFormData({
       slotNumber: spot.slotNumber,
@@ -130,7 +130,7 @@ const UploadParkingSpots = () => {
       return;
     }
 
-    // Original Add Logic
+    
     let payload = [];
 
     if (uploadMode === "single") {
@@ -174,7 +174,7 @@ const UploadParkingSpots = () => {
   };
 
   return (
-    // Main container with responsive padding and dark mode theming
+    
     <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-4 sm:p-8">
         <button

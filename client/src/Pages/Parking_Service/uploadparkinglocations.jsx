@@ -5,7 +5,7 @@ import {
   FaHome,
   FaHashtag,
   FaWarehouse,
-  FaEdit, // Added
+  FaEdit, 
   FaTrash,
 } from "react-icons/fa";
 import { MapPin, Building, Upload } from "lucide-react";
@@ -38,7 +38,7 @@ export default function UploadParkingLocations() {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
-          setLocationVerified(true); // Set location as verified
+          setLocationVerified(true); 
           setLoadingVerification(false);
         },
         (error) => {
@@ -77,7 +77,7 @@ export default function UploadParkingLocations() {
         const response = await axios.get(
           `/api/parking-locations/user/${user.userId}`,
         );
-        setParkings(response.data); // Set the parking data
+        setParkings(response.data); 
       } catch (error) {
         console.error("Error fetching parking locations:", error);
       }
@@ -97,12 +97,12 @@ export default function UploadParkingLocations() {
       setUploading(true);
 
       if (isEditing) {
-        // Edit Existing (PUT Request)
+        
         const response = await axios.put(
           `/api/parking-locations/${editId}`,
           formData,
         );
-        // Update the item in the local state array
+        
         setParkings(
           parkings.map((p) => (p.locationId === editId ? response.data : p)),
         );
@@ -110,7 +110,7 @@ export default function UploadParkingLocations() {
         setIsEditing(false);
         setEditId(null);
       } else {
-        // Create New (POST Request)
+        
         const response = await axios.post(`/api/parking-locations`, formData);
         setParkings([...parkings, response.data]);
         navigate(
@@ -151,15 +151,15 @@ export default function UploadParkingLocations() {
     setShowModal(true);
   };
   const handleEdit = (e, parking) => {
-    e.stopPropagation(); // Prevents triggering the card's navigation onClick
+    e.stopPropagation(); 
     setIsEditing(true);
-    setEditId(parking.locationId); // Ensure this matches your backend ID field
-    setFormData(parking); // Populate the form with existing data
-    setLocationVerified(true); // Assuming existing locations have valid coords
+    setEditId(parking.locationId); 
+    setFormData(parking); 
+    setLocationVerified(true); 
     setShowModal(true);
   };
   const handleDelete = async (e, id) => {
-    e.stopPropagation(); // Prevents triggering the card's navigation onClick
+    e.stopPropagation(); 
     if (
       !window.confirm("Are you sure you want to delete this parking location?")
     )
@@ -167,7 +167,7 @@ export default function UploadParkingLocations() {
 
     try {
       await axios.delete(`/api/parking-locations/${id}`);
-      // Remove the deleted item from UI
+      
       setParkings(parkings.filter((p) => p.locationId !== id));
     } catch (error) {
       console.error("Error deleting parking location:", error);
@@ -175,7 +175,7 @@ export default function UploadParkingLocations() {
     }
   };
   return (
-    // Main container with responsive padding and dark mode theming
+    
     <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <div className="w-full max-w-7xl mx-auto bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-lg">
         <div className="flex justify-between items-center mb-6">

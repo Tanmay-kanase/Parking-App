@@ -12,26 +12,23 @@ function FinanceTab({ locationId }) {
 
   useEffect(() => {
     const fetchPayments = async () => {
-      // Return early if we don't have the user yet
       if (!user?.userId) return;
 
       try {
         setLoading(true);
-        // Fetching by userId based on your PaymentController
+
         const response = await axios.get(`/api/payments/user/${user.userId}`);
 
-        // Map backend variables to match your existing frontend keys safely
         const formattedData = response.data.map((p) => ({
           paymentId: p.paymentId || "N/A",
           transactionId: p.transactionId || "N/A",
           paymentMethod: p.paymentMethod || "unknown",
           paymentTime: p.paymentTime || new Date().toISOString(),
-          // Note: If Razorpay saves this to your DB in paise, change this to p.amount / 100
+
           amount: p.amount / 100 || 0,
           status: p.status || "pending",
         }));
 
-        // Optional: Sort so newest payments are on top
         formattedData.sort(
           (a, b) => new Date(b.paymentTime) - new Date(a.paymentTime),
         );
@@ -50,7 +47,6 @@ function FinanceTab({ locationId }) {
 
   const paymentsPagination = usePagination(payments, 10);
 
-  // Return loading/error states before rendering the main UI
   if (loading)
     return <p className="text-gray-500">Loading financial data...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;

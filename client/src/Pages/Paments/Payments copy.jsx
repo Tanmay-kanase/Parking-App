@@ -11,14 +11,14 @@ import {
   XCircle,
   MapPin,
   Clock,
-  Archive, // Added missing import from previous version
+  Archive, 
 } from "lucide-react";
 
 const PaymentsPage = () => {
   const [activeTab, setActiveTab] = useState("slots");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  // --- MOCK DATA ---
+  
   const parkingSlots = [
     {
       slotId: "S1",
@@ -362,12 +362,12 @@ const PaymentsPage = () => {
     },
   ];
 
-  // --- HANDLERS ---
+  
   const handleDownload = (reportName) => {
     alert(`Triggering PDF generation for: ${reportName}`);
   };
 
-  // --- RENDER HELPERS ---
+  
   const renderTabs = () => (
     <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
       {[

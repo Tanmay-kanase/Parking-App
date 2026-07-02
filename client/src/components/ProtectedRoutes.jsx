@@ -9,7 +9,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/signin" replace />;
   }
 
-  // eslint-disable-next-line react/prop-types
   if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }

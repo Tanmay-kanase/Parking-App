@@ -21,9 +21,7 @@ function HistoryTab(userId) {
           `/api/parking-history/user/${user.userId}`,
         );
 
-        // Map the backend data to match the table's expected format
         const formattedData = response.data.map((h) => ({
-          // Using h.histroy_id to match the typo in your Spring Boot model
           history_id: h.histroy_id || h.historyId || "N/A",
           vehicleId: h.vehicleId || "N/A",
           slotId: h.slotId || "N/A",
@@ -32,10 +30,9 @@ function HistoryTab(userId) {
             : "N/A",
           exitTime: h.exitTime ? new Date(h.exitTime).toLocaleString() : "N/A",
           amountPaid: h.amountPaid || "0.00",
-          parking_lot_id: h.parking_lot_id, // Keep this for potential filtering later
+          parking_lot_id: h.parking_lot_id,
         }));
 
-        // Optional: If you only want to show history for the currently selected location from the dropdown
         const filteredByLocation = locationId
           ? formattedData.filter((h) => h.parking_lot_id === locationId)
           : formattedData;
@@ -50,7 +47,7 @@ function HistoryTab(userId) {
     };
 
     fetchHistory();
-  }, [user, locationId]); // Re-run if user or selected location changes
+  }, [user, locationId]);
 
   const historyPagination = usePagination(history, 5);
 

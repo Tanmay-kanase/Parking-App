@@ -11,14 +11,13 @@ const DoBooking = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
 
-  // Data passed from the previous page
   const locationId = params.get("locID");
   const name = params.get("name");
 
   const [message, setMessage] = useState("Getting Parkings ...");
   const [loadingbooking, setLoadingBooking] = useState(false);
-  const [spots, setSpots] = useState([]); // Grouped slots by vehicle type
-  const [selectedSpot, setSelectedSpot] = useState(null); // The slot selected in the UI grid
+  const [spots, setSpots] = useState([]);
+  const [selectedSpot, setSelectedSpot] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [showPopup, setShowPopup] = useState(false);
@@ -26,22 +25,15 @@ const DoBooking = () => {
   const [error, setError] = useState("");
   const [lockedSlots, setLockedSlots] = useState({});
 
-  // DoBooking.jsx (Inside the DoBooking component, after the initial useEffect for vehicles)
-
-  // --- Initial Form Data Calculation ---
-  // This runs once on mount to populate formData based on initial filterData
-  // --- Initial Form Data Calculation ---
   useEffect(() => {
-    const startString = filterData.startTime; // e.g. "2026-04-23T13:00"
+    const startString = filterData.startTime;
     const duration = parseFloat(filterData.duration);
 
     if (startString && duration > 0) {
-      // 1. Let JS read the local string normally (do NOT add 'Z' here)
       const start = new Date(startString);
-      // 2. Calculate end time in milliseconds
+
       const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-      // 3. Store the strict UTC strings in formData to send to the backend
       setFormData((prev) => ({
         ...prev,
         startTime: start.toISOString(),
@@ -49,16 +41,13 @@ const DoBooking = () => {
         time: filterData.duration,
       }));
     }
-  }, []); // Keep dependency array empty
+  }, []);
 
   const handlePayment = async () => {
     try {
-      // Calculate the amount right before making the API call
       const totalAmount =
         selectedSpot.pricePerHour * parseFloat(formData.time || 1);
 
-      // Depending on your backend, Razorpay usually expects the amount in the smallest currency unit (e.g., paise).
-      // If your backend doesn't multiply by 100, you might need to do it here: totalAmount * 100.
       const response = await axios.post(`/api/payments/create-order`, {
         amount: totalAmount,
       });
@@ -66,7 +55,6 @@ const DoBooking = () => {
       const order = response.data;
       console.log("ORDER:", order);
 
-      // Step 2: Razorpay options
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEYID,
         amount: order.amount,
@@ -75,8 +63,7 @@ const DoBooking = () => {
         description: "Parking Slot Booking",
         order_id: order.id,
         handler: async function (response) {
-          //  THIS IS WHAT YOU NEED
-          setShowPopup(false); // Close the payment modal if it's still open
+          setShowPopup(false);
           setMessage("Booking in progress...");
           setLoadingBooking(true);
           const bookingPayload = {
@@ -134,7 +121,6 @@ const DoBooking = () => {
           color: "#FACC15",
         },
         modal: {
-          // 👇 CRITICAL FIX: Triggered when user exits the checkout manually without paying
           ondismiss: async function () {
             console.log("Razorpay checkout closed by the user.");
             try {
@@ -166,7 +152,7 @@ const DoBooking = () => {
 
   const getInitialDateTimeLocal = () => {
     const now = new Date();
-    // Format the date part (YYYY-MM-DD)
+
     const datePart =
       now.getFullYear() +
       "-" +
@@ -174,7 +160,6 @@ const DoBooking = () => {
       "-" +
       String(now.getDate()).padStart(2, "0");
 
-    // Format the time part (HH:MM)
     const timePart =
       String(now.getHours()).padStart(2, "0") +
       ":" +
@@ -183,28 +168,24 @@ const DoBooking = () => {
     return `${datePart}T${timePart}`;
   };
 
-  // 1. NEW STATE for filtering inputs (Top section)
   const [filterData, setFilterData] = useState({
     startTime: getInitialDateTimeLocal(),
-    duration: "1", // Hours for booking
-    vehicleType: params.get("vType"), // Used to filter the visible slot groups
+    duration: "1",
+    vehicleType: params.get("vType"),
   });
 
-  // 2. NEW/UPDATED STATE for the final booking form data (used in the modal)
   const [formData, setFormData] = useState({
-    time: "1", // duration in hours (kept for logic continuity)
+    time: "1",
     paymentMethod: "credit-card",
     vehicleNumber: "",
-    startTime: "", // Calculated
-    endTime: "", // Calculated
+    startTime: "",
+    endTime: "",
   });
 
   if (loading) {
     return <div>Loading user info...</div>;
   }
 
-  // --- Vehicle Logic (Kept mostly unchanged) ---
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (!user || !user.userId) return;
 
@@ -229,7 +210,6 @@ const DoBooking = () => {
     }
   }, [user]);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     stompClient.onConnect = () => {
       stompClient.subscribe("/topic/slot-updates", (message) => {
@@ -252,28 +232,24 @@ const DoBooking = () => {
         }
 
         if (data.status === "BOOKED") {
-          // 1. Remove from the locked state just in case
           setLockedSlots((prev) => {
             const updated = { ...prev };
             delete updated[data.slotId];
             return updated;
           });
 
-          // 2. Filter the slot out of the grouped spots list
           setSpots((prevSpots) => {
-            return (
-              prevSpots
-                .map((group) => {
-                  return {
-                    ...group,
-                    slots: group.slots.filter(
-                      (slot) => slot.slotId !== data.slotId,
-                    ),
-                  };
-                })
-                // Optional: completely hide the vehicle group if 0 slots are left
-                .filter((group) => group.slots.length > 0)
-            );
+            return prevSpots
+              .map((group) => {
+                return {
+                  ...group,
+                  slots: group.slots.filter(
+                    (slot) => slot.slotId !== data.slotId,
+                  ),
+                };
+              })
+
+              .filter((group) => group.slots.length > 0);
           });
         }
       });
@@ -286,7 +262,6 @@ const DoBooking = () => {
     };
   }, []);
 
-  // --- Validation and Formatting (Kept unchanged) ---
   const validateVehicleNumber = (number) => {
     const regex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
     if (!regex.test(number)) {
@@ -306,9 +281,7 @@ const DoBooking = () => {
     return formatted;
   };
 
-  // --- Payment Handlers (Kept unchanged) ---
   const handlePaymentClick = () => {
-    // Check if essential data is set before payment
     if (!selectedSpot || !formData.startTime || !formData.vehicleNumber) {
       alert(
         "Please select a slot, specify a vehicle number, and set the booking time.",
@@ -319,45 +292,43 @@ const DoBooking = () => {
     setError("");
   };
 
-  // --- Slot Fetching and Filtering Logic (Updated) ---
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const fetchAndFilterParkingSlots = async () => {
       setMessage("Getting Parkings ...");
-      // 1. **Early Exit for Incomplete Data**
+
       if (!locationId || !filterData.startTime || !filterData.duration) {
-        // If critical filter data is missing, we don't fetch.
-        // The client-side will show "No slots found" until a time is set.
-        setSpots([]); // Clear spots if we can't search correctly
+        setSpots([]);
         return;
       }
 
       setLoadingBooking(true);
 
-      // --- CHANGE START ---
-      // 1. Read the local input time
       const start = new Date(filterData.startTime);
       const duration = parseFloat(filterData.duration);
       const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-      // 2. Convert to pure UTC strings and encode them for the URL
       const startUTC = encodeURIComponent(start.toISOString());
       const endUTC = encodeURIComponent(end.toISOString());
-      // --- CHANGE END ---
 
-      // Construct the URL with all query parameters
       const apiUrl = `/api/parking-slots/availableByVehicle?parkingId=${locationId}&startTime=${startUTC}&endTime=${endUTC}`;
 
       try {
-        // 2. **Updated API Call**
         const response = await axios.get(apiUrl);
         console.log("====== FRONTEND DEBUG: FETCHING SLOTS ======");
         console.log("1. Local Start String:", filterData.startTime);
         console.log("2. Encoded UTC Start:", startUTC);
         console.log("3. Full API URL:", apiUrl);
         console.log("============================================");
+        let filteredSlots = response.data;
 
-        // **3. Simplified grouping now that the backend filters by time/availability**
+        if (filterData.vehicleType) {
+          filteredSlots = response.data.filter(
+            (slot) =>
+              slot.vehicleType.toLowerCase() ===
+              filterData.vehicleType.toLowerCase(),
+          );
+        }
+
         const grouped = response.data.reduce((acc, slot) => {
           const type = slot.vehicleType;
           if (!acc[type]) {
@@ -373,18 +344,15 @@ const DoBooking = () => {
         setSpots(Object.values(grouped));
       } catch (error) {
         console.error("Error fetching parking slots:", error);
-        setSpots([]); // Clear slots on error
+        setSpots([]);
       } finally {
         setLoadingBooking(false);
       }
     };
 
     if (locationId) {
-      // Fetch only when locationId and essential filter parameters change
       fetchAndFilterParkingSlots();
     }
-
-    // **4. Updated Dependencies to trigger fetch on filter changes**
   }, [
     locationId,
     filterData.vehicleType,
@@ -392,8 +360,6 @@ const DoBooking = () => {
     filterData.duration,
   ]);
 
-  // --- Input Change Handlers (Updated) ---
-  // 3. Handle filtering input changes (Start Time, Duration, Vehicle Type)
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
 
@@ -411,7 +377,7 @@ const DoBooking = () => {
         duration > 0
       ) {
         const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
-        // FIX: Use prevForm so you don't overwrite/delete other form inputs!
+
         setFormData((prevForm) => ({
           ...prevForm,
           startTime: start.toISOString(),
@@ -419,7 +385,6 @@ const DoBooking = () => {
           time: updatedFilter.duration,
         }));
       } else {
-        // FIX: Pass empty strings to prevent backend parsing crashes
         setFormData((prevForm) => ({
           ...prevForm,
           startTime: "",
@@ -431,7 +396,6 @@ const DoBooking = () => {
     });
   };
 
-  // 4. Handle form changes only for non-time/duration fields in the modal (e.g., payment)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -470,7 +434,6 @@ const DoBooking = () => {
     }
   };
 
-  // --- UI Render ---
   if (loadingbooking)
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-70 backdrop-blur-lg transition-opacity duration-300">
@@ -592,41 +555,37 @@ const DoBooking = () => {
                   </h4>
 
                   <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-                    {slots.map(
-                      (
-                        slot, // Show ALL slots
-                      ) => (
-                        <div
-                          key={slot.slotId}
-                          className={`p-3 text-center rounded-lg shadow-sm border text-white transition-all ${
-                            lockedSlots[slot.slotId]
-                              ? "bg-yellow-500 cursor-not-allowed opacity-70"
-                              : "bg-green-500 cursor-pointer hover:bg-green-600"
-                          } ${selectedSpot?.slotId === slot.slotId ? "ring-4 ring-yellow-400" : ""}`}
-                          onClick={() => {
-                            if (!formData.startTime) {
-                              toast.error("Please select Start Time first");
-                              return;
-                            }
-                            if (lockedSlots[slot.slotId]) {
-                              toast.warning("Slot temporarily reserved");
-                              return;
-                            }
-                            lockSlot(slot);
-                          }}
-                        >
-                          <span className="font-semibold text-sm block">
-                            {slot.slotNumber}
-                          </span>
-                          <span className="text-xs block">
-                            ₹{slot.pricePerHour}/hr
-                          </span>
-                          <span className="text-[10px] font-bold">
-                            {lockedSlots[slot.slotId] ? "LOCKED" : "AVAILABLE"}
-                          </span>
-                        </div>
-                      ),
-                    )}
+                    {slots.map((slot) => (
+                      <div
+                        key={slot.slotId}
+                        className={`p-3 text-center rounded-lg shadow-sm border text-white transition-all ${
+                          lockedSlots[slot.slotId]
+                            ? "bg-yellow-500 cursor-not-allowed opacity-70"
+                            : "bg-green-500 cursor-pointer hover:bg-green-600"
+                        } ${selectedSpot?.slotId === slot.slotId ? "ring-4 ring-yellow-400" : ""}`}
+                        onClick={() => {
+                          if (!formData.startTime) {
+                            toast.error("Please select Start Time first");
+                            return;
+                          }
+                          if (lockedSlots[slot.slotId]) {
+                            toast.warning("Slot temporarily reserved");
+                            return;
+                          }
+                          lockSlot(slot);
+                        }}
+                      >
+                        <span className="font-semibold text-sm block">
+                          {slot.slotNumber}
+                        </span>
+                        <span className="text-xs block">
+                          ₹{slot.pricePerHour}/hr
+                        </span>
+                        <span className="text-[10px] font-bold">
+                          {lockedSlots[slot.slotId] ? "LOCKED" : "AVAILABLE"}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               );

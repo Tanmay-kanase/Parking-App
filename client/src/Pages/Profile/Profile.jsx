@@ -43,7 +43,7 @@ const Profile = () => {
     fetchData();
   }, [user?.userId, user?.role]);
 
-  // Fetch vehicles
+  
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -59,7 +59,7 @@ const Profile = () => {
   if (loading || !user) return <p>Loading profile...</p>;
 
   return (
-    // Main container with dark mode background and text colors
+    
     <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
       <div className="w-full bg-white dark:bg-gray-800 shadow-lg p-8 flex flex-col md:flex-row items-center md:items-start">
         {/* Left - Profile Image */}

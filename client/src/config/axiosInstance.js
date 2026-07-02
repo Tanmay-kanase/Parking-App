@@ -1,15 +1,13 @@
-// /src/utils/axiosInstance.js
 import axios from "axios";
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
-  withCredentials: true, // send cookies if needed
+  withCredentials: true,
 });
 
-// Add a request interceptor to include Authorization token
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // Adjust the key if stored differently
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

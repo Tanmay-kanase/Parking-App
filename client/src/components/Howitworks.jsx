@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Define content for both user roles
 const content = {
   user: {
     title: "How It Works for Drivers",
@@ -51,10 +50,8 @@ const content = {
 };
 
 const HowItWorks = () => {
-  // State to manage the active role ('user' or 'parking_owner')
   const [activeRole, setActiveRole] = useState("user");
 
-  // Get the correct content based on the active role
   const { title, subtitle, steps } = content[activeRole];
 
   return (
@@ -98,7 +95,6 @@ const HowItWorks = () => {
 
         {/* Dynamic Steps Mapping */}
         {steps.map((step, index) => {
-          // Determine whether to reverse based on role
           const isReversed =
             activeRole === "user" ? index % 2 !== 0 : index % 2 === 0;
 

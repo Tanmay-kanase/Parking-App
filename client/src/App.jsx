@@ -1,15 +1,12 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import axios from "axios";
-
-// 1. KEEP STATIC IMPORTS for core layout, wrappers, and initial load components
 import Navbar from "./components/Navbar";
 import SkeletonLoader from "./components/SkeletonLoader";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import { useAuth } from "./context/AuthContext";
 import SearchParkings from "./Pages/Parking_Service/showparkingsbylocation";
 
-// 2. USE LAZY IMPORTS for your page/route components
 const Home = lazy(() => import("./Pages/Home"));
 const ParkingSpots = lazy(() => import("./Pages/parkings/Parking_Spots"));
 const Profile = lazy(() => import("./Pages/Profile/Profile"));
@@ -36,7 +33,6 @@ const Signin = lazy(() => import("./Pages/Auth/Signin"));
 const SystemArchitecture = lazy(
   () => import("./Pages/Architecture/SystemArchitecture"),
 );
-const Demo = lazy(() => import("./Pages/Auth/Demo"));
 const PaymentsPage = lazy(() => import("./Pages/Paments/Payments"));
 
 function App() {
@@ -85,7 +81,7 @@ function App() {
           <Route path="/show-parkings" element={<ShowParkings />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/arch" element={<SystemArchitecture />} />
-          <Route path="/demo" element={<Demo />} />
+          {/* <Route path="/demo" element={<Demo />} /> */}
           <Route path="/searchParking" element={<SearchParkings />} />
 
           {/* Protected Routes - Any Authenticated User */}

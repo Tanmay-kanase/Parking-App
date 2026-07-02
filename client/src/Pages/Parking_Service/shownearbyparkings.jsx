@@ -22,7 +22,7 @@ export default function Shownearbyparkings() {
   const [loading, setLoading] = useState(true);
   const [selections, setSelections] = useState({});
   function getDistanceFromLatLng(lat1, lng1, lat2, lng2) {
-    const R = 6371; // Radius of the earth in km
+    const R = 6371; 
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLng = ((lng2 - lng1) * Math.PI) / 180;
     const a =
@@ -32,8 +32,8 @@ export default function Shownearbyparkings() {
         Math.sin(dLng / 2) *
         Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Distance in km
-    return distance.toFixed(2); // rounded to 2 decimals
+    const distance = R * c; 
+    return distance.toFixed(2); 
   }
 
   const handleBooking = (parkingId, name) => {
@@ -41,11 +41,11 @@ export default function Shownearbyparkings() {
     if (!selection || !selection.vehicleType) {
       setFlashId(parkingId);
 
-      // Remove the flash class after the animation completes (e.g., 1000ms for two flashes)
+      
       setTimeout(() => {
         setFlashId(null);
-      }, 1400); // Wait for 2 x 0.5s animation duration
-      // alert("Please select a Vehicle Type and a Date/Time before proceeding.");
+      }, 1400); 
+      
       return;
     }
     const selectedVehicleType = selection.vehicleType;
@@ -128,10 +128,10 @@ export default function Shownearbyparkings() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {parkings.length > 0 ? (
             parkings.map((parking) => {
-              // Determine if the current card is the one flashing
+              
               const isFlashing = flashId === parking.locationId;
 
-              // Determine if another card is flashing (and this one should be dimmed)
+              
               const shouldBeDimmed = flashId !== null && !isFlashing;
               if (isFlashing) showError("Select one of the vehicle type");
               return (
@@ -305,7 +305,7 @@ export default function Shownearbyparkings() {
                   )}
                   <button
                     className="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-                    // disabled={!parking.available}
+                    
                     onClick={() =>
                       handleBooking(parking.locationId, parking.name)
                     }

@@ -78,7 +78,7 @@ const EditProfile = () => {
     }
   };
 
-  // Fetch user data
+  
   useEffect(() => {
     if (!userId) return;
 
@@ -94,7 +94,7 @@ const EditProfile = () => {
     fetchUserData();
   }, [userId]);
 
-  // Fetch vehicles
+  
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -108,7 +108,7 @@ const EditProfile = () => {
     fetchVehicles();
   }, [user.role, userId]);
 
-  // Fetch parking locations
+  
   useEffect(() => {
     if (user.role !== "parking_owner") return;
 
@@ -129,7 +129,7 @@ const EditProfile = () => {
   }, [user.role, userId]);
 
   return (
-    // Main container with dark mode background and text colors
+    
     <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Main card with dark mode background */}
       <div className="w-full bg-white dark:bg-gray-800 shadow-lg p-8 flex flex-col md:flex-row items-center md:items-start">

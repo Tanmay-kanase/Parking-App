@@ -2,7 +2,6 @@ import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
-    // Base classes for light mode, dark: classes for dark mode
     <footer className="bg-gray-50 text-gray-700 py-10 dark:bg-gray-900 dark:text-gray-300">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">

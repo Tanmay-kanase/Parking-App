@@ -4,8 +4,6 @@ import { FileText } from "lucide-react";
 import usePagination from "../../hooks/usePagination";
 import axios from "../../config/axiosInstance";
 function BookingsTab({ locationId }) {
-  // --- YOUR MOCK DATA GOES HERE (bookings, payments, history, etc.) ---
-
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,14 +15,13 @@ function BookingsTab({ locationId }) {
           `/api/bookings/location/${locationId}`,
         );
 
-        // Axios already gives data in response.data
         const data = response.data;
 
         const formattedData = data.map((item) => ({
           bookingId: item.bookingId.slice(0, 5),
           slotNumber: item.slotNumber,
           location: item.location,
-          amountPaid: item.amountPaid / 100, // paise → rupees
+          amountPaid: item.amountPaid / 100,
           paymentStatus: item.paymentStatus,
           startTime: item.startTime,
           endTime: item.endTime,
@@ -37,7 +34,6 @@ function BookingsTab({ locationId }) {
       } catch (err) {
         console.error(err);
 
-        // Better error handling
         if (err.response) {
           setError(err.response.data.message || "Server error");
         } else if (err.request) {

@@ -105,8 +105,8 @@ const MyBookings = () => {
                 Start Time:{" "}
                 <span className="font-medium text-gray-700 dark:text-gray-300">
                   {new Date(booking.startTime).toLocaleString("en-US", {
-                    dateStyle: "medium", // e.g., Apr 23, 2026
-                    timeStyle: "short", // e.g., 1:44 PM
+                    dateStyle: "medium",
+                    timeStyle: "short",
                   })}
                 </span>
               </p>

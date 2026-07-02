@@ -20,8 +20,8 @@ const DoBooking = () => {
   });
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
-  // Fetch vehicles from the backend using userId from localStorage
-  // Handle vehicle selection change
+  
+  
 
   const handleVehicleChange = (e) => {
     setSelectedVehicle(e.target.value);
@@ -43,7 +43,7 @@ const DoBooking = () => {
         .then((response) => {
           const data = response.data;
           setVehicles(data);
-          // If only one vehicle, set it automatically
+          
           if (data.length === 1) {
             setSelectedVehicle(data[0].licensePlate);
             setFormData((prev) => ({
@@ -108,10 +108,10 @@ const DoBooking = () => {
           selectedSpot.slotId
         }`,
         {
-          available: false, // Update availability status
+          available: false, 
         }
       );
-      // Post to Parking History
+      
       try {
         setMessage("Saving parking history...");
 
@@ -119,7 +119,7 @@ const DoBooking = () => {
           `${import.meta.env.VITE_BACKEND_URL}/api/parking-history`,
           {
             userId: user.userId,
-            vehicleId: formData.vehicleNumber, // Assuming license plate as ID if not available
+            vehicleId: formData.vehicleNumber, 
             parking_lot_id: locationId,
             slotId: selectedSpot.slotNumber,
             paymentId: transactionId,
@@ -153,8 +153,8 @@ const DoBooking = () => {
         slotNumber: selectedSpot.slotNumber,
         location: selectedSpot.location,
         amountPaid: selectedSpot.pricePerHour * formData.time,
-        startTime: formData.startTime, // Added start time
-        endTime: formData.endTime, // Added end time
+        startTime: formData.startTime, 
+        endTime: formData.endTime, 
         licensePlate: formData.vehicleNumber,
         vehicleType: selectedSpot.vehicleType,
         paymentMethod: formData.paymentMethod,
@@ -220,7 +220,7 @@ const DoBooking = () => {
     }
   }, [locationId]);
 
-  // Handle form input changes
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -240,23 +240,23 @@ const DoBooking = () => {
         !isNaN(start.getTime()) &&
         !isNaN(duration)
       ) {
-        // Calculate end time in UTC
+        
         const endUTC = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-        // Convert to local time by adjusting for the user's timezone offset
+        
         const localEndTime = new Date(
           endUTC.getTime() - endUTC.getTimezoneOffset() * 60000
         );
 
-        // Format the local end time as 'YYYY-MM-DDTHH:MM' to set in the input field
-        updatedForm.endTime = localEndTime.toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+        
+        updatedForm.endTime = localEndTime.toISOString().slice(0, 16); 
       }
 
       return updatedForm;
     });
   };
 
-  // Handle form submission
+  
   const handleSubmit = async (e) => {
     try {
       await axios.put(
@@ -264,21 +264,21 @@ const DoBooking = () => {
           selectedSpot.slotId
         }`,
         {
-          available: false, // Update availability status
+          available: false, 
         }
       );
 
       alert("Booking Confirmed! Slot is now unavailable.");
-      // navigate("/booking");
+      
 
-      // Update UI to reflect changes
+      
       setSpots((prevSpots) =>
         prevSpots.map((spot) =>
           spot.id === selectedSpot.id ? { ...spot, available: false } : spot
         )
       );
 
-      //setSelectedSpot(null); // Close booking form
+      
     } catch (error) {
       console.error("Error updating slot availability:", error);
       alert("Failed to book slot. Please try again.");
@@ -288,7 +288,7 @@ const DoBooking = () => {
       slotId: selectedSpot.slotId,
     });
 
-    //setSelectedSpot(null); // Close form after submission
+    
   };
   console.log("Selected Spots");
   console.log(selectedSpot);
@@ -313,7 +313,7 @@ const DoBooking = () => {
       </div>
     );
   return (
-    // Main container with responsive padding and dark mode background/text colors
+    
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 md:p-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-6">
@@ -473,7 +473,7 @@ const DoBooking = () => {
                               vehicleNumber: selected,
                             });
                           } else {
-                            setFormData({ ...formData, vehicleNumber: "" }); // clear box for manual entry
+                            setFormData({ ...formData, vehicleNumber: "" }); 
                           }
                         }}
                         className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
