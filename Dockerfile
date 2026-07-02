@@ -5,20 +5,6 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/client
 
-# 1. Accept the specific build arguments from Render
-ARG VITE_BACKEND_URL
-ARG VITE_GOOGLE_API_KEY
-ARG VITE_GOOGLE_CLIENT_ID
-ARG VITE_FIREBASE_API_KEY
-ARG VITE_RAZORPAY_KEYID
-
-# 2. Map them to ENV so Vite can bake them into the build
-ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
-ENV VITE_GOOGLE_API_KEY=$VITE_GOOGLE_API_KEY
-ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
-ENV VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY
-ENV VITE_RAZORPAY_KEYID=$VITE_RAZORPAY_KEYID
-
 # Copy package files first (better caching)
 COPY client/package*.json ./
 
@@ -27,6 +13,8 @@ RUN npm install
 
 # Copy remaining frontend files
 COPY client/ ./
+
+RUN --mount=type=secret,id=_env,dst=/app/client/.env 
 
 # Build frontend
 RUN npm run build
