@@ -35,12 +35,9 @@ const Signup = () => {
     setError("");
     setMessage("");
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/send-otp`,
-        {
-          email: email,
-        },
-      );
+      const res = await axios.post(`/api/users/send-otp`, {
+        email: email,
+      });
       if (res.data.message) {
         setOtpVisible(true);
         setGeneratedOtp(res.data.otp);
@@ -114,17 +111,14 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
-        {
-          name: fullName,
-          email: email,
-          phone,
-          password,
-          photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-          role,
-        },
-      );
+      const response = await axios.post(`/api/users/signup`, {
+        name: fullName,
+        email: email,
+        phone,
+        password,
+        photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+        role,
+      });
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));

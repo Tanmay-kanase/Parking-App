@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const Signin = () => {
-  const { login, setUser } = useAuth(); 
+  const { login, setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); 
-  const [error, setError] = useState(""); 
-  const [message, setMessage] = useState(""); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const GoogleClient = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const navigate = useNavigate();
@@ -23,12 +23,12 @@ const Signin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(""); 
+    setError("");
     setMessage("");
     try {
-      await login({ email, password }); 
+      await login({ email, password });
       showMessage("Login successful! Redirecting...");
-      navigate("/"); 
+      navigate("/");
     } catch (err) {
       console.error("Login failed:", err.response?.data || err.message);
       showError(
@@ -51,10 +51,7 @@ const Signin = () => {
       const { name, email: googleEmail, sub: googleUserId, picture } = userInfo;
       console.log(userInfo);
 
-     
-      const checkRes = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${googleEmail}`,
-      );
+      const checkRes = await axios.get(`/api/users/email/${googleEmail}`);
 
       const isNewUser = !checkRes?.data?.email;
 
@@ -68,7 +65,7 @@ const Signin = () => {
 
       const userData = {
         name,
-        email: googleEmail, 
+        email: googleEmail,
         userId: googleUserId,
         photo: picture,
         password,
@@ -76,10 +73,7 @@ const Signin = () => {
 
       console.log("checking user Data before hit request ", userData);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-login`,
-        userData,
-      );
+      const res = await axios.post(`/api/users/google-login`, userData);
       console.log(res);
       console.log("success");
       localStorage.setItem("token", res.data.token);
