@@ -14,16 +14,18 @@ const Verify = () => {
   const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
+    let isMounted = true;
     html5QrCodeRef.current = new Html5Qrcode("reader");
-
-    Html5Qrcode.getCameras().then((devices) => {
-      if (devices && devices.length) {
-        setCameras(devices);
-        startScanner(devices[0].id);
-      }
-    });
-
+    Html5Qrcode.getCameras()
+      .then((devices) => {
+        if (isMounted && devices?.length) {
+          setCameras(devices);
+          startScanner(devices[0].id);
+        }
+      })
+      .catch((err) => console.error("Camera list error:", err));
     return () => {
+      isMounted = false;
       stopScanner();
     };
   }, []);
@@ -47,21 +49,28 @@ const Verify = () => {
       .catch((err) => console.error("Start error:", err));
   };
 
-  const stopScanner = () => {
-    if (html5QrCodeRef.current) {
-      html5QrCodeRef.current
+  const stopScanner = async () => {
+    if (html5QrCodeRef.current?.isScanning) {
+      await html5QrCodeRef.current
         .stop()
         .catch((err) => console.error("Stop error:", err));
     }
   };
 
-  const switchCamera = () => {
+  const switchCamera = async () => {
     if (cameras.length > 1) {
-      stopScanner();
+      await stopScanner();
       const nextIndex = (currentCamIndex + 1) % cameras.length;
       setCurrentCamIndex(nextIndex);
       startScanner(cameras[nextIndex].id);
     }
+  };
+
+  const resetScan = async () => {
+    setScanned(false);
+    setResult(null);
+    await stopScanner();
+    startScanner(cameras[currentCamIndex]?.id);
   };
 
   const successSound = new Audio(
@@ -106,14 +115,8 @@ const Verify = () => {
     }
   };
 
-  const resetScan = () => {
-    setScanned(false);
-    setResult(null);
-    startScanner(cameras[currentCamIndex]?.id);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen inset-0 z-50 bg-black/40 backdrop-blur-sm text-gray-100 flex flex-col items-center justify-center p-4">
       <h2 className="text-2xl font-bold mb-6">Scan QR Code to Verify Slot</h2>
 
       {!result && (

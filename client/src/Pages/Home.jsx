@@ -20,12 +20,11 @@ import HowItWorks from "../components/Howitworks";
 import { useAuth } from "../context/AuthContext";
 import Hero from "../components/Hero";
 
-
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  
+
   const { logout, user } = useAuth();
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -54,30 +53,14 @@ const Home = () => {
       console.error(err);
     }
   };
-  
+
   const handleSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/searchParking?query=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  
-  
-  
-  
-  
-
-  
-  
-  
-  
-  
-  
-  
-
-  
   const handleNearby = () => {
-    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -86,7 +69,7 @@ const Home = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          
+
           showAlert(
             "Unable to get your location. Please try again or search manually.",
           );
@@ -137,7 +120,7 @@ const Home = () => {
           >
             <h2 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900 dark:text-white">
               Find Your <span className="text-yellow-500">Perfect Spot</span>,
-              Instantly.
+              LocalDateTimely.
             </h2>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
               Our smart parking solutions help you find, reserve, and pay for

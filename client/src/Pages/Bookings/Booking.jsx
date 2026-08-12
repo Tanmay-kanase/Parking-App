@@ -11,6 +11,9 @@ import {
   FaWallet,
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
+import QRCode from "qrcode";
+import jsPDF from "jspdf";
+import { QRCodeSVG } from "qrcode.react";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -101,9 +104,45 @@ const MyBookings = () => {
     return { total, upcoming, ongoing, totalSpent };
   }, [bookings]);
 
-  function downloadRec() {
-    alert("Downloading receipt");
-  }
+  const downloadRec = async (booking) => {
+    try {
+      const qrDataUrl = await QRCode.toDataURL(booking.bookingId, {
+        width: 200,
+        margin: 1,
+      });
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("Parking Booking Receipt", 20, 20);
+
+      doc.setFontSize(11);
+      const lines = [
+        `Booking ID: ${booking.bookingId}`,
+        `License Plate: ${booking.licensePlate}`,
+        `Slot: ${booking.slotNumber}`,
+        `Location: ${booking.location}`,
+        `Vehicle Type: ${booking.vehicleType}`,
+        `Start: ${new Date(booking.startTime).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`,
+        `End: ${new Date(booking.endTime).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`,
+        `Payment Method: ${booking.paymentMethod}`,
+        `Payment Status: ${booking.paymentStatus}`,
+        `Amount Paid: ${currencyFormatter.format((booking.amountPaid || 0) / 100)}`,
+      ];
+
+      let y = 35;
+      lines.forEach((line) => {
+        doc.text(line, 20, y);
+        y += 8;
+      });
+
+      doc.addImage(qrDataUrl, "PNG", 20, y + 5, 50, 50);
+
+      doc.save(`receipt-${booking.bookingId}.pdf`);
+    } catch (err) {
+      console.error("Failed to generate receipt:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-8">
@@ -234,7 +273,7 @@ const MyBookings = () => {
                     </div>
 
                     <button
-                      onClick={downloadRec}
+                      onClick={() => downloadRec(booking)}
                       aria-label="Download Receipt"
                       title="Download Receipt"
                       className="flex items-center justify-center p-2 text-sm text-gray-600 transition-colors border-2 border-gray-200 rounded-full dark:text-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0"
@@ -249,6 +288,19 @@ const MyBookings = () => {
                     <StatusIcon />
                     {status.label}
                   </p>
+
+                  {(status.label === "Ongoing" ||
+                    status.label === "Upcoming") && (
+                    <div className="flex justify-center py-3 border-t border-gray-100 dark:border-gray-700">
+                      <QRCodeSVG
+                        value={booking.bookingId}
+                        size={120}
+                        bgColor="transparent"
+                        fgColor="currentColor"
+                        className="text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
+                  )}
 
                   <div className="border-t border-gray-100 dark:border-gray-700 pt-3 space-y-2 text-sm">
                     <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">

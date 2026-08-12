@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -22,8 +23,8 @@ public class Booking {
     private String location;
     private double amountPaid;
     private String paymentStatus;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;// Time when parking ends
+    private Instant startTime;
+    private Instant endTime;// Time when parking ends
     private String paymentMethod;
     private String licensePlate;
     private String vehicleType; // "Car", "Bike", etc.
