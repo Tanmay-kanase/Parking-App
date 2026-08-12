@@ -14,142 +14,6 @@ const DoBooking = () => {
   const locationId = params.get("locID");
   const name = params.get("name");
 
-  const [message, setMessage] = useState("Getting Parkings ...");
-  const [loadingbooking, setLoadingBooking] = useState(false);
-  const [spots, setSpots] = useState([]);
-  const [selectedSpot, setSelectedSpot] = useState(null);
-  const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicle, setSelectedVehicle] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
-  const [transactionId, setTransactionId] = useState("");
-  const [error, setError] = useState("");
-  const [lockedSlots, setLockedSlots] = useState({});
-
-  useEffect(() => {
-    const startString = filterData.startTime;
-    const duration = parseFloat(filterData.duration);
-
-    if (startString && duration > 0) {
-      const start = new Date(startString);
-
-      const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
-
-      setFormData((prev) => ({
-        ...prev,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-        time: filterData.duration,
-      }));
-    }
-  }, []);
-
-  const handlePayment = async () => {
-    try {
-      const totalAmount =
-        selectedSpot.pricePerHour * parseFloat(formData.time || 1);
-
-      const response = await axios.post(`/api/payments/create-order`, {
-        amount: totalAmount,
-      });
-
-      const order = response.data;
-      console.log("ORDER:", order);
-
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEYID,
-        amount: order.amount,
-        currency: "INR",
-        name: "Parking App",
-        description: "Parking Slot Booking",
-        order_id: order.id,
-        handler: async function (response) {
-          setShowPopup(false);
-          setMessage("Booking in progress...");
-          setLoadingBooking(true);
-          const bookingPayload = {
-            userId: user.userId,
-            email: user.email,
-            slotId: selectedSpot.slotId,
-            slotNumber: selectedSpot.slotNumber,
-            location: selectedSpot.location,
-            vehicleNumber: formData.vehicleNumber,
-            vehicleType: selectedSpot.vehicleType,
-            paymentMethod: formData.paymentMethod,
-            transactionId: response.razorpay_payment_id,
-            amount: order.amount,
-            startTime: formData.startTime,
-            endTime: formData.endTime,
-            locationId: params.get("locID"),
-            orderId: response.razorpay_order_id,
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature,
-          };
-
-          console.log("====== FRONTEND DEBUG: PAYLOAD TO BACKEND ======");
-          console.log(
-            "1. Raw startTime type:",
-            typeof bookingPayload.startTime,
-          );
-          console.log("2. Raw startTime value:", bookingPayload.startTime);
-          console.log("3. Raw endTime value:", bookingPayload.endTime);
-          console.log(
-            "4. Full Payload stringified:",
-            JSON.stringify(bookingPayload, null, 2),
-          );
-          console.log("=================================================");
-          console.log("Booking Payload:", bookingPayload);
-
-          await axios.post(`/api/bookings/complete`, bookingPayload);
-          await unlockSlot(selectedSpot.slotId);
-          setMessage("Booking Successful! Redirecting...");
-          setTimeout(() => {
-            navigate("/booking");
-          }, 500);
-        },
-        catch(backendError) {
-          console.error("Backend booking settlement failed:", backendError);
-          alert(
-            "Payment received, but booking confirmation failed. Please contact support.",
-          );
-        },
-        prefill: {
-          name: "Tanmay",
-          email: "test@gmail.com",
-          contact: "9999999999",
-        },
-        theme: {
-          color: "#FACC15",
-        },
-        modal: {
-          ondismiss: async function () {
-            console.log("Razorpay checkout closed by the user.");
-            try {
-              if (selectedSpot) {
-                await unlockSlot(selectedSpot.slotId);
-              }
-            } catch (unlockErr) {
-              console.error("Failed to unlock slot on dismiss:", unlockErr);
-            }
-          },
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-
-      rzp.on("payment.failed", async function (response) {
-        if (selectedSpot) {
-          await unlockSlot(selectedSpot.slotId);
-        }
-        console.error("FAILED:", response);
-        alert(response.error.description);
-      });
-    } catch (error) {
-      console.error("Payment failed", error);
-      alert("Payment Failed");
-    }
-  };
-
   const getInitialDateTimeLocal = () => {
     const now = new Date();
 
@@ -168,10 +32,22 @@ const DoBooking = () => {
     return `${datePart}T${timePart}`;
   };
 
+  // ----- State (declared up front so no hook below ever runs conditionally) -----
+  const [message, setMessage] = useState("Getting Parkings ...");
+  const [loadingbooking, setLoadingBooking] = useState(false);
+  const [spots, setSpots] = useState([]);
+  const [selectedSpot, setSelectedSpot] = useState(null);
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
+  const [error, setError] = useState("");
+  const [lockedSlots, setLockedSlots] = useState({});
+
   const [filterData, setFilterData] = useState({
     startTime: getInitialDateTimeLocal(),
     duration: "1",
-    vehicleType: params.get("vType"),
+    vehicleType: params.get("vType") || "",
   });
 
   const [formData, setFormData] = useState({
@@ -182,39 +58,51 @@ const DoBooking = () => {
     endTime: "",
   });
 
-  if (loading) {
-    return <div>Loading user info...</div>;
-  }
+  // ----- Effects (all hooks live above any early return) -----
+  useEffect(() => {
+    const startString = filterData.startTime;
+    const duration = parseFloat(filterData.duration);
+
+    if (startString && duration > 0) {
+      const start = new Date(startString);
+      const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
+
+      setFormData((prev) => ({
+        ...prev,
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+        time: filterData.duration,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!user || !user.userId) return;
 
-    if (user.userId) {
-      axios
-        .get(`/api/vehicles/user/${user.userId}`)
-        .then((response) => {
-          const data = response.data;
-          setVehicles(data);
+    axios
+      .get(`/api/vehicles/user/${user.userId}`)
+      .then((response) => {
+        const data = response.data;
+        setVehicles(data);
 
-          if (data.length === 1) {
-            setSelectedVehicle(data[0].licensePlate);
-            setFormData((prev) => ({
-              ...prev,
-              vehicleNumber: data[0].licensePlate,
-            }));
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching vehicles:", error);
-        });
-    }
+        if (data.length === 1) {
+          setSelectedVehicle(data[0].licensePlate);
+          setFormData((prev) => ({
+            ...prev,
+            vehicleNumber: data[0].licensePlate,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching vehicles:", error);
+      });
   }, [user]);
 
   useEffect(() => {
     stompClient.onConnect = () => {
       stompClient.subscribe("/topic/slot-updates", (message) => {
         const data = JSON.parse(message.body);
-        console.log("SOCKET:", data);
 
         if (data.status === "LOCKED") {
           setLockedSlots((prev) => ({
@@ -238,19 +126,16 @@ const DoBooking = () => {
             return updated;
           });
 
-          setSpots((prevSpots) => {
-            return prevSpots
-              .map((group) => {
-                return {
-                  ...group,
-                  slots: group.slots.filter(
-                    (slot) => slot.slotId !== data.slotId,
-                  ),
-                };
-              })
-
-              .filter((group) => group.slots.length > 0);
-          });
+          setSpots((prevSpots) =>
+            prevSpots
+              .map((group) => ({
+                ...group,
+                slots: group.slots.filter(
+                  (slot) => slot.slotId !== data.slotId,
+                ),
+              }))
+              .filter((group) => group.slots.length > 0),
+          );
         }
       });
     };
@@ -261,36 +146,6 @@ const DoBooking = () => {
       stompClient.deactivate();
     };
   }, []);
-
-  const validateVehicleNumber = (number) => {
-    const regex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
-    if (!regex.test(number)) {
-      setError("Invalid format! Use: MH-43-AR-0707");
-    } else {
-      setError("");
-    }
-  };
-
-  const formatVehicleNumber = (input) => {
-    let cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    let formatted = "";
-    if (cleaned.length > 0) formatted += cleaned.substring(0, 2);
-    if (cleaned.length > 2) formatted += "-" + cleaned.substring(2, 4);
-    if (cleaned.length > 4) formatted += "-" + cleaned.substring(4, 6);
-    if (cleaned.length > 6) formatted += "-" + cleaned.substring(6, 10);
-    return formatted;
-  };
-
-  const handlePaymentClick = () => {
-    if (!selectedSpot || !formData.startTime || !formData.vehicleNumber) {
-      alert(
-        "Please select a slot, specify a vehicle number, and set the booking time.",
-      );
-      return;
-    }
-    setShowPopup(true);
-    setError("");
-  };
 
   useEffect(() => {
     const fetchAndFilterParkingSlots = async () => {
@@ -314,11 +169,6 @@ const DoBooking = () => {
 
       try {
         const response = await axios.get(apiUrl);
-        console.log("====== FRONTEND DEBUG: FETCHING SLOTS ======");
-        console.log("1. Local Start String:", filterData.startTime);
-        console.log("2. Encoded UTC Start:", startUTC);
-        console.log("3. Full API URL:", apiUrl);
-        console.log("============================================");
         let filteredSlots = response.data;
 
         if (filterData.vehicleType) {
@@ -329,7 +179,7 @@ const DoBooking = () => {
           );
         }
 
-        const grouped = response.data.reduce((acc, slot) => {
+        const grouped = filteredSlots.reduce((acc, slot) => {
           const type = slot.vehicleType;
           if (!acc[type]) {
             acc[type] = {
@@ -359,6 +209,161 @@ const DoBooking = () => {
     filterData.startTime,
     filterData.duration,
   ]);
+
+  // ----- Helpers / handlers (regular functions, safe to define anywhere) -----
+  const lockSlot = async (slot) => {
+    try {
+      const response = await axios.post(`/api/slots/lock`, {
+        slotId: slot.slotId,
+        userId: user.userId,
+      });
+
+      if (response.data.success) {
+        setSelectedSpot(slot);
+        toast.success("Slot locked successfully");
+      } else {
+        toast.error("Slot already locked");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Unable to lock slot");
+    }
+  };
+
+  const unlockSlot = async (slotId) => {
+    try {
+      await axios.post(`/api/slots/unlock`, {
+        slotId,
+        userId: user.userId,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handlePayment = async () => {
+    try {
+      const totalAmount =
+        selectedSpot.pricePerHour * parseFloat(formData.time || 1);
+
+      const response = await axios.post(`/api/payments/create-order`, {
+        amount: totalAmount,
+      });
+
+      const order = response.data;
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEYID,
+        amount: order.amount,
+        currency: "INR",
+        name: "Parking App",
+        description: "Parking Slot Booking",
+        order_id: order.id,
+        handler: async function (response) {
+          setShowPopup(false);
+          setMessage("Booking in progress...");
+          setLoadingBooking(true);
+
+          const bookingPayload = {
+            userId: user.userId,
+            email: user.email,
+            slotId: selectedSpot.slotId,
+            slotNumber: selectedSpot.slotNumber,
+            location: selectedSpot.location,
+            vehicleNumber: formData.vehicleNumber,
+            vehicleType: selectedSpot.vehicleType,
+            paymentMethod: formData.paymentMethod,
+            transactionId: response.razorpay_payment_id,
+            amount: order.amount,
+            startTime: formData.startTime,
+            endTime: formData.endTime,
+            locationId: params.get("locID"),
+            orderId: response.razorpay_order_id,
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+          };
+
+          try {
+            await axios.post(`/api/bookings/complete`, bookingPayload);
+            await unlockSlot(selectedSpot.slotId);
+            setMessage("Booking Successful! Redirecting...");
+            setTimeout(() => {
+              navigate("/booking");
+            }, 500);
+          } catch (backendError) {
+            console.error("Backend booking settlement failed:", backendError);
+            setLoadingBooking(false);
+            alert(
+              "Payment received, but booking confirmation failed. Please contact support.",
+            );
+          }
+        },
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: user?.phone || "",
+        },
+        theme: {
+          color: "#FACC15",
+        },
+        modal: {
+          ondismiss: async function () {
+            try {
+              if (selectedSpot) {
+                await unlockSlot(selectedSpot.slotId);
+              }
+            } catch (unlockErr) {
+              console.error("Failed to unlock slot on dismiss:", unlockErr);
+            }
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+      rzp.on("payment.failed", async function (response) {
+        if (selectedSpot) {
+          await unlockSlot(selectedSpot.slotId);
+        }
+        console.error("Payment failed:", response.error);
+        alert(response.error.description);
+      });
+    } catch (error) {
+      console.error("Payment failed", error);
+      alert("Payment Failed");
+    }
+  };
+
+  const handlePaymentClick = () => {
+    if (!selectedSpot || !formData.startTime || !formData.vehicleNumber) {
+      alert(
+        "Please select a slot, specify a vehicle number, and set the booking time.",
+      );
+      return;
+    }
+    setShowPopup(true);
+    setError("");
+  };
+
+  const validateVehicleNumber = (number) => {
+    const regex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
+    if (!regex.test(number)) {
+      setError("Invalid format! Use: MH-43-AR-0707");
+    } else {
+      setError("");
+    }
+  };
+
+  const formatVehicleNumber = (input) => {
+    let cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    let formatted = "";
+    if (cleaned.length > 0) formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) formatted += "-" + cleaned.substring(2, 4);
+    if (cleaned.length > 4) formatted += "-" + cleaned.substring(4, 6);
+    if (cleaned.length > 6) formatted += "-" + cleaned.substring(6, 10);
+    return formatted;
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -404,47 +409,50 @@ const DoBooking = () => {
     }));
   };
 
-  const lockSlot = async (slot) => {
-    try {
-      const response = await axios.post(`/api/slots/lock`, {
-        slotId: slot.slotId,
-        userId: user.userId,
-      });
-
-      if (response.data.success) {
-        setSelectedSpot(slot);
-        toast.success("Slot locked successfully");
-      } else {
-        toast.error("Slot already locked");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Unable to lock slot");
-    }
-  };
-
-  const unlockSlot = async (slotId) => {
-    try {
-      await axios.post(`/api/slots/unlock`, {
-        slotId,
-        userId: user.userId,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // ----- Early returns (safe here: every hook above has already run) -----
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-3 text-gray-600 dark:text-gray-300">
+          <svg
+            className="animate-spin h-8 w-8 text-yellow-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          <span className="text-sm font-medium">Loading user info...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (loadingbooking)
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-70 backdrop-blur-lg transition-opacity duration-300">
-        <div className="flex flex-col items-center p-6 sm:p-8 max-w-sm mx-4 bg-gray-800 rounded-xl shadow-2xl space-y-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-200/70 dark:bg-gray-900/70 backdrop-blur-lg transition-opacity duration-300">
+        <div className="flex flex-col items-center p-6 sm:p-8 max-w-sm mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl space-y-4 border border-gray-200 dark:border-gray-700">
           {/* Loading Spinner */}
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400"></div>
-          <p className="text-lg sm:text-xl font-semibold text-gray-100 mt-4 text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 dark:border-blue-400"></div>
+
+          <p className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mt-4 text-center">
             {message}
           </p>
-          <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
-            <div className="w-full h-full bg-blue-400 animate-pulse-width"></div>
+
+          <div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden mt-2">
+            <div className="w-full h-full bg-blue-500 dark:bg-blue-400 animate-pulse-width"></div>
           </div>
         </div>
       </div>
@@ -457,7 +465,7 @@ const DoBooking = () => {
           Booking for Location: {name}
         </h2>
 
-        {/* 5. Time and Vehicle Selection Area (NEW) */}
+        {/* Time and Vehicle Selection Area */}
         <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
           <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
             Select Date & Time
@@ -531,11 +539,11 @@ const DoBooking = () => {
           </div>
         </div>
 
-        {/* 6. Slot Grid Display (Updated to show all slots and allow selection) */}
+        {/* Slot Grid Display */}
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
           Select an Available Slot{" "}
           <span className="text-sm italic">
-            * Only slots note booked by anyone shows
+            * Only slots not booked by anyone shows
           </span>
         </h3>
 
@@ -597,9 +605,9 @@ const DoBooking = () => {
           )}
         </div>
 
-        {/* 7. Booking Form Modal/Section (UPDATED) */}
+        {/* Booking Form Modal */}
         {selectedSpot && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-40 p-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-40 p-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -694,8 +702,10 @@ const DoBooking = () => {
                           <input
                             type="text"
                             placeholder="MH-43-AR-0707"
-                            className={`border p-2 rounded-lg mt-2 ${
-                              error ? "border-red-500" : "border-gray-300"
+                            className={`border p-2 rounded-lg mt-2 w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                              error
+                                ? "border-red-500"
+                                : "border-gray-300 dark:border-gray-600"
                             }`}
                             value={formData.vehicleNumber}
                             onChange={(e) => {
@@ -740,7 +750,7 @@ const DoBooking = () => {
                     Total Amount
                   </label>
                   <p className="font-semibold text-lg text-gray-900 dark:text-gray-100 mt-2">
-                    $
+                    ₹
                     {(
                       selectedSpot.pricePerHour * parseFloat(formData.time || 1)
                     ).toFixed(2)}
@@ -762,7 +772,7 @@ const DoBooking = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={handlePayment}
+                  type="submit"
                   className="w-full sm:w-auto bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
                 >
                   Proceed to Payments
@@ -772,7 +782,7 @@ const DoBooking = () => {
           </div>
         )}
 
-        {/* Payment QR Code Popup (Remains unchanged) */}
+        {/* Payment QR Code Popup */}
         {showPopup && (
           <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-sm sm:max-w-md shadow-lg text-center">

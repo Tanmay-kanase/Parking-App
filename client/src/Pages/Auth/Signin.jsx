@@ -51,8 +51,11 @@ const Signin = () => {
       const { name, email: googleEmail, sub: googleUserId, picture } = userInfo;
       console.log(userInfo);
 
-      const checkRes = await axios.get(`/api/users/email/${googleEmail}`);
-
+      // const checkRes = await axios.get(`/api/users/email/${googleEmail}`);
+      const checkRess = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/email/${googleEmail}`,
+      );
+      const checkRes = await checkRess.json();
       const isNewUser = !checkRes?.data?.email;
 
       if (isNewUser) {
@@ -73,7 +76,8 @@ const Signin = () => {
 
       console.log("checking user Data before hit request ", userData);
 
-      const res = await axios.post(`/api/users/google-login`, userData);
+      const ress = await axios.post(`/api/users/google-login`, userData);
+      const res = await ress.json();
       console.log(res);
       console.log("success");
       localStorage.setItem("token", res.data.token);

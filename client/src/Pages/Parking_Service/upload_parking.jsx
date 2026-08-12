@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FaCar, FaTruck, FaMotorcycle, FaBus } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import axios from "../../config/axiosInstance";
-import { useAuth } from "../../context/AuthContext";
 
 const UploadParkingSpots = () => {
   const [spots, setSpots] = useState([]);
@@ -12,75 +11,79 @@ const UploadParkingSpots = () => {
   const locationId = params.get("locationId");
   const name = params.get("name");
   const [showModal, setShowModal] = useState(false);
-  const [uploadMode, setUploadMode] = useState("single"); 
+  const [uploadMode, setUploadMode] = useState("single");
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingSlotId, setEditingSlotId] = useState(null);
 
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     slotNumber: "",
+    slotPrefix: "",
+    startNumber: "",
+    endNumber: "",
     parkingId: `${locationId}`,
     location: `${name}`,
     userId: `${userId}`,
     pricePerHour: "",
-    vehicleType: "", 
-    available: true, 
-  });
+    vehicleType: "",
+    available: true,
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   useEffect(() => {
     const fetchParkingSlots = async () => {
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/parking-slots/parking/${locationId}`,
+          `/api/parking-slots/parking/${locationId}`,
         );
-        setSpots(response.data); 
+        setSpots(response.data);
       } catch (error) {
         console.error("Error fetching parking slots:", error);
       }
     };
 
     fetchParkingSlots();
-  }, []);
+  }, [locationId]);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (e.target.id === "available") {
-      setFormData({
-        ...formData,
-        [e.target.id]: e.target.checked,
-      });
-    }
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleVehicleType = (type) => {
     setFormData({ ...formData, vehicleType: type });
   };
 
-  
-  
-  
-  
+  const handleOpenAddModal = () => {
+    setIsEditMode(false);
+    setEditingSlotId(null);
+    setUploadMode("single");
+    setFormData({
+      ...initialFormData,
+      parkingId: `${locationId}`,
+      location: `${name}`,
+      userId: `${userId}`,
+    });
+    setShowModal(true);
+  };
 
-  
-  
-  
-  
-
-  
-  
-  
-  
-  
-  
-  
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setIsEditMode(false);
+    setEditingSlotId(null);
+  };
 
   const handleEdit = (spot) => {
     setIsEditMode(true);
     setShowModal(true);
     setEditingSlotId(spot.slotId);
-    setUploadMode("single"); 
+    setUploadMode("single");
 
     setFormData({
+      ...initialFormData,
       slotNumber: spot.slotNumber,
       parkingId: spot.parkingId,
       location: spot.location,
@@ -108,9 +111,7 @@ const UploadParkingSpots = () => {
     if (isEditMode) {
       try {
         const response = await axios.put(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/parking-slots/${editingSlotId}`,
+          `/api/parking-slots/${editingSlotId}`,
           formData,
         );
         const updatedSlot = response.data;
@@ -121,16 +122,13 @@ const UploadParkingSpots = () => {
           ),
         );
 
-        setIsEditMode(false);
-        setEditingSlotId(null);
-        setShowModal(false);
+        handleCloseModal();
       } catch (error) {
         console.error("Error updating slot:", error);
       }
       return;
     }
 
-    
     let payload = [];
 
     if (uploadMode === "single") {
@@ -161,8 +159,6 @@ const UploadParkingSpots = () => {
       }
     }
 
-    console.log(payload);
-
     try {
       const response = await axios.post(`/api/parking-slots/batch`, payload);
       const newSlots = response.data;
@@ -174,11 +170,10 @@ const UploadParkingSpots = () => {
   };
 
   return (
-    
     <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-4 sm:p-8">
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenAddModal}
           className="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-colors"
         >
           Add Parking Slots
@@ -186,7 +181,7 @@ const UploadParkingSpots = () => {
 
         {/* Modal for adding/editing slots */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <form
               onSubmit={handleSubmit}
               className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
@@ -233,6 +228,7 @@ const UploadParkingSpots = () => {
                       type="text"
                       name="slotNumber"
                       placeholder="e.g., A101"
+                      value={formData.slotNumber}
                       onChange={handleChange}
                       className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
                       required
@@ -252,6 +248,7 @@ const UploadParkingSpots = () => {
                         type="text"
                         name="slotPrefix"
                         placeholder="e.g., A"
+                        value={formData.slotPrefix}
                         onChange={handleChange}
                         className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
                         required
@@ -269,6 +266,7 @@ const UploadParkingSpots = () => {
                         type="number"
                         name="startNumber"
                         placeholder="e.g., 101"
+                        value={formData.startNumber}
                         onChange={handleChange}
                         className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
                         required
@@ -286,6 +284,7 @@ const UploadParkingSpots = () => {
                         type="number"
                         name="endNumber"
                         placeholder="e.g., 120"
+                        value={formData.endNumber}
                         onChange={handleChange}
                         className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
                         required
@@ -363,6 +362,7 @@ const UploadParkingSpots = () => {
                       checked={formData.available}
                       type="checkbox"
                       id="available"
+                      name="available"
                       className="hidden"
                     />
                     <span
@@ -387,7 +387,7 @@ const UploadParkingSpots = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={handleCloseModal}
                     className="w-full sm:w-auto bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white font-bold px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                   >
                     Cancel
@@ -463,9 +463,7 @@ const UploadParkingSpots = () => {
                   <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
                     Vehicle Type
                   </th>
-                  <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
-                    Availability
-                  </th>
+
                   <th className="p-3 font-bold border-b-2 border-gray-200 dark:border-gray-600">
                     Actions
                   </th>
@@ -489,17 +487,7 @@ const UploadParkingSpots = () => {
                     <td className="p-3 border-b border-gray-200 dark:border-gray-600 capitalize">
                       {spot.vehicleType}
                     </td>
-                    <td className="p-3 border-b border-gray-200 dark:border-gray-600">
-                      <span
-                        className={`font-bold px-2 py-1 rounded-full text-xs ${
-                          spot.available
-                            ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
-                            : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
-                        }`}
-                      >
-                        {spot.available ? "Available" : "Not Available"}
-                      </span>
-                    </td>
+
                     <td className="p-3 border-b border-gray-200 dark:border-gray-600 flex gap-4">
                       <button
                         onClick={() => handleEdit(spot)}

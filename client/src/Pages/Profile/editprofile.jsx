@@ -54,6 +54,9 @@ const EditProfile = () => {
 
   const submitVehicle = async () => {
     try {
+      console.log("UserID  : ", userId);
+      console.log("Data to be loaded : ", { ...vehicle, userId });
+
       await axios.post(`/api/vehicles/add`, {
         ...vehicle,
         userId,
@@ -78,7 +81,6 @@ const EditProfile = () => {
     }
   };
 
-  
   useEffect(() => {
     if (!userId) return;
 
@@ -94,7 +96,6 @@ const EditProfile = () => {
     fetchUserData();
   }, [userId]);
 
-  
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -108,7 +109,6 @@ const EditProfile = () => {
     fetchVehicles();
   }, [user.role, userId]);
 
-  
   useEffect(() => {
     if (user.role !== "parking_owner") return;
 
@@ -129,7 +129,6 @@ const EditProfile = () => {
   }, [user.role, userId]);
 
   return (
-    
     <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Main card with dark mode background */}
       <div className="w-full bg-white dark:bg-gray-800 shadow-lg p-8 flex flex-col md:flex-row items-center md:items-start">

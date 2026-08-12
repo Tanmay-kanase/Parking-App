@@ -4,14 +4,14 @@ import {
   FaCity,
   FaHome,
   FaHashtag,
-  FaWarehouse,
-  FaEdit, 
+  FaEdit,
   FaTrash,
 } from "react-icons/fa";
-import { MapPin, Building, Upload } from "lucide-react";
+import { MapPin, Building } from "lucide-react";
 import axios from "../../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+
 export default function UploadParkingLocations() {
   const [parkings, setParkings] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -22,6 +22,7 @@ export default function UploadParkingLocations() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
+
   useEffect(() => {
     if (!loading && user?.userId) {
       setFormData((prev) => ({ ...prev, userId: user.userId }));
@@ -38,7 +39,7 @@ export default function UploadParkingLocations() {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
-          setLocationVerified(true); 
+          setLocationVerified(true);
           setLoadingVerification(false);
         },
         (error) => {
@@ -46,6 +47,7 @@ export default function UploadParkingLocations() {
           alert(
             "Failed to get your location. Please enable location services.",
           );
+          setLoadingVerification(false);
         },
       );
     } else {
@@ -70,6 +72,7 @@ export default function UploadParkingLocations() {
     truckSlots: "",
     busSlots: "",
   });
+
   useEffect(() => {
     if (loading || !user?.userId) return;
     const fetchParkings = async () => {
@@ -77,7 +80,7 @@ export default function UploadParkingLocations() {
         const response = await axios.get(
           `/api/parking-locations/user/${user.userId}`,
         );
-        setParkings(response.data); 
+        setParkings(response.data);
       } catch (error) {
         console.error("Error fetching parking locations:", error);
       }
@@ -85,7 +88,6 @@ export default function UploadParkingLocations() {
 
     if (user) fetchParkings();
   }, [user, loading]);
-  console.log(parkings);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -97,12 +99,11 @@ export default function UploadParkingLocations() {
       setUploading(true);
 
       if (isEditing) {
-        
         const response = await axios.put(
           `/api/parking-locations/${editId}`,
           formData,
         );
-        
+
         setParkings(
           parkings.map((p) => (p.locationId === editId ? response.data : p)),
         );
@@ -110,7 +111,6 @@ export default function UploadParkingLocations() {
         setIsEditing(false);
         setEditId(null);
       } else {
-        
         const response = await axios.post(`/api/parking-locations`, formData);
         setParkings([...parkings, response.data]);
         navigate(
@@ -127,7 +127,6 @@ export default function UploadParkingLocations() {
     }
   };
 
-  console.log(formData);
   const handleAddNew = () => {
     setIsEditing(false);
     setEditId(null);
@@ -150,16 +149,18 @@ export default function UploadParkingLocations() {
     setLocationVerified(false);
     setShowModal(true);
   };
+
   const handleEdit = (e, parking) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     setIsEditing(true);
-    setEditId(parking.locationId); 
-    setFormData(parking); 
-    setLocationVerified(true); 
+    setEditId(parking.locationId);
+    setFormData(parking);
+    setLocationVerified(true);
     setShowModal(true);
   };
+
   const handleDelete = async (e, id) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (
       !window.confirm("Are you sure you want to delete this parking location?")
     )
@@ -167,15 +168,14 @@ export default function UploadParkingLocations() {
 
     try {
       await axios.delete(`/api/parking-locations/${id}`);
-      
       setParkings(parkings.filter((p) => p.locationId !== id));
     } catch (error) {
       console.error("Error deleting parking location:", error);
       alert("Failed to delete parking location.");
     }
   };
+
   return (
-    
     <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <div className="w-full max-w-7xl mx-auto bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-lg">
         <div className="flex justify-between items-center mb-6">
@@ -192,13 +192,13 @@ export default function UploadParkingLocations() {
 
         {/* Modal for Adding/Editing Parking */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <form
               onSubmit={handleSubmit}
               className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-4"
             >
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Add New Parking Location
+                {isEditing ? "Edit Parking Location" : "Add New Parking Location"}
               </h3>
 
               {/* Form fields with labels for better accessibility and responsiveness */}
@@ -412,7 +412,11 @@ export default function UploadParkingLocations() {
                   className="w-full sm:w-auto flex-1 bg-yellow-500 text-white p-3 rounded-lg text-md font-semibold hover:bg-yellow-600 disabled:opacity-50"
                   disabled={uploading}
                 >
-                  {uploading ? "Uploading..." : "Upload Location"}
+                  {uploading
+                    ? "Uploading..."
+                    : isEditing
+                      ? "Update Location"
+                      : "Upload Location"}
                 </button>
                 <button
                   type="button"
@@ -458,8 +462,6 @@ export default function UploadParkingLocations() {
                 </div>
 
                 <div className="flex items-center gap-3 mb-2 pr-16">
-                  {" "}
-                  {/* added pr-16 to avoid text overlapping buttons */}
                   <FaMapMarkerAlt className="text-red-500 text-xl flex-shrink-0" />
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">
                     {parking.name}

@@ -22,7 +22,7 @@ const SkeletonLoader = () => {
             >
               {/* Image/Map Thumbnail */}
               <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-xl w-full" />
-
+              
               {/* Card Details */}
               <div className="space-y-3">
                 {/* Title & Status Badge Row */}

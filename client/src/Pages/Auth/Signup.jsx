@@ -35,13 +35,25 @@ const Signup = () => {
     setError("");
     setMessage("");
     try {
-      const res = await axios.post(`/api/users/send-otp`, {
-        email: email,
-      });
-      if (res.data.message) {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/send-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (data.message) {
         setOtpVisible(true);
-        setGeneratedOtp(res.data.otp);
-        showMessage(`OTP Sent ! ${res.data.otp}`);
+        setGeneratedOtp(data.otp);
+        showMessage(`OTP Sent ! ${data.otp}`);
       }
     } catch (err) {
       showError(
@@ -111,18 +123,31 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post(`/api/users/signup`, {
-        name: fullName,
-        email: email,
-        phone,
-        password,
-        photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email,
+            phone,
+            password,
+            photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+            role,
+          }),
+        },
+      );
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      await setUser(response.data.user);
+      const data = await response.json();
+
+      console.log(data);
+
+      //  localStorage.setItem("token", response.data.token);
+      // localStorage.setItem("user", JSON.stringify(response.data.user));
+      await setUser(data.user);
       showMessage("Account created successfully! Redirecting...");
       navigate("/");
     } catch (err) {
@@ -199,6 +224,7 @@ const Signup = () => {
 
               <button
                 type="button"
+                id="sendotp"
                 onClick={handleSendOtp}
                 disabled={otpVerified || isSendingOtp || isVerifyingOtp}
                 className={`flex-shrink-0 px-4 py-3 sm:py-0 sm:h-auto sm:w-auto text-sm font-medium rounded-r-lg sm:rounded-l-none sm:rounded-r-lg transition-all duration-300
@@ -270,6 +296,7 @@ const Signup = () => {
                 />
                 <button
                   type="button"
+                  id="verifyotp"
                   onClick={handleVerifyOtp}
                   disabled={isVerifyingOtp || isSendingOtp}
                   className={`flex-shrink-0 px-4 py-3 sm:py-0 sm:h-auto sm:w-auto text-sm font-medium rounded-r-lg sm:rounded-l-none sm:rounded-r-lg transition-all duration-300

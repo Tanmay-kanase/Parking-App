@@ -22,7 +22,7 @@ export default function Shownearbyparkings() {
   const [loading, setLoading] = useState(true);
   const [selections, setSelections] = useState({});
   function getDistanceFromLatLng(lat1, lng1, lat2, lng2) {
-    const R = 6371; 
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLng = ((lng2 - lng1) * Math.PI) / 180;
     const a =
@@ -32,8 +32,8 @@ export default function Shownearbyparkings() {
         Math.sin(dLng / 2) *
         Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; 
-    return distance.toFixed(2); 
+    const distance = R * c;
+    return distance.toFixed(2);
   }
 
   const handleBooking = (parkingId, name) => {
@@ -41,16 +41,15 @@ export default function Shownearbyparkings() {
     if (!selection || !selection.vehicleType) {
       setFlashId(parkingId);
 
-      
       setTimeout(() => {
         setFlashId(null);
-      }, 1400); 
-      
+      }, 1400);
+
       return;
     }
     const selectedVehicleType = selection.vehicleType;
     navigate(
-      `/do-booking?locID=${parkingId}&name=${name}&vType=${selectedVehicleType}`
+      `/do-booking?locID=${parkingId}&name=${name}&vType=${selectedVehicleType}`,
     );
   };
   const location = useLocation();
@@ -64,12 +63,9 @@ export default function Shownearbyparkings() {
     setLoading(true);
     if (lat && lng) {
       axios
-        .get(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/parking-locations/nearby?lat=${lat}&lng=${lng}`,
-          { withCredentials: true }
-        )
+        .get(`/api/parking-locations/nearby?lat=${lat}&lng=${lng}`, {
+          withCredentials: true,
+        })
         .then((response) => {
           const withDistance = response.data.map((parking) => ({
             ...parking,
@@ -128,10 +124,8 @@ export default function Shownearbyparkings() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {parkings.length > 0 ? (
             parkings.map((parking) => {
-              
               const isFlashing = flashId === parking.locationId;
 
-              
               const shouldBeDimmed = flashId !== null && !isFlashing;
               if (isFlashing) showError("Select one of the vehicle type");
               return (
@@ -305,7 +299,6 @@ export default function Shownearbyparkings() {
                   )}
                   <button
                     className="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-                    
                     onClick={() =>
                       handleBooking(parking.locationId, parking.name)
                     }

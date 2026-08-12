@@ -1,181 +1,340 @@
-/* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "../../config/axiosInstance";
 import {
   FaCar,
   FaClock,
-  FaDollarSign,
+  FaMoneyBill,
   FaCheckCircle,
-  FaTimesCircle,
   FaParking,
   FaDownload,
+  FaCalendarCheck,
+  FaWallet,
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 2,
+});
+
+const getBookingStatus = (booking) => {
+  const now = new Date();
+  const start = new Date(booking.startTime);
+  const end = new Date(booking.endTime);
+
+  if (now > end) {
+    return {
+      label: "Parking Completed",
+      icon: FaCheckCircle,
+      textClass: "text-blue-600 dark:text-blue-400",
+      borderColor: "#3b82f6",
+    };
+  }
+  if (now < start) {
+    return {
+      label: "Upcoming",
+      icon: FaClock,
+      textClass: "text-yellow-600 dark:text-yellow-400",
+      borderColor: "#eab308",
+    };
+  }
+  return {
+    label: "Ongoing",
+    icon: FaCar,
+    textClass: "text-green-600 dark:text-green-400",
+    borderColor: "#10b981",
+  };
+};
+
+const getPaymentStatusClasses = (status) => {
+  const normalized = (status || "").toLowerCase();
+  if (["paid", "success", "completed"].includes(normalized)) {
+    return "text-green-600 dark:text-green-400";
+  }
+  if (["pending", "processing"].includes(normalized)) {
+    return "text-yellow-600 dark:text-yellow-400";
+  }
+  if (["failed", "cancelled", "refunded"].includes(normalized)) {
+    return "text-red-600 dark:text-red-400";
+  }
+  return "text-gray-600 dark:text-gray-400";
+};
+
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
   const { user } = useAuth();
+
   useEffect(() => {
     if (!user || !user.userId) return;
+
     const fetchBookings = async () => {
-      console.log("Fetchin user for userid", user);
-      console.log("Fetching bookings for userId:", user.userId);
-
-      if (!user.userId) return;
-
       try {
+        setIsFetching(true);
         const response = await axios.get(`/api/bookings/user/${user.userId}`);
         setBookings(response.data);
       } catch (error) {
         console.error("Error fetching bookings:", error);
+      } finally {
+        setIsFetching(false);
       }
     };
 
     fetchBookings();
   }, [user]);
-  console.log("Booking : ", bookings);
+
+  const stats = useMemo(() => {
+    const total = bookings.length;
+    const upcoming = bookings.filter(
+      (b) => new Date() < new Date(b.startTime),
+    ).length;
+    const ongoing = bookings.filter(
+      (b) =>
+        new Date() >= new Date(b.startTime) &&
+        new Date() <= new Date(b.endTime),
+    ).length;
+    const totalSpent = bookings.reduce(
+      (sum, b) => sum + (b.amountPaid || 0) / 100,
+      0,
+    );
+    return { total, upcoming, ongoing, totalSpent };
+  }, [bookings]);
 
   function downloadRec() {
-    alert("Downloading reiept");
+    alert("Downloading receipt");
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-6">
-          Bookings History
-        </h2>
-        <p className="text-center text-gray-500 dark:text-gray-400 mb-8">
-          View details of your past parking bookings.
-        </p>
-
-        {/* Responsive Grid Layout */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bookings.map((booking) => (
-            <div
-              key={booking.bookingId}
-              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col gap-4 border-l-4"
-              style={{
-                borderColor:
-                  booking.status === "active"
-                    ? "#10b981"
-                    : booking.status === "completed"
-                      ? "#3b82f6"
-                      : "#ef4444",
-              }}
-            >
-              <div className="flex items-center justify-between gap-4 text-xl font-bold text-gray-900 dark:text-gray-100">
-                {/* License Plate Section */}
-                <div className="flex items-center gap-2">
-                  <FaCar className="text-blue-600 dark:text-blue-400 shrink-0" />
-                  <span className="truncate">{booking.licensePlate}</span>
-                </div>
-
-                {/* Download Button Section */}
-                <button
-                  onClick={downloadRec}
-                  aria-label="Download Receipt"
-                  title="Download Receipt"
-                  className="flex items-center justify-center p-2 text-sm text-gray-600 transition-colors border-2 border-gray-200 rounded-full dark:text-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0"
-                >
-                  <FaDownload />
-                </button>
-              </div>
-
-              <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                <FaParking className="text-gray-600 dark:text-gray-300" /> Slot:{" "}
-                {booking.slotNumber}
-              </p>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                Location:{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {booking.location}
-                </span>
-              </p>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                Vehicle Type:{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {booking.vehicleType}
-                </span>
-              </p>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                Start Time:{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {new Date(booking.startTime).toLocaleString("en-US", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </span>
-              </p>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                End Time:{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {/* Notice this is now booking.endTime, and no UTC override */}
-                  {new Date(booking.endTime).toLocaleString("en-US", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </span>
-              </p>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                Payment Method:{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {booking.paymentMethod}
-                </span>
-              </p>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                Payment Status:{" "}
-                <span className="font-medium text-green-600 dark:text-green-400">
-                  {booking.paymentStatus}
-                </span>
-              </p>
-
-              <p
-                className={`text-lg font-semibold flex items-center gap-2 ${
-                  new Date() > new Date(booking.endTime)
-                    ? "text-blue-600 dark:text-blue-400"
-                    : new Date() < new Date(booking.startTime)
-                      ? "text-yellow-600 dark:text-yellow-400"
-                      : "text-green-600 dark:text-green-400"
-                }`}
-              >
-                {new Date() > new Date(booking.endTime) ? (
-                  <FaCheckCircle />
-                ) : new Date() < new Date(booking.startTime) ? (
-                  <FaClock />
-                ) : (
-                  <FaCar />
-                )}
-
-                {new Date() > new Date(booking.endTime)
-                  ? "Parking Completed"
-                  : new Date() < new Date(booking.startTime)
-                    ? "Upcoming"
-                    : "Ongoing"}
-              </p>
-
-              <div className="flex justify-between items-center">
-                <p className="text-gray-700 dark:text-gray-200 font-semibold flex items-center gap-2">
-                  <FaDollarSign className="text-green-600 dark:text-green-400" />{" "}
-                  Paid: {booking.amountPaid / 100}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Bookings History
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            View details of your past parking bookings.
+          </p>
         </div>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-5 flex items-center gap-4">
+            <div className="h-11 w-11 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+              <FaCalendarCheck className="text-blue-600 dark:text-blue-400 text-lg" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Total Bookings
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.total}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-5 flex items-center gap-4">
+            <div className="h-11 w-11 rounded-lg bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0">
+              <FaCar className="text-green-600 dark:text-green-400 text-lg" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Ongoing
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.ongoing}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-5 flex items-center gap-4">
+            <div className="h-11 w-11 rounded-lg bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center flex-shrink-0">
+              <FaClock className="text-yellow-600 dark:text-yellow-400 text-lg" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Upcoming
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.upcoming}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-5 flex items-center gap-4">
+            <div className="h-11 w-11 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+              <FaWallet className="text-emerald-600 dark:text-emerald-400 text-lg" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Total Spent
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {currencyFormatter.format(stats.totalSpent)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bookings */}
+        {isFetching ? (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-10 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+            <svg
+              className="animate-spin h-6 w-6 text-yellow-500 mb-3"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            <span className="text-sm font-medium">
+              Fetching your bookings...
+            </span>
+          </div>
+        ) : bookings.length === 0 ? (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-10 flex flex-col items-center justify-center text-center">
+            <div className="h-14 w-14 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center mb-4">
+              <FaParking className="text-yellow-600 dark:text-yellow-400 text-2xl" />
+            </div>
+            <p className="font-semibold text-gray-900 dark:text-white">
+              No bookings yet
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Your upcoming and past bookings will show up here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {bookings.map((booking) => {
+              const status = getBookingStatus(booking);
+              const StatusIcon = status.icon;
+
+              return (
+                <div
+                  key={booking.bookingId}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3 border border-gray-100 dark:border-gray-700 border-l-4"
+                  style={{ borderLeftColor: status.borderColor }}
+                >
+                  <div className="flex items-center justify-between gap-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FaCar className="text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span className="truncate">{booking.licensePlate}</span>
+                    </div>
+
+                    <button
+                      onClick={downloadRec}
+                      aria-label="Download Receipt"
+                      title="Download Receipt"
+                      className="flex items-center justify-center p-2 text-sm text-gray-600 transition-colors border-2 border-gray-200 rounded-full dark:text-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0"
+                    >
+                      <FaDownload />
+                    </button>
+                  </div>
+
+                  <p
+                    className={`text-sm font-semibold flex items-center gap-2 ${status.textClass}`}
+                  >
+                    <StatusIcon />
+                    {status.label}
+                  </p>
+
+                  <div className="border-t border-gray-100 dark:border-gray-700 pt-3 space-y-2 text-sm">
+                    <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <FaParking className="text-gray-400 dark:text-gray-500" />
+                      Slot:{" "}
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {booking.slotNumber}
+                      </span>
+                    </p>
+
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Location:{" "}
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {booking.location}
+                      </span>
+                    </p>
+
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Vehicle Type:{" "}
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {booking.vehicleType}
+                      </span>
+                    </p>
+
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Start:{" "}
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {new Date(booking.startTime).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    </p>
+
+                    <p className="text-gray-500 dark:text-gray-400">
+                      End:{" "}
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {new Date(booking.endTime).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    </p>
+
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Payment Method:{" "}
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {booking.paymentMethod}
+                      </span>
+                    </p>
+
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Payment Status:{" "}
+                      <span
+                        className={`font-medium ${getPaymentStatusClasses(
+                          booking.paymentStatus,
+                        )}`}
+                      >
+                        {booking.paymentStatus}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-700 pt-3">
+                    <p className="text-gray-700 dark:text-gray-200 font-semibold flex items-center gap-2">
+                      <FaMoneyBill className="text-green-600 dark:text-green-400" />
+                      Paid:{" "}
+                      {currencyFormatter.format(
+                        (booking.amountPaid || 0) / 100,
+                      )}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* View More Button */}
-        <div className="mt-10 text-center">
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-300">
-            View More Bookings
-          </button>
-        </div>
+        {bookings.length > 0 && (
+          <div className="mt-10 text-center">
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-300">
+              View More Bookings
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ const Verify = () => {
     Html5Qrcode.getCameras().then((devices) => {
       if (devices && devices.length) {
         setCameras(devices);
-        startScanner(devices[0].id); 
+        startScanner(devices[0].id);
       }
     });
 
@@ -72,26 +72,37 @@ const Verify = () => {
   );
 
   const handleScan = async (data) => {
-    if (data && !scanned) {
-      setScanned(true);
-      const slotId = data.trim();
+    const bookingId = data.trim();
 
-      try {
-        const response = await axios.get(`/api/parking-slots/${slotId}`);
-        const isValid = response.data;
+    try {
+      const response = await axios.post(`/api/verify/${bookingId}`);
 
-        if (isValid) {
-          successSound.play();
-        } else {
-          errorSound.play();
-        }
+      const verification = response.data;
 
-        setResult({ isValid, slotId });
-      } catch (error) {
-        console.error("Error verifying slot:", error);
+      if (
+        verification.status === "ACTIVE" ||
+        verification.status === "COMPLETED"
+      ) {
+        successSound.play();
+      } else {
         errorSound.play();
-        setResult({ isValid: false, slotId });
       }
+
+      setResult({
+        bookingId,
+        message: verification.message,
+        status: verification.status,
+      });
+    } catch (error) {
+      console.error(error);
+
+      errorSound.play();
+
+      setResult({
+        bookingId,
+        message: "Verification failed.",
+        status: "ERROR",
+      });
     }
   };
 
@@ -131,18 +142,29 @@ const Verify = () => {
           <div className="bg-gray-800 rounded-xl shadow-lg p-8 max-w-sm text-center">
             <h3
               className={`text-2xl font-bold mb-4 ${
-                result.isValid ? "text-green-500" : "text-red-500"
+                result.status === "ACTIVE"
+                  ? "text-green-500"
+                  : result.status === "COMPLETED"
+                    ? "text-blue-500"
+                    : result.status === "EXPIRED"
+                      ? "text-red-500"
+                      : "text-yellow-500"
               }`}
             >
-              {result.isValid
-                ? "✅ Green Signal - Valid Slot"
-                : "❌ Red Signal - Invalid Slot"}
+              {result.status === "ACTIVE" && "🚗 Entry Approved"}
+              {result.status === "COMPLETED" && "👋 Exit Recorded"}
+              {result.status === "EXPIRED" && "⏰ Booking Expired"}
+              {result.status === "BOOKED" && "⌛ Too Early"}
+              {result.status === "ERROR" && "❌ Verification Failed"}
             </h3>
-            <p className="mb-6 text-gray-300">
-              Slot ID: <span className="font-semibold">{result.slotId}</span>
+            <p className="text-lg text-gray-300 mb-2">{result.message}</p>
+
+            <p className="text-sm text-gray-400">
+              Booking ID:
+              <span className="font-semibold ml-1">{result.bookingId}</span>
             </p>
 
-            {result.isValid && (
+            {result.status === "ACTIVE" && (
               <div className="w-full h-24 bg-gray-700 border-t-4 border-gray-600 rounded-md overflow-hidden shadow-md mt-4">
                 <div className="h-full bg-green-600 animate-slide-up-gate flex justify-center items-center">
                   <span className="text-white text-xl font-semibold animate-pulse">

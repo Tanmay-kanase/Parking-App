@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-
+import React, { createContext, useContext, useEffect, useState } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -20,11 +19,26 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     console.log("credentials : ", credentials);
-    const res = await axios.post(`/api/users/login`, credentials);
-    console.log(res);
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    setUser(res.data.user);
+
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      },
+    );
+
+    const data = await res.json();
+
+    console.log(data);
+
+    //  localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
   };
 
   const signup = async (userData) => {
