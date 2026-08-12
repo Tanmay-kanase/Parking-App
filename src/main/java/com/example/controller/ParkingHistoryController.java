@@ -15,9 +15,9 @@ public class ParkingHistoryController {
     private ParkingHistoryService parkingHistoryService;
 
     @PostMapping
-public ParkingHistory createParkingHistory(@RequestBody ParkingHistory parkingHistory) {
-    return parkingHistoryService.saveParkingHistory(parkingHistory);
-}
+    public ParkingHistory createParkingHistory(@RequestBody ParkingHistory parkingHistory) {
+        return parkingHistoryService.saveParkingHistory(parkingHistory);
+    }
 
     @GetMapping("/user/{userId}")
     public List<ParkingHistory> getHistoryByUserId(@PathVariable String userId) {

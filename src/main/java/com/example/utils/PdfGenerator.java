@@ -68,7 +68,7 @@ public class PdfGenerator {
 
         // QR Code
         try {
-            Image qrImage = Image.getInstance(generateQRCodeImage(booking.getSlotId()));
+            Image qrImage = Image.getInstance(generateQRCodeImage(booking.getBookingId()));
             qrImage.setAlignment(Element.ALIGN_CENTER);
             qrImage.scaleAbsolute(100, 100); // Adjust size as needed
             document.add(qrImage);

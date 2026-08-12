@@ -15,14 +15,14 @@ import java.awt.image.BufferedImage;
 
 public class QrCodeGenerator {
 
-    public static byte[] generateQRCodeImage(String slotId) throws Exception {
+    public static byte[] generateQRCodeImage(String bookingid) throws Exception {
         int width = 300;
         int height = 300;
 
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.MARGIN, 1); // Reduce the margin
 
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(slotId, BarcodeFormat.QR_CODE, width, height, hints);
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(bookingid, BarcodeFormat.QR_CODE, width, height, hints);
 
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         for (int x = 0; x < width; x++) {

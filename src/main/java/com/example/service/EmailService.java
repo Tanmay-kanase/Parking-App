@@ -43,19 +43,17 @@ public class EmailService {
             helper.addAttachment("ParkEasy_Receipt.pdf", new ByteArrayResource(pdfBytes));
 
             // 2. Generate QR Code
-            // byte[] qrCodeBytes =
-            // QrCodeGenerator.generateQRCodeImage(booking.getSlotId());
-            // helper.addAttachment("ParkingQRCode.png", new
-            // ByteArrayResource(qrCodeBytes));
+            byte[] qrCodeBytes = QrCodeGenerator.generateQRCodeImage(booking.getBookingId());
+            helper.addAttachment("ParkingQRCode.png", new ByteArrayResource(qrCodeBytes));
 
             // 3. Generate iCal Invite
             byte[] icsFile = ICalGenerator.generateCalendarInvite(booking);
             helper.addAttachment("ParkingEvent.ics", new ByteArrayResource(icsFile));
 
             mailSender.send(message);
-            System.out.println("✅ HTML Email sent successfully to " + toEmail);
+            System.out.println(" HTML Email sent successfully to " + toEmail);
         } catch (MessagingException e) {
-            System.out.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
+            System.out.println(" Failed to send email to " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
         }
 

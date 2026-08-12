@@ -22,8 +22,8 @@ public class Booking {
     private String location;
     private double amountPaid;
     private String paymentStatus;
-    private Instant startTime;
-    private Instant endTime;// Time when parking ends
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;// Time when parking ends
     private String paymentMethod;
     private String licensePlate;
     private String vehicleType; // "Car", "Bike", etc.
