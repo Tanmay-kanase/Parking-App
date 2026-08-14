@@ -42,7 +42,7 @@ function App() {
     return (
       localStorage.theme === "dark" ||
       (!("theme" in localStorage) &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches)
+        window.matchMedia("(prefers-color-scheme: light)").matches)
     );
   });
 

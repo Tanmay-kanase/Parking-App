@@ -20,21 +20,19 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     console.log("credentials : ", credentials);
 
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
+    const res = await fetch(`/api/users/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(credentials),
+    });
 
     const data = await res.json();
-
-    console.log(data);
+    if (!res.ok) {
+      throw new Error(data.message || "Invalid email or password");
+    }
 
     //  localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));

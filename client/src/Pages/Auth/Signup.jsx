@@ -116,43 +116,44 @@ const Signup = () => {
       return;
     }
 
-    if (!otpVerified) {
-      showError("Please verify your email before creating an account.");
-      setLoading(false);
-      return;
-    }
+    // if (!otpVerified) {
+    //   showError("Please verify your email before creating an account.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: fullName,
-            email,
-            phone,
-            password,
-            photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            role,
-          }),
+      const response = await fetch(`/api/users/signup`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          name: fullName,
+          email,
+          phone,
+          password,
+          photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+          role,
+        }),
+      });
 
       const data = await response.json();
+      console.log("Eror for signup is ", data);
 
-      console.log(data);
+      if (!response.ok) {
+        showError(data.error || "Account creation failed.");
+        return;
+      }
 
-      //  localStorage.setItem("token", response.data.token);
-      // localStorage.setItem("user", JSON.stringify(response.data.user));
-      await setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
       showMessage("Account created successfully! Redirecting...");
       navigate("/");
     } catch (err) {
       console.error("Signup error:", err);
-      showError(err.response?.data?.message || "Account creation failed.");
+      showError(err.data.error || "Account creation failed.");
     } finally {
       setLoading(false);
     }
@@ -221,7 +222,7 @@ const Signup = () => {
                   required
                 />
               </div>
-
+              {/* 
               <button
                 type="button"
                 id="sendotp"
@@ -233,7 +234,7 @@ const Signup = () => {
                       ? "bg-green-600 text-white cursor-not-allowed opacity-80 dark:bg-green-800 dark:opacity-90"
                       : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   } flex items-center justify-center gap-2`}
-              >
+              >  
                 {otpVerified ? (
                   <>
                     <svg
@@ -279,7 +280,7 @@ const Signup = () => {
                 ) : (
                   "Send OTP"
                 )}
-              </button>
+              </button>*/}
             </div>
 
             {/* OTP Input and Verify Button */}

@@ -39,7 +39,7 @@ const Payments = () => {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-100 text-gray-900 p-4 sm:p-8 dark:bg-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gray-100 text-gray-900 p-4 sm:p-8 dark:bg-gray-900 dark:text-gray-100">
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-4 sm:p-6 dark:bg-gray-800">
         <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-2 sm:mb-4 dark:text-gray-100">
           Payments History

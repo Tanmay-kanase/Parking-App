@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -24,13 +24,13 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
+  const searchInputRef = useRef(null);
   const { logout, user } = useAuth();
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-
+  const [isLocating, setIsLocating] = useState(false);
   const showAlert = (message) => {
     setAlertMessage(message);
     setIsAlertVisible(true);
@@ -57,11 +57,14 @@ const Home = () => {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/searchParking?query=${encodeURIComponent(searchQuery)}`);
+    } else {
+      searchInputRef.current?.focus(); // moves cursor into the box
     }
   };
 
   const handleNearby = () => {
     if (navigator.geolocation) {
+      setIsLocating(true); // ADD
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -93,7 +96,7 @@ const Home = () => {
     <div className={`min-h-screen font-sans`}>
       {/* Alert Modal */}
       {isAlertVisible && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
             <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
               Notification
@@ -133,6 +136,7 @@ const Home = () => {
               <div className="relative flex-grow w-full max-w-xl">
                 <input
                   type="text"
+                  ref={searchInputRef}
                   placeholder="Search for a city, address, or landmark..."
                   value={searchQuery}
                   onChange={(e) => {
@@ -181,10 +185,39 @@ const Home = () => {
                 </button>
                 <button
                   onClick={handleNearby}
-                  className="w-full sm:w-auto px-6 py-3 flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95"
+                  disabled={isLocating}
+                  className="w-full sm:w-auto px-6 py-3 flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition duration-300 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100"
                 >
-                  <MapPin size={20} />
-                  Nearby
+                  {isLocating ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                      Locating...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin size={20} />
+                      Nearby
+                    </>
+                  )}
                 </button>
               </div>
             </div>

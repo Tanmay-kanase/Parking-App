@@ -56,12 +56,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
       icon: <Bookmark size={20} />,
       role: "user",
     },
-    {
-      name: "Payments",
-      href: "payments",
-      icon: <Wallet size={20} />,
-      role: "user",
-    },
   ];
 
   const getNavLinks = () => {

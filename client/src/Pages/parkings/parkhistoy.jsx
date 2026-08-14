@@ -112,7 +112,7 @@ const ParkingHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">

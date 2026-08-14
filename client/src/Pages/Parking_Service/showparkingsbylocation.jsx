@@ -166,13 +166,13 @@ export default function SearchParkings() {
                   className="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-xl p-6 flex flex-col justify-between border border-gray-200 dark:border-transparent"
                 >
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-1">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-1 line-clamp-2 min-h-[3.5rem]">
                       {parking.name}
                     </h3>
 
-                    <div className="flex items-start gap-2 text-gray-600 dark:text-gray-400 text-sm mb-3">
+                    <div className="flex items-start gap-2 text-gray-600 dark:text-gray-400 text-sm mb-3 min-h-[2.5rem]">
                       <FaMapMarkerAlt className="mt-1 flex-shrink-0 text-red-500 dark:text-red-400" />
-                      <p>
+                      <p className="line-clamp-2">
                         {parking.address}, {parking.city}, {parking.state}{" "}
                         {parking.zipCode}
                       </p>
@@ -280,19 +280,25 @@ export default function SearchParkings() {
                     </div>
 
                     {parking.user && (
-                      <div className="mb-6 bg-gray-100 dark:bg-gray-700/30 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">
+                      <>
+                        <p className="text-gray-600 dark:text-gray-400">
                           <strong className="text-gray-900 dark:text-gray-300">
                             Owner:
                           </strong>{" "}
                           {parking.user.name}
                         </p>
-                      </div>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          <strong className="text-gray-900 dark:text-gray-300">
+                            Phone:
+                          </strong>{" "}
+                          {parking.user.phone}
+                        </p>
+                      </>
                     )}
                   </div>
 
                   <button
-                    className="mt-4 w-full bg-yellow-500 text-gray-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-400 transition-colors shadow-md"
+                    className="w-full bg-yellow-500 text-gray-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-400 transition-colors shadow-md"
                     onClick={() =>
                       handleBooking(parking.locationId, parking.name)
                     }

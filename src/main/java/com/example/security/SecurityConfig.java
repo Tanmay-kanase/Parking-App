@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/**").permitAll() // 👈 Public API endpoints
                         .requestMatchers("/api/verify/**").permitAll()
+                        .requestMatchers("/api/bookings/**").permitAll()
                         .requestMatchers("/api/**").authenticated() // 👈 All other APIs require token
                         .anyRequest().permitAll() // 👈 Allow React app and static assets to load
                 )

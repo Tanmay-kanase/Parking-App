@@ -176,7 +176,7 @@ export default function UploadParkingLocations() {
   };
 
   return (
-    <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <div className="w-full max-w-7xl mx-auto bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
@@ -198,7 +198,9 @@ export default function UploadParkingLocations() {
               className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-4"
             >
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {isEditing ? "Edit Parking Location" : "Add New Parking Location"}
+                {isEditing
+                  ? "Edit Parking Location"
+                  : "Add New Parking Location"}
               </h3>
 
               {/* Form fields with labels for better accessibility and responsiveness */}

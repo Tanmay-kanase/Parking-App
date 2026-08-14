@@ -17,7 +17,7 @@ import { QRCodeSVG } from "qrcode.react";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
-  currency: "USD",
+  currency: "INR",
   maximumFractionDigits: 2,
 });
 
@@ -68,7 +68,7 @@ const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const { user } = useAuth();
-
+  const [selectedBooking, setSelectedBooking] = useState(null);
   useEffect(() => {
     if (!user || !user.userId) return;
 
@@ -76,7 +76,10 @@ const MyBookings = () => {
       try {
         setIsFetching(true);
         const response = await axios.get(`/api/bookings/user/${user.userId}`);
-        setBookings(response.data);
+        const sorted = [...response.data].sort(
+          (a, b) => new Date(b.startTime) - new Date(a.startTime),
+        );
+        setBookings(sorted); // CHANGED from setBookings(response.data)
       } catch (error) {
         console.error("Error fetching bookings:", error);
       } finally {
@@ -263,6 +266,7 @@ const MyBookings = () => {
               return (
                 <div
                   key={booking.bookingId}
+                  onClick={() => setSelectedBooking(booking)}
                   className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3 border border-gray-100 dark:border-gray-700 border-l-4"
                   style={{ borderLeftColor: status.borderColor }}
                 >
@@ -273,7 +277,10 @@ const MyBookings = () => {
                     </div>
 
                     <button
-                      onClick={() => downloadRec(booking)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadRec(booking);
+                      }}
                       aria-label="Download Receipt"
                       title="Download Receipt"
                       className="flex items-center justify-center p-2 text-sm text-gray-600 transition-colors border-2 border-gray-200 rounded-full dark:text-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0"
@@ -385,6 +392,48 @@ const MyBookings = () => {
             <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-300">
               View More Bookings
             </button>
+          </div>
+        )}
+
+        {/* Scan QR Modal - metro-style scan screen */}
+        {selectedBooking && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setSelectedBooking(null)}
+          >
+            <div
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col items-center relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl leading-none"
+                aria-label="Close"
+              >
+                &times;
+              </button>
+
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                Scan at Entry/Exit
+              </p>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Slot {selectedBooking.slotNumber} &bull;{" "}
+                {selectedBooking.licensePlate}
+              </h3>
+
+              <div className="bg-white p-4 rounded-xl border-4 border-yellow-500 shadow-inner">
+                <QRCodeSVG
+                  value={selectedBooking.bookingId}
+                  size={220}
+                  bgColor="#ffffff"
+                  fgColor="#000000"
+                />
+              </div>
+
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">
+                Hold this code up to the scanner at the gate
+              </p>
+            </div>
           </div>
         )}
       </div>

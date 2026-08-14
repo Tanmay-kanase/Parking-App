@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "../../config/axiosInstance";
 import stompClient from "../../config/socket";
@@ -10,10 +10,12 @@ const DoBooking = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-
+  const messageIntervalRef = useRef(null);
+  const [paymentloading, setPaymentLoading] = useState(false);
   const locationId = params.get("locID");
   const name = params.get("name");
-
+  const vehicleInputRef = useRef(null);
+  const [lockingSlotId, setLockingSlotId] = useState(null);
   const getInitialDateTimeLocal = () => {
     const now = new Date();
 
@@ -212,6 +214,7 @@ const DoBooking = () => {
 
   // ----- Helpers / handlers (regular functions, safe to define anywhere) -----
   const lockSlot = async (slot) => {
+    setLockingSlotId(slot.slotId);
     try {
       const response = await axios.post(`/api/slots/lock`, {
         slotId: slot.slotId,
@@ -227,6 +230,8 @@ const DoBooking = () => {
     } catch (error) {
       console.error(error);
       toast.error("Unable to lock slot");
+    } finally {
+      setLockingSlotId(null); // ADD
     }
   };
 
@@ -242,6 +247,12 @@ const DoBooking = () => {
   };
 
   const handlePayment = async () => {
+    if (!formData.vehicleNumber) {
+      alert("Enter vehicle number ");
+      vehicleInputRef.current?.focus();
+      return;
+    }
+    setPaymentLoading(true);
     try {
       const totalAmount =
         selectedSpot.pricePerHour * parseFloat(formData.time || 1);
@@ -261,7 +272,18 @@ const DoBooking = () => {
         order_id: order.id,
         handler: async function (response) {
           setShowPopup(false);
-          setMessage("Booking in progress...");
+          const progressMessages = [
+            "Booking in progress...",
+            "Processing Payment...",
+            "Verifying Payment...",
+            "Booking Slot...",
+          ];
+          let msgIndex = 0;
+          setMessage(progressMessages[msgIndex]);
+          messageIntervalRef.current = setInterval(() => {
+            msgIndex = (msgIndex + 1) % progressMessages.length;
+            setMessage(progressMessages[msgIndex]);
+          }, 1000);
           setLoadingBooking(true);
 
           const bookingPayload = {
@@ -308,6 +330,7 @@ const DoBooking = () => {
         },
         modal: {
           ondismiss: async function () {
+            setPaymentLoading(false);
             try {
               if (selectedSpot) {
                 await unlockSlot(selectedSpot.slotId);
@@ -323,6 +346,7 @@ const DoBooking = () => {
       rzp.open();
 
       rzp.on("payment.failed", async function (response) {
+        setPaymentLoading(false);
         if (selectedSpot) {
           await unlockSlot(selectedSpot.slotId);
         }
@@ -332,6 +356,8 @@ const DoBooking = () => {
     } catch (error) {
       console.error("Payment failed", error);
       alert("Payment Failed");
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -472,7 +498,7 @@ const DoBooking = () => {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Start Time */}
-            <div>
+            <div className="h-[42px]">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Start Time
               </label>
@@ -487,7 +513,7 @@ const DoBooking = () => {
             </div>
 
             {/* Duration (Hours) */}
-            <div>
+            <div className="h-[42px]">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Duration (Hours)
               </label>
@@ -504,7 +530,7 @@ const DoBooking = () => {
             </div>
 
             {/* Vehicle Type Filter */}
-            <div>
+            <div className="h-[42px]">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Vehicle Type Filter
               </label>
@@ -519,6 +545,7 @@ const DoBooking = () => {
                 <option value="sedan">Sedan</option>
                 <option value="truck">Truck</option>
                 <option value="bus">Bus</option>
+                <option value="compact">Compact</option>
               </select>
             </div>
 
@@ -527,7 +554,7 @@ const DoBooking = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 End Time
               </label>
-              <p className="w-full p-2 font-semibold text-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
+              <p className="w-full h-[42px] flex items-center p-2 font-medium text-base bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
                 {formData.endTime
                   ? new Date(formData.endTime).toLocaleString("en-US", {
                       dateStyle: "short",
@@ -563,37 +590,77 @@ const DoBooking = () => {
                   </h4>
 
                   <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-                    {slots.map((slot) => (
-                      <div
-                        key={slot.slotId}
-                        className={`p-3 text-center rounded-lg shadow-sm border text-white transition-all ${
-                          lockedSlots[slot.slotId]
-                            ? "bg-yellow-500 cursor-not-allowed opacity-70"
-                            : "bg-green-500 cursor-pointer hover:bg-green-600"
-                        } ${selectedSpot?.slotId === slot.slotId ? "ring-4 ring-yellow-400" : ""}`}
-                        onClick={() => {
-                          if (!formData.startTime) {
-                            toast.error("Please select Start Time first");
-                            return;
-                          }
-                          if (lockedSlots[slot.slotId]) {
-                            toast.warning("Slot temporarily reserved");
-                            return;
-                          }
-                          lockSlot(slot);
-                        }}
-                      >
-                        <span className="font-semibold text-sm block">
-                          {slot.slotNumber}
-                        </span>
-                        <span className="text-xs block">
-                          ₹{slot.pricePerHour}/hr
-                        </span>
-                        <span className="text-[10px] font-bold">
-                          {lockedSlots[slot.slotId] ? "LOCKED" : "AVAILABLE"}
-                        </span>
-                      </div>
-                    ))}
+                    {slots.map((slot) => {
+                      const isLocking = lockingSlotId === slot.slotId; // ADD
+
+                      return (
+                        <div
+                          key={slot.slotId}
+                          className={`relative p-3 text-center rounded-lg shadow-sm border text-white transition-all ${
+                            lockedSlots[slot.slotId]
+                              ? "bg-yellow-500 cursor-not-allowed opacity-70"
+                              : isLocking
+                                ? "bg-green-500 cursor-wait opacity-80"
+                                : "bg-green-500 cursor-pointer hover:bg-green-600"
+                          } ${selectedSpot?.slotId === slot.slotId ? "ring-4 ring-yellow-400" : ""}`}
+                          onClick={() => {
+                            if (isLocking) return; // ADD — prevent double clicks mid-lock
+                            if (!formData.startTime) {
+                              toast.error("Please select Start Time first");
+                              return;
+                            }
+                            if (lockedSlots[slot.slotId]) {
+                              toast.warning("Slot temporarily reserved");
+                              return;
+                            }
+                            lockSlot(slot);
+                          }}
+                        >
+                          {isLocking ? (
+                            // ADD — spinner overlay while this specific slot is locking
+                            <div className="flex flex-col items-center justify-center py-1">
+                              <svg
+                                className="animate-spin h-5 w-5 text-white mb-1"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                              </svg>
+                              <span className="text-[10px] font-bold">
+                                LOCKING...
+                              </span>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="font-semibold text-sm block">
+                                {slot.slotNumber}
+                              </span>
+                              <span className="text-xs block">
+                                ₹{slot.pricePerHour}/hr
+                              </span>
+                              <span className="text-[10px] font-bold">
+                                {lockedSlots[slot.slotId]
+                                  ? "LOCKED"
+                                  : "AVAILABLE"}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -648,18 +715,36 @@ const DoBooking = () => {
                     Vehicle Number
                   </label>
                   {vehicles.length === 0 ? (
-                    <input
-                      type="text"
-                      name="vehicleNumber"
-                      value={formData.vehicleNumber}
-                      onChange={handleChange}
-                      className="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500"
-                      placeholder="Enter your vehicle number"
-                      required
-                    />
+                    <>
+                      <input
+                        type="text"
+                        ref={vehicleInputRef}
+                        name="vehicleNumber"
+                        value={formData.vehicleNumber}
+                        onChange={(e) => {
+                          const formatted = formatVehicleNumber(e.target.value);
+                          setFormData((prev) => ({
+                            ...prev,
+                            vehicleNumber: formatted,
+                          }));
+                          validateVehicleNumber(formatted);
+                        }}
+                        className={`mt-1 w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-yellow-500 ${
+                          error
+                            ? "border-red-500"
+                            : "border-gray-300 dark:border-gray-600"
+                        }`}
+                        placeholder="MH-43-AR-0707"
+                        required
+                      />
+                      {error && (
+                        <p className="text-red-500 text-sm mt-1">{error}</p>
+                      )}
+                    </>
                   ) : vehicles.length === 1 ? (
                     <input
                       type="text"
+                      ref={vehicleInputRef}
                       name="vehicleNumber"
                       value={formData.vehicleNumber}
                       onChange={handleChange}
@@ -670,6 +755,7 @@ const DoBooking = () => {
                     <>
                       <select
                         name="vehicleNumber"
+                        ref={vehicleInputRef}
                         value={selectedVehicle || ""}
                         onChange={(e) => {
                           const selected = e.target.value;
@@ -773,9 +859,36 @@ const DoBooking = () => {
                 </button>
                 <button
                   type="submit"
+                  disabled={paymentloading}
                   className="w-full sm:w-auto bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
                 >
-                  Proceed to Payments
+                  {paymentloading ? (
+                    <div className="flex gap-2">
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                      <span>Processing ... </span>
+                    </div>
+                  ) : (
+                    <>Proceed to Payments</>
+                  )}
                 </button>
               </div>
             </form>

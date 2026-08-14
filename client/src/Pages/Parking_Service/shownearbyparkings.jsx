@@ -37,20 +37,7 @@ export default function Shownearbyparkings() {
   }
 
   const handleBooking = (parkingId, name) => {
-    const selection = selections[parkingId];
-    if (!selection || !selection.vehicleType) {
-      setFlashId(parkingId);
-
-      setTimeout(() => {
-        setFlashId(null);
-      }, 1400);
-
-      return;
-    }
-    const selectedVehicleType = selection.vehicleType;
-    navigate(
-      `/do-booking?locID=${parkingId}&name=${name}&vType=${selectedVehicleType}`,
-    );
+    navigate(`/do-booking?locID=${parkingId}&name=${name}&vType=${" "}`);
   };
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -97,27 +84,27 @@ export default function Shownearbyparkings() {
 
   if (loading)
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-sm transition-opacity duration-300">
-        <div className="flex flex-col items-center p-8 bg-gray-800 rounded-xl shadow-2xl space-y-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-200/70 dark:bg-gray-900/75 backdrop-blur-sm transition-opacity duration-300">
+        <div className="flex flex-col items-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-2xl space-y-4 border border-gray-200 dark:border-transparent">
           {/* Loading Spinner */}
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 dark:border-blue-400"></div>
 
           {/* Loading Message */}
-          <p className="text-xl font-semibold text-gray-100 mt-4 text-center">
+          <p className="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-4 text-center">
             Loading Parking ...
           </p>
 
           {/* Optional: Add a subtle loading bar for perceived progress, if actual progress is not available */}
-          <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
-            <div className="w-full h-full bg-blue-400 animate-pulse-width"></div>
+          <div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden mt-2">
+            <div className="w-full h-full bg-blue-500 dark:bg-blue-400 animate-pulse-width"></div>
           </div>
         </div>
       </div>
     );
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-10">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-yellow-400 mb-6">
+        <h2 className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-6">
           Available Parkings in {searchLocation}
         </h2>
 
@@ -131,19 +118,19 @@ export default function Shownearbyparkings() {
               return (
                 <div
                   key={parking.slotId}
-                  className={`bg-gray-800 shadow-lg rounded-xl p-6 flex flex-col justify-between ${
+                  className={`bg-white dark:bg-gray-800 shadow-md dark:shadow-lg rounded-xl p-6 flex flex-col justify-between border border-gray-200 dark:border-transparent ${
                     shouldBeDimmed ? "opacity-50 blur-[1px]" : ""
                   }`}
                 >
-                  <h3 className="text-xl font-semibold text-gray-50">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-1 line-clamp-2 min-h-[3.5rem]">
                     {parking.name}
                   </h3>
 
-                  <p className="text-gray-400 text-lg font-semibold">
+                  <p className="text-gray-600 dark:text-gray-400 text-lg font-semibold">
                     📍 {parking.distance} km away
                   </p>
 
-                  <p className="text-gray-400 text-lg font-semibold">
+                  <p className="text-gray-600 dark:text-gray-400 text-lg font-semibold">
                     Total Slots: {parking.totalSlots}
                   </p>
 
@@ -151,7 +138,7 @@ export default function Shownearbyparkings() {
                   <div className="mb-4">
                     <label
                       htmlFor={`vehicle-${parking.locationId}`}
-                      className="block text-gray-300 font-semibold mb-1"
+                      className="block text-gray-700 dark:text-gray-300 font-semibold mb-1"
                     >
                       Available Parking :
                     </label>
@@ -162,25 +149,25 @@ export default function Shownearbyparkings() {
                         {
                           type: "bike",
                           icon: FaMotorcycle,
-                          color: "text-blue-400",
+                          color: "text-blue-600 dark:text-blue-400",
                           slots: parking.bikeSlots,
                         },
                         {
                           type: "sedan",
                           icon: FaCar,
-                          color: "text-green-500",
+                          color: "text-green-600 dark:text-green-500",
                           slots: parking.sedanSlots,
                         },
                         {
                           type: "truck",
                           icon: FaTruck,
-                          color: "text-red-500",
+                          color: "text-red-600 dark:text-red-500",
                           slots: parking.truckSlots,
                         },
                         {
                           type: "bus",
                           icon: FaBus,
-                          color: "text-yellow-500",
+                          color: "text-yellow-600 dark:text-yellow-500",
                           slots: parking.busSlots,
                         },
                       ].map((v) => {
@@ -198,7 +185,7 @@ export default function Shownearbyparkings() {
                             ${
                               isSelected
                                 ? "bg-yellow-500 text-gray-900 shadow-lg"
-                                : "bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600"
+                                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
                             } p-1 transition-all duration-300 ${
                               flashId === parking.locationId
                                 ? "animate-flash-glow border-2 border-yellow-500 rounded-lg scale-[1.05] shadow-2xl"
@@ -211,7 +198,7 @@ export default function Shownearbyparkings() {
                               } text-lg`}
                             />
                             <span>{v.type}</span>
-                            <span className="text-blue-500 font-bold">
+                            <span className="text-blue-600 dark:text-blue-500 font-bold">
                               {v.slots}
                             </span>
                           </button>
@@ -220,42 +207,13 @@ export default function Shownearbyparkings() {
                     </div>
                   </div>
 
-                  {/* <p className="text-gray-400 text-lg font-semibold">
-                  Avail Slots :
-                </p>
-                 🚗 Vehicle Slots Grid (2x2)
-                <div className="grid grid-cols-2 gap-3 text-sm font-semibold text-gray-300">
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaMotorcycle className="text-blue-400 text-lg" />
-                    <span>
-                      Bike:{" "}
-                      <span className="text-blue-500 font-bold">
-                        {parking.bikeSlots}
-                      </span>
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaCar className="text-green-500 text-lg" />
-                    <span>Sedan: {parking.sedanSlots}</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaTruck className="text-red-500 text-lg" />
-                    <span>Truck: {parking.truckSlots}</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                    <FaBus className="text-yellow-500 text-lg" />
-                    <span>Bus: {parking.busSlots}</span>
-                  </div>
-                </div> */}
-
-                  <p className="text-gray-400 text-lg font-semibold mb-2">
+                  <p className="text-gray-700 dark:text-gray-400 text-lg font-semibold mb-2">
                     Features
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {/* ⚡ EV Charging */}
-                    <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                      <FaChargingStation className="text-blue-400 text-lg" />
+                    <div className="flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg bg-gray-50 dark:bg-transparent">
+                      <FaChargingStation className="text-blue-500 dark:text-blue-400 text-lg" />
                       <span>Charging:</span>
                       {parking.evCharging ? (
                         <FaCheckCircle className="text-green-500 text-lg" />
@@ -265,7 +223,7 @@ export default function Shownearbyparkings() {
                     </div>
 
                     {/* 📹 CCTV Camera */}
-                    <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
+                    <div className="flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg bg-gray-50 dark:bg-transparent">
                       <FaVideo className="text-yellow-500 text-lg" />
                       <span>CCTV:</span>
                       {parking.cctvCamera ? (
@@ -276,8 +234,8 @@ export default function Shownearbyparkings() {
                     </div>
 
                     {/* 🚿 Washing */}
-                    <div className="flex items-center justify-center gap-2 border border-gray-700 p-2 rounded-lg">
-                      <FaShower className="text-blue-300 text-lg" />
+                    <div className="flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg bg-gray-50 dark:bg-transparent">
+                      <FaShower className="text-blue-400 dark:text-blue-300 text-lg" />
                       <span>Washing:</span>
                       {parking.washing ? (
                         <FaCheckCircle className="text-green-500 text-lg" />
@@ -289,11 +247,17 @@ export default function Shownearbyparkings() {
 
                   {parking.user && (
                     <>
-                      <p className="text-gray-400">
-                        <strong>Owner:</strong> {parking.user.name}
+                      <p className="text-gray-600 dark:text-gray-400">
+                        <strong className="text-gray-900 dark:text-gray-300">
+                          Owner:
+                        </strong>{" "}
+                        {parking.user.name}
                       </p>
-                      <p className="text-gray-400">
-                        <strong>Phone:</strong> {parking.user.phone}
+                      <p className="text-gray-600 dark:text-gray-400">
+                        <strong className="text-gray-900 dark:text-gray-300">
+                          Phone:
+                        </strong>{" "}
+                        {parking.user.phone}
                       </p>
                     </>
                   )}
@@ -309,7 +273,7 @@ export default function Shownearbyparkings() {
               );
             })
           ) : (
-            <p className="text-gray-400 col-span-full">
+            <p className="text-gray-500 dark:text-gray-400 col-span-full">
               No parking slots available at this location.
             </p>
           )}
