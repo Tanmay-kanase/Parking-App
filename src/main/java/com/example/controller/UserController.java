@@ -85,6 +85,10 @@ public class UserController {
         user.setPassword(password);
         try {
             Map<String, Object> result = userService.registerUser(user);
+            Cookie cookie = new Cookie("token", (String) result.get("token"));
+
+            System.out.println(result.toString());
+            response.addCookie(cookie);
             return ResponseEntity.ok(result);
 
         } catch (RuntimeException e) {
@@ -94,14 +98,18 @@ public class UserController {
         }
     }
 
-
-
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData,
             HttpServletResponse response) {
         try {
-            Map<String, Object> result =
-                    userService.loginUser(loginData.get("email"), loginData.get("password"));
+            Map<String, Object> result = userService.loginUser(loginData.get("email"), loginData.get("password"));
+            Cookie cookie = new Cookie("token", (String) result.get("token"));
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            // cookie.setSecure(true); // enable once you're on HTTPS
+            response.addCookie(cookie);
+            System.out.println(result.get("token"));
+            System.out.println(result.toString());
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -137,7 +145,6 @@ public class UserController {
                     .body(Map.of("message", "Invalid token"));
         }
     }
-
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
@@ -212,8 +219,7 @@ public class UserController {
         try {
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                String token =
-                        jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+                String token = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
                 Map<String, Object> result = Map.of("token", token, "user", user);
                 return ResponseEntity.ok(result);
             } else {
@@ -232,8 +238,6 @@ public class UserController {
                     .body(Map.of("message", e.getMessage()));
         }
     }
-
-
 
     @DeleteMapping("/delete/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable String userId) {
@@ -260,6 +264,5 @@ public class UserController {
 
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
-
 
 }

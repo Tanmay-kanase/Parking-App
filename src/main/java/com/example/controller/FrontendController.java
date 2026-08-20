@@ -25,7 +25,8 @@ public class FrontendController {
             "/arch",
             "/parking-spots",
             "/parking-slots",
-            "/park-history"
+            "/park-history",
+            ""
     })
     public String forwardReactRoutes() {
         return "forward:/index.html";

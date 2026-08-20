@@ -17,16 +17,14 @@ public class SecurityConfig {
     private JwtAuthFilter jwtAuthFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configure(http))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**").permitAll() // 👈 Public API endpoints
-                        .requestMatchers("/api/verify/**").permitAll()
-                        .requestMatchers("/api/bookings/**").permitAll()
-                        .requestMatchers("/api/**").authenticated() // 👈 All other APIs require token
-                        .anyRequest().permitAll() // 👈 Allow React app and static assets to load
+                        .requestMatchers("/api/users/**").permitAll() // Public API endpoints
+                        .requestMatchers("/api/**").authenticated() // All other APIs require token
+                        .anyRequest().permitAll() // Allow React app and static assets to load
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -34,7 +32,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
