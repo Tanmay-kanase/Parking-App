@@ -68,10 +68,6 @@ public class UserService {
 
         User user = userOpt.get();
 
-        System.out.println("Raw password: " + password);
-        System.out.println("Encoded password from DB: " + user.getPassword());
-        System.out.println("Matches: " + passwordEncoder.matches(password, user.getPassword()));
-
         if (!passwordEncoder.matches(password, user.getPassword())) {
 
             throw new RuntimeException("Wrong password");
@@ -98,7 +94,6 @@ public class UserService {
         }
     }
 
-    // Method to retrieve the user's email by userId
     public String getEmailByUserId(String userId) {
         User user = userRepository.findByUserId(userId);
         if (user != null) {

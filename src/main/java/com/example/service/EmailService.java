@@ -33,27 +33,22 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom("tanmaykanase07@gmail.com"); // Replace with your verified sender
+            helper.setFrom("tanmaykanase07@gmail.com");
             helper.setTo(toEmail);
             helper.setSubject(subject);
-            helper.setText(htmlBody, true); // 'true' enables HTML
-
-            // 1. Generate PDF
+            helper.setText(htmlBody, true);
             byte[] pdfBytes = PdfGenerator.generateReceipt(booking);
             helper.addAttachment("ParkEasy_Receipt.pdf", new ByteArrayResource(pdfBytes));
 
-            // 2. Generate QR Code
             byte[] qrCodeBytes = QrCodeGenerator.generateQRCodeImage(booking.getBookingId());
             helper.addAttachment("ParkingQRCode.png", new ByteArrayResource(qrCodeBytes));
 
-            // 3. Generate iCal Invite
             byte[] icsFile = ICalGenerator.generateCalendarInvite(booking);
             helper.addAttachment("ParkingEvent.ics", new ByteArrayResource(icsFile));
 
             mailSender.send(message);
-            System.out.println(" HTML Email sent successfully to " + toEmail);
+
         } catch (MessagingException e) {
-            System.out.println(" Failed to send email to " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
         }
 

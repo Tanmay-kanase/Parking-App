@@ -12,7 +12,7 @@ public class Feedback {
     private String feedbackId;
     private String userId;
     private String slotId;
-    private double rating; // 1-5
+    private double rating;
     private String comment;
     private Date createdAt;
 }

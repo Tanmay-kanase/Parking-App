@@ -24,15 +24,13 @@ public class PdfGenerator {
         PdfWriter.getInstance(document, baos);
         document.open();
 
-        // Title
         Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
         Paragraph title = new Paragraph("ParkEasy Parking Booking Receipt", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
 
-        document.add(new Paragraph(" ")); // Empty line
+        document.add(new Paragraph(" "));
 
-        // Booking Details Table
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(100);
         table.setSpacingBefore(10f);

@@ -11,7 +11,6 @@ import org.springframework.retry.annotation.Backoff;
 import com.example.dto.CompleteBookingRequest;
 import com.example.model.Booking;
 import com.example.model.ParkingHistory;
-import com.example.model.ParkingSlot;
 import com.example.model.Payment;
 import com.example.repository.BookingRepository;
 import com.example.repository.ParkingSlotRepository;
@@ -20,8 +19,6 @@ import com.example.utils.RazorpayUtils;
 import com.razorpay.RazorpayClient;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -66,29 +63,21 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    @Scheduled(fixedRate = 60000) // Runs every 60 seconds
+    @Scheduled(fixedRate = 60000)
     public void expireOldBookings() {
         Instant now = Instant.now();
 
-        // Only fetch bookings that are still marked as ACTIVE but have expired
         List<Booking> expiredBookings = bookingRepository.findByStatusAndEndTimeBefore("ACTIVE", now);
 
         if (!expiredBookings.isEmpty()) {
-            System.out.println("Found " + expiredBookings.size() + " expired bookings. Updating status...");
 
             for (Booking booking : expiredBookings) {
                 try {
-                    // 1. Free up the parking slot so others can book it
-                    // slotService.markSlotAsAvailable(booking.getSlotId());
 
-                    // 2. Change the status instead of deleting
                     booking.setStatus("EXPIRED");
                     bookingRepository.save(booking);
 
-                    System.out.println(" Marked booking " + booking.getBookingId() + " as EXPIRED and freed slot "
-                            + booking.getSlotId());
                 } catch (Exception e) {
-                    System.out.println("❌ Failed to update booking " + booking.getBookingId() + ": " + e.getMessage());
                 }
             }
         }
@@ -118,10 +107,6 @@ public class BookingService {
     @Transactional
     public Booking completeBooking(CompleteBookingRequest request) {
 
-        System.out.println("\n[DEBUG] === STARTING completeBooking ===");
-        System.out.println("[DEBUG] Request data: OrderId=" + request.orderId + ", PaymentId=" + request.paymentId
-                + ", SlotId=" + request.slotId);
-
         boolean isValid = RazorpayUtils.verifySignature(
                 request.orderId,
                 request.paymentId,
@@ -137,10 +122,8 @@ public class BookingService {
         if (existing.isPresent()) {
             throw new RuntimeException("Duplicate payment detected");
         }
-        System.out.println("[DEBUG] 3. Validating slot locks for slotId: " + request.slotId);
 
         String owner = slotLockService.getLockOwner(request.slotId);
-        System.out.println("[DEBUG] 3. Redis getLockOwner result: " + owner + " | Expected userId: " + request.userId);
         if (owner == null) {
             throw new RuntimeException("Slot lock has expired. Please try booking again.");
         }
@@ -149,7 +132,6 @@ public class BookingService {
             throw new RuntimeException("Slot is currently locked/booked by another user.");
         }
 
-        // 2. Save Parking History
         ParkingHistory history = new ParkingHistory();
         history.setUserId(request.userId);
         history.setVehicleId(request.vehicleNumber);
@@ -162,7 +144,7 @@ public class BookingService {
 
         parkingHistoryService.saveParkingHistory(history);
 
-        String finalStatus = "completed"; // Default fallback
+        String finalStatus = "completed";
         String finalMethod = request.paymentMethod;
         String r_email = request.email;
         String r_contact = null;
@@ -177,13 +159,11 @@ public class BookingService {
             com.razorpay.Payment rpPayment = razorpay.payments.fetch(request.paymentId);
             com.razorpay.Order razorpayOrder = razorpay.orders.fetch(request.orderId);
             if (rpPayment != null) {
-                // Get Status and Method directly from Razorpay
                 finalStatus = razorpayOrder.has("status") ? razorpayOrder.get("status") : "completed"; // e.g.,
                                                                                                        // "captured",
                                                                                                        // "authorized"
-                finalMethod = rpPayment.get("method"); // e.g., "netbanking", "upi", "card"
+                finalMethod = rpPayment.get("method");
 
-                // Extract metadata safely
                 r_email = rpPayment.has("email") ? rpPayment.get("email") : request.email;
                 r_contact = rpPayment.has("contact") ? rpPayment.get("contact") : null;
                 r_bank = rpPayment.has("bank") ? rpPayment.get("bank") : null;
@@ -196,9 +176,7 @@ public class BookingService {
         } catch (Exception e) {
             System.err.println("Razorpay Fetch Failed - using request fallback: " + e.getMessage());
         }
-        // --- End: Gateway Data Fetching ---
 
-        // 4. Save Payment Entity
         Payment payment = new Payment();
         payment.setPaymentId(request.paymentId);
         payment.setUserId(request.userId);
@@ -211,12 +189,11 @@ public class BookingService {
         payment.setFee(r_fee);
         payment.setTax(r_tax);
         payment.setAmount(request.amount);
-        payment.setPaymentMethod(finalMethod); // API Value
-        payment.setStatus(finalStatus); // API Value
+        payment.setPaymentMethod(finalMethod);
+        payment.setStatus(finalStatus);
         payment.setPaymentTime(new Date());
         paymentService.savePayment(payment);
 
-        // 4. Create Booking
         Booking booking = new Booking();
         booking.setUserId(request.userId);
         booking.setEmail(request.email);
@@ -231,97 +208,21 @@ public class BookingService {
         booking.setPaymentStatus("Completed");
         booking.setTransactionId(request.transactionId);
         booking.setStatus("ACTIVE");
-        System.out.println("====== BACKEND DEBUG: ATTEMPTING TO PARSE ======");
         Instant start = Instant.parse(request.startTime);
         Instant end = Instant.parse(request.endTime);
-
-        System.out.println("3. Parsed Start Instant: " + start.toString());
-        System.out.println("4. Parsed End Instant:   " + end.toString());
-        System.out.println("================================================");
 
         booking.setStartTime(start);
         booking.setEndTime(end);
         Booking savedBooking = bookingRepository.save(booking);
 
-        // 5. Send Email
-        try {
-            String subject = "Booking Confirmed!";
-            String content = emailTemplateService.generateBookingTemplate(savedBooking);
-            emailService.sendBookingConfirmation(request.email, subject, content, savedBooking);
-        } catch (Exception e) {
-            System.out.println("Email failed but booking successful");
-        }
+        // try {
+        // String subject = "Booking Confirmed!";
+        // String content = emailTemplateService.generateBookingTemplate(savedBooking);
+        // emailService.sendBookingConfirmation(request.email, subject, content,
+        // savedBooking);
+        // } catch (Exception e) {
+        // }
 
-        try {
-            RazorpayClient razorpay = new RazorpayClient(keyId, keySecret);
-
-            // Fetch Payment
-            com.razorpay.Payment razorpayPayment = razorpay.payments.fetch(request.paymentId);
-
-            // Fetch Order
-            com.razorpay.Order razorpayOrder = razorpay.orders.fetch(request.orderId);
-
-            System.out.println("=== FULL PAYMENT OBJECT ===");
-            System.out.println(razorpayPayment.toString());
-
-            // {
-            // "payment": {
-            // "id": "pay_Sbs3Vk1ihD4Krx",
-            // "entity": "payment",
-            // "amount": 50000,
-            // "currency": "INR",
-            // "status": "captured",
-            // "order_id": "order_Sbs3HbwIySfce6",
-            // "method": "netbanking",
-            // "bank": "PUNB_R",
-            // "contact": "+919702210707",
-            // "email": "test@gmail.com",
-            // "description": "Parking Slot Booking",
-            // "fee": 1180,
-            // "tax": 180,
-            // "amount_refunded": 0,
-            // "refund_status": null,
-            // "captured": true,
-            // "international": false,
-            // "invoice_id": null,
-            // "wallet": null,
-            // "vpa": null,
-            // "card_id": null,
-            // "notes": [],
-            // "created_at": 1775841774,
-            // "acquirer_data": {
-            // "bank_transaction_id": "4695128"
-            // },
-            // "error": {
-            // "code": null,
-            // "description": null,
-            // "source": null,
-            // "step": null,
-            // "reason": null
-            // }
-            // },
-            // "order": {
-            // "id": "order_Sbs3HbwIySfce6",
-            // "entity": "order",
-            // "amount": 50000,
-            // "amount_paid": 50000,
-            // "amount_due": 0,
-            // "currency": "INR",
-            // "status": "paid",
-            // "receipt": "txn_123456",
-            // "attempts": 1,
-            // "description": null,
-            // "offer_id": null,
-            // "checkout": null,
-            // "notes": [],
-            // "created_at": 1775841760
-            // }
-            // }
-            System.out.println("=== FULL ORDER OBJECT ===");
-            System.out.println(razorpayOrder.toString());
-        } catch (Exception e) {
-            System.out.println("Error in fetching payment details");
-        }
         slotLockService.unlockSlot(request.slotId);
         String wsMessage = String.format("{\"slotId\":\"%s\", \"status\":\"BOOKED\"}", request.slotId);
         messagingTemplate.convertAndSend("/topic/slot-updates", wsMessage);

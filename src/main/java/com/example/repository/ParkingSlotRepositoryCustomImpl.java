@@ -26,6 +26,6 @@ public class ParkingSlotRepositoryCustomImpl implements ParkingSlotRepositoryCus
 
         var result = mongoTemplate.findAndModify(query, update, ParkingSlot.class);
 
-        return result != null; // if null → already booked
+        return result != null; 
     }
 }

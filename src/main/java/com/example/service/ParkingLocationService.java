@@ -18,7 +18,6 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +26,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ParkingLocationService {
-
-    // private final UserRepository userRepository;
-
-    // private final ParkingSlotRepository parkingSlotRepository;
 
     private final ParkingSlotRepository parkingSlotRepository;
     private final UserRepository userRepository;
@@ -93,10 +88,7 @@ public class ParkingLocationService {
     }
 
     public List<ParkingLocationResponse> getNearbyParkings(double lat, double lng, double radiusInKm) {
-        System.out.println("🔍 Finding nearby parkings...");
-        System.out.println("📍 Latitude: " + lat);
-        System.out.println("📍 Longitude: " + lng);
-        System.out.println("📏 Radius (KM): " + radiusInKm);
+
         GeoJsonPoint userLocation = new GeoJsonPoint(lng, lat);
         Distance radius = new Distance(radiusInKm, Metrics.KILOMETERS);
 
@@ -107,24 +99,18 @@ public class ParkingLocationService {
         for (ParkingLocation location : nearbyLocations) {
             Instant now = Instant.now();
 
-            // 1. Get all slots of this parking
             List<ParkingSlot> allSlots = parkingSlotRepository.findByParkingId(location.getLocationId());
 
-            // 2. Get active bookings
             List<Booking> activeBookings = bookingRepository.findActiveBookings(location.getLocationId(), now);
 
-            // 3. Get booked slotIds
             Set<String> bookedSlotIds = activeBookings.stream()
                     .map(Booking::getSlotId)
                     .collect(Collectors.toSet());
 
-            // 4. Initialize counters
             int bike = 0, sedan = 0, truck = 0, bus = 0;
 
-            // 5. Count available slots
             for (ParkingSlot slot : allSlots) {
 
-                // If slot is NOT booked currently
                 if (!bookedSlotIds.contains(slot.getSlotId())) {
 
                     switch (slot.getVehicleType().toLowerCase()) {
@@ -145,20 +131,16 @@ public class ParkingLocationService {
                 }
             }
 
-            System.out.println(
-                    "    Location (lat,lng): " + location.getLocation().getY() + ", " + location.getLocation().getX());
             ParkingLocationResponse response = new ParkingLocationResponse();
             BeanUtils.copyProperties(location, response);
-            // 6. Set in response
             response.setBikeSlots(bike);
             response.setSedanSlots(sedan);
             response.setTruckSlots(truck);
             response.setBusSlots(bus);
 
-            // Optional: overall availability
             response.setAvailable((bike + sedan + truck + bus) > 0);
-            response.setLat(location.getLocation().getY()); // latitude
-            response.setLng(location.getLocation().getX()); // longitude
+            response.setLat(location.getLocation().getY());
+            response.setLng(location.getLocation().getX());
 
             userRepository.findById(location.getUserId()).ifPresent(user -> {
                 UserDTO dto = new UserDTO();
@@ -248,13 +230,6 @@ public class ParkingLocationService {
                 dto.setPhone(user.getPhone());
                 response.setUser(dto);
             });
-
-            System.out.println("City = " + city);
-            System.out.println("Found locations = " + locations.size());
-
-            for (ParkingLocation loc : locations) {
-                System.out.println("LocationID: " + loc.getLocationId());
-            }
 
             responses.add(response);
         }

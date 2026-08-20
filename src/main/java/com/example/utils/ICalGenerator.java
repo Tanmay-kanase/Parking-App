@@ -4,14 +4,11 @@ import com.example.model.Booking;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class ICalGenerator {
 
@@ -31,7 +28,6 @@ public class ICalGenerator {
         return calendarData.getBytes(StandardCharsets.UTF_8);
     }
 
-    // 📅 Format: 20250421T180000Z (iCal UTC format)
     private static String formatDateTime(Instant dateTime) {
         ZonedDateTime utcTime = dateTime.atZone(ZoneId.systemDefault())
                 .withZoneSameInstant(ZoneOffset.UTC);

@@ -56,7 +56,6 @@ public class PaymentController {
 
         Order order = client.orders.create(orderRequest);
 
-        // Extract only required fields
         Map<String, Object> response = new HashMap<>();
         response.put("id", order.get("id"));
         response.put("amount", order.get("amount"));

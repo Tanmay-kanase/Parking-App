@@ -14,20 +14,19 @@ import java.util.List;
 public class ParkingLocation {
     @Id
     private String locationId;
-    private String userId; // User who owns this parking location
-
-    private String name; // Name of the parking location
+    private String userId;
+    private String name;
     private String address;
     private String city;
     private String state;
     private String zipCode;
-    private List<String> slotIds; // References to parking slots
+    private List<String> slotIds;
     private boolean evCharging;
     private boolean cctvCamera;
     private boolean washing;
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-    private GeoJsonPoint location; 
+    private GeoJsonPoint location;
 
     @Transient
     private Double lat;

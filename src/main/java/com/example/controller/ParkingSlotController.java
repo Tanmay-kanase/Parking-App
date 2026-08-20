@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,10 +9,7 @@ import com.example.service.ParkingSlotService;
 import com.example.repository.ParkingSlotRepository;
 import java.util.List;
 import java.util.Optional;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @RestController
 @RequestMapping("/api/parking-slots")
@@ -56,7 +52,6 @@ public class ParkingSlotController {
     @PostMapping
     public ResponseEntity<ParkingSlot> createSlot(@RequestBody ParkingSlot slot) {
         ParkingSlot createdSlot = parkingSlotService.createSlot(slot);
-        System.out.println("Received Request: " + slot);
         return ResponseEntity.ok(createdSlot);
     }
 
@@ -64,7 +59,6 @@ public class ParkingSlotController {
     public ResponseEntity<ParkingSlot> updateSlot(@PathVariable String slotId,
             @RequestBody ParkingSlot updatedSlot) {
         try {
-            System.out.println("\n\n\nBooking started\n\n\n");
             ParkingSlot slot = parkingSlotService.updateSlot(slotId, updatedSlot);
             return ResponseEntity.ok(slot);
         } catch (RuntimeException e) {
@@ -90,13 +84,9 @@ public class ParkingSlotController {
             @RequestParam Instant endTime) {
 
         try {
-
-            System.out.println("Available Tiem" + parkingId + " " + vehicleType + " " + startTime
-                    + " " + endTime);
             List<ParkingSlot> availableSlots = parkingSlotService.getAvailableSlotsByTime(parkingId, vehicleType,
                     startTime,
                     startTime);
-            System.out.println("AvailableSlots : " + availableSlots);
             return ResponseEntity.ok(availableSlots);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -106,8 +96,8 @@ public class ParkingSlotController {
     @GetMapping("/availableByVehicle")
     public List<ParkingSlot> getAvailableSlots(
             @RequestParam String parkingId,
-            @RequestParam Instant startTime, // Removed the annotation
-            @RequestParam Instant endTime) { // Removed the annotation
+            @RequestParam Instant startTime,
+            @RequestParam Instant endTime) {
 
         return parkingSlotService.getAvailableSlots(parkingId, startTime, endTime);
     }

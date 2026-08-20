@@ -25,7 +25,7 @@ public class Payment {
     private Long tax;
     @Indexed(unique = true)
     private String transactionId;
-    private String paymentMethod; // "credit_card", "paypal"
-    private String status; // "completed", "failed"
+    private String paymentMethod;
+    private String status;
     private Date paymentTime;
 }

@@ -12,8 +12,6 @@ import com.example.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,7 +104,7 @@ public class UserController {
             Cookie cookie = new Cookie("token", (String) result.get("token"));
             cookie.setHttpOnly(true);
             cookie.setPath("/");
-            // cookie.setSecure(true); // enable once you're on HTTPS
+            cookie.setSecure(true);
             response.addCookie(cookie);
             System.out.println(result.get("token"));
             System.out.println(result.toString());
@@ -116,8 +114,6 @@ public class UserController {
                     .body(Map.of("message", e.getMessage()));
         }
     }
-
-    // UserController.java
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(
@@ -136,8 +132,7 @@ public class UserController {
                         .body(Map.of("message", "User not found"));
             }
 
-            // Remove sensitive info before sending
-            user.setPassword(null); // to avoid sending password
+            user.setPassword(null);
 
             return ResponseEntity.ok(user);
         } catch (Exception e) {
@@ -253,12 +248,11 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
-        // Invalidate the token cookie
         Cookie cookie = new Cookie("token", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // same as login
+        cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge(0); // delete the cookie
+        cookie.setMaxAge(0);
 
         response.addCookie(cookie);
 

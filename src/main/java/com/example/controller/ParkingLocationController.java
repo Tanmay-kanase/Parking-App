@@ -28,10 +28,10 @@ public class ParkingLocationController {
         List<ParkingLocationResponse> responses = parkingLocationService.getLocationsByAddress(address);
 
         if (responses.isEmpty()) {
-            return ResponseEntity.noContent().build(); // Returns a 204 if no locations match the address
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(responses); // Returns 200 with the list of locations
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/user/{userId}")
@@ -86,8 +86,7 @@ public class ParkingLocationController {
     public ResponseEntity<List<ParkingLocationResponse>> getNearbyParkings(
             @RequestParam double lat,
             @RequestParam double lng,
-            @RequestParam(defaultValue = "500000") double radiusKm // default 50km
-    ) {
+            @RequestParam(defaultValue = "500000") double radiusKm) {
         List<ParkingLocationResponse> results = parkingLocationService.getNearbyParkings(lat, lng, radiusKm);
         return ResponseEntity.ok(results);
     }

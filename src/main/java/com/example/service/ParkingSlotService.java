@@ -9,11 +9,7 @@ import com.example.repository.ParkingSlotRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,8 +57,6 @@ public class ParkingSlotService {
             if (updatedSlot.getVehicleType() != null)
                 slot.setVehicleType(updatedSlot.getVehicleType());
 
-            // Always update availability if sent
-
             return parkingSlotRepository.save(slot);
         }).orElseThrow(() -> new RuntimeException("Parking Slot not found"));
     }
@@ -74,18 +68,15 @@ public class ParkingSlotService {
     public List<ParkingSlot> getAvailableSlotsByTime(String parkingId, String vehicleType,
             Instant start, Instant end) {
 
-        // Get all slots for that parking + vehicle type
         List<ParkingSlot> slots = parkingSlotRepository.findByParkingId(parkingId).stream()
                 .filter(slot -> slot.getVehicleType().equalsIgnoreCase(vehicleType))
                 .collect(Collectors.toList());
-        System.out.println("Slots" + slots);
-        // Filter out slots that are already booked
+
         return slots.stream().filter(slot -> {
             List<Booking> conflicts = bookingRepository.findBySlotIdAndStartTimeLessThanAndEndTimeGreaterThan(
                     slot.getSlotId(), start, end);
 
-            System.out.println("Conflicts" + conflicts);
-            return conflicts.isEmpty(); // keep slot only if NOT conflicting
+            return conflicts.isEmpty();
         }).collect(Collectors.toList());
     }
 

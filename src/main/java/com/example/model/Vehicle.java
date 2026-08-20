@@ -11,6 +11,6 @@ public class Vehicle {
     private String vehicleId;
     private String userId;
     private String licensePlate;
-    private String vehicleType; // "Car", "Bike", etc.
+    private String vehicleType;
     private String comapany;
 }

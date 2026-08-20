@@ -42,11 +42,8 @@ public class BookingController {
             emailService.sendBookingConfirmation(booking.getEmail(), subject, emailContent,
                     savedBooking);
 
-            System.out.println("Booking confirmation email sent to " + booking.getEmail());
-
             return ResponseEntity.status(HttpStatus.CREATED).body(savedBooking);
         } catch (Exception e) {
-            System.out.println("❌ Error during booking: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -78,12 +75,7 @@ public class BookingController {
 
     @PostMapping("/complete")
     public ResponseEntity<?> completeBooking(@RequestBody CompleteBookingRequest request) {
-        System.out.println("====== BACKEND DEBUG: REQUEST RECEIVED ======");
-        System.out.println("1. Received StartTime: [" + request.startTime + "]");
-        System.out.println("2. Received EndTime:   [" + request.endTime + "]");
-        System.out.println("=============================================");
         try {
-
             Booking booking = bookingService.completeBooking(request);
             return ResponseEntity.ok(booking);
         } catch (Exception e) {

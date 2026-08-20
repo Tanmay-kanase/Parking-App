@@ -29,13 +29,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = null;
 
-        // Check Authorization header
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
         }
 
-        // If no header, check cookie
         if (token == null && request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("token".equals(cookie.getName())) {
