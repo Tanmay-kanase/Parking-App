@@ -1,28 +1,12 @@
-# ================================
-# Stage 1: Build React/Vite Frontend
-# ================================
-FROM node:20-alpine AS frontend-builder
+# Stage 1: Fetch pre-built frontend dist from GitHub
+FROM alpine/git AS frontend-fetcher
 
-WORKDIR /app/client
+WORKDIR /app
 
-# Copy package files first (better caching)
-COPY client/package*.json ./
+# Shallow clone only the repo containing the ready-made dist folder
+RUN git clone --depth 1 https://github.com/Tanmay-kanase/Parking-Backend-NodeJs.git repo
 
-# Install dependencies
-RUN npm install
-
-# Copy remaining frontend files
-COPY client/ ./
-
-RUN --mount=type=secret,id=_env,dst=/app/client/.env 
-
-# Build frontend
-RUN npm run build
-
-
-# ================================
 # Stage 2: Build Spring Boot Backend
-# ================================
 FROM maven:3.9.6-eclipse-temurin-21 AS backend-builder
 
 WORKDIR /app
@@ -36,16 +20,13 @@ COPY src ./src
 # Create static resources folder
 RUN mkdir -p ./src/main/resources/static
 
-# Copy frontend build into Spring Boot static folder
-COPY --from=frontend-builder /app/client/dist/ ./src/main/resources/static/
+# Copy the pre-built frontend dist into Spring Boot static folder
+COPY --from=frontend-fetcher /app/repo/src/client/dist/ ./src/main/resources/static/
 
 # Build Spring Boot JAR
 RUN mvn clean package -DskipTests
 
-
-# ================================
 # Stage 3: Production Runtime
-# ================================
 FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
