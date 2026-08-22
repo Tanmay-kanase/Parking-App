@@ -84,9 +84,13 @@ public class UserController {
         try {
             Map<String, Object> result = userService.registerUser(user);
             Cookie cookie = new Cookie("token", (String) result.get("token"));
-
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setSecure(true);
+            cookie.setMaxAge(7 * 24 * 60 * 60);
             System.out.println(result.toString());
             response.addCookie(cookie);
+
             return ResponseEntity.ok(result);
 
         } catch (RuntimeException e) {
@@ -105,6 +109,7 @@ public class UserController {
             cookie.setHttpOnly(true);
             cookie.setPath("/");
             cookie.setSecure(true);
+            cookie.setMaxAge(7 * 24 * 60 * 60);
             response.addCookie(cookie);
             System.out.println(result.get("token"));
             System.out.println(result.toString());

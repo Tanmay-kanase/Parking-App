@@ -123,7 +123,7 @@ const Home = () => {
           >
             <h2 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900 dark:text-white">
               Find Your <span className="text-yellow-500">Perfect Spot</span>,
-              LocalDateTimely.
+              Instantly.
             </h2>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
               Our smart parking solutions help you find, reserve, and pay for
